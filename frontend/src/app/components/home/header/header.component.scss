@@ -1,0 +1,15 @@
+/* Hover dropdown cho Bootstrap */
+.dropdown-hover:hover > .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
+
+/* Tăng độ tương thích (tuỳ chọn) */
+.dropdown-hover .dropdown-menu {
+  display: none;
+  position: absolute;
+}
+a[routerLink] {
+  cursor: pointer;
+  text-decoration: none;
+}

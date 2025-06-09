@@ -1,1 +1,203 @@
-<p>footer works!</p>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mẫu Footer</title>
+    <style>
+        /* CSS Reset & Body Style (Để xem trước) */
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex-grow: 1;
+        }
+
+        /* --- BẮT ĐẦU CSS CHO FOOTER --- */
+        :root {
+            --footer-bg-color: #2c3e50; /* Màu nền chính của footer */
+            --footer-text-color: #ecf0f1; /* Màu chữ chính */
+            --footer-link-color: #bdc3c7; /* Màu của các liên kết */
+            --footer-link-hover-color: #ffffff; /* Màu khi di chuột qua liên kết */
+            --footer-title-color: #ffffff; /* Màu của các tiêu đề cột */
+            --footer-border-color: #34495e; /* Màu của đường kẻ phân cách */
+        }
+
+        .site-footer {
+            background-color: var(--footer-bg-color);
+            color: var(--footer-text-color);
+            padding: 50px 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-main {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column .footer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--footer-title-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-column ul li a {
+            color: var(--footer-link-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--footer-link-hover-color);
+            text-decoration: underline;
+        }
+
+        .footer-column p {
+            margin: 0 0 10px 0;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a img {
+            width: 32px;
+            height: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .social-icons a:hover img {
+            transform: scale(1.1);
+        }
+        
+        .payment-logos, .partner-logos {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-logos img, .partner-logos img {
+            height: 30px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--footer-border-color);
+            padding-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--footer-link-color);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .footer-main {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .footer-main {
+                grid-template-columns: 1fr;
+            }
+            .site-footer {
+                padding: 40px 0;
+            }
+        }
+        /* --- KẾT THÚC CSS CHO FOOTER --- */
+    </style>
+</head>
+<body>
+
+    
+    <footer class="site-footer" style="background-color: antiquewhite;">
+        <div class="footer-container" >
+            <div class="footer-main">
+                <div class="footer-column">
+                    <h5 class="footer-title">Thông tin công ty</h5>
+                    <p><strong>CÔNG TY CỔ PHẦN SÁCH ABC</strong></p>
+                    <p>Địa chỉ: Số 123, Đường ABC, Phường XYZ, Quận Ba Đình, Hà Nội</p>
+                    <p>Số điện thoại: <a href="tel:19001234">1900 1234</a></p>
+                   <a href="mailto:support@yourbookstore.com"> Email:support.com </a>
+                    <p>Giấy ĐKKD số 0101234567 do Sở KHĐT TP. Hà Nội cấp lần đầu ngày 01/01/2025.</p>
+                </div>
+
+                <div class="footer-column">
+                    <h5 class="footer-title">Về chúng tôi</h5>
+                    <ul>
+                        <li><a href="#">Giới thiệu công ty</a></li>
+                        <li><a href="#">Hệ thống nhà sách</a></li>
+                        <li><a href="#">Tuyển dụng</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h5 class="footer-title">Hỗ trợ khách hàng</h5>
+                    <ul>
+                        <li><a href="#">Các câu hỏi thường gặp</a></li>
+                        <li><a href="#">Chính sách đổi trả - hoàn tiền</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Phương thức vận chuyển</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h5 class="footer-title">Kết nối với chúng tôi</h5>
+                    <div class="social-icons">
+                        <a href="#" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook"></a>
+                        <a href="#" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/YouTube_play_button_icon_%282013%E2%80%932017%29.svg" alt="YouTube"></a>
+                        <a href="#" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg" alt="TikTok"></a>
+                        <a href="#" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram"></a>
+                    </div>
+                    
+                    <h5 class="footer-title" style="margin-top: 30px;">Phương thức thanh toán</h5>
+                    <div class="payment-logos">
+                        <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" alt="VNPAY">
+                        <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo">
+                        <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/logo-ZaloPay.png" alt="ZaloPay">
+                    </div>
+
+                    <div class="partner-logos" style="margin-top: 20px;">
+                        <img src="https://images.dmca.com/Badges/dmca_protected_sml_120n.png?ID=b58105e2-63b3-44ee-a5c5-1b0b975add69" alt="DMCA">
+                        <img src="http://online.gov.vn/PublicImages/2015/08/27/11/20150827110756-dathongbao.png" alt="Đã thông báo Bộ Công Thương">
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Bản quyền thuộc về Công ty Cổ phần Sách ABC. Bảo lưu mọi quyền.</p>
+            </div>
+        </div>
+    </footer>
+    </body>
+</html>

@@ -1,0 +1,21 @@
+.sidebar {
+  width: 250px;
+  background-color: #212529;
+}
+
+.sidebar .nav-link {
+  padding: 10px 15px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: #101e33;
+  color: white !important;
+}
+a[routerLink] {
+  cursor: pointer;
+  text-decoration: none;
+}
+.nav-link {
+  cursor: pointer;
+}

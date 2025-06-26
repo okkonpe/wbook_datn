@@ -1,0 +1,15 @@
+.image-wrapper {
+  width: 100%;
+  aspect-ratio: 3 / 4; /* Tỷ lệ ảnh như sách: chiều ngang : chiều cao */
+  overflow: hidden;
+  position: relative;
+  background-color: #f8f8f8;
+}
+
+.book-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* hoặc thử 'cover' nếu ảnh đầy đủ */
+  display: flex;
+  margin: 0 auto;
+}

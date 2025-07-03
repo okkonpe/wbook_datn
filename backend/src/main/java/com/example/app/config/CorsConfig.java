@@ -10,12 +10,15 @@ public class CorsConfig {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
-
+            @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Cho tất cả endpoint
-                        .allowedOrigins("http://localhost:4200") // Cho phép từ Angular
-                        .allowedMethods("*"); // GET, POST, PUT, DELETE, ...
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:4200")
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
+    }
 }
-}
+

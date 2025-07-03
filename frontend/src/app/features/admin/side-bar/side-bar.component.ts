@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-side-bar',
   imports: [RouterModule,CommonModule],
+  standalone:true,
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.scss'
 })

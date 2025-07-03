@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "san_pham_chi_tiet")
@@ -11,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+
 public class Book {
 
     @Id
@@ -76,4 +78,11 @@ public class Book {
 
     @Column(name = "trang_thai")
     private Boolean trangThai;
+    @ManyToMany
+    @JoinTable(
+            name = "sach_tac_gia",
+            joinColumns = @JoinColumn(name = "id_tac_gia"),
+            inverseJoinColumns = @JoinColumn(name = "id_san_pham_chi_tiet")
+    )
+    private Set<TacGia> tacGia = new HashSet<>();
 }

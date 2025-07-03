@@ -25,6 +25,10 @@ export const routes: Routes = [
         path: 'products/authors',
         loadComponent: () => import('./features/admin/authors/authors.component').then(m => m.AuthorsComponent)
       },
+      {
+        path: 'products/book',
+        loadComponent: () => import('./features/admin/book-management/book-management.component').then(m => m.BookManagementComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

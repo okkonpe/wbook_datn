@@ -3,11 +3,13 @@ import { HomeComponent } from './pages/home/home.component';
 import { ContactComponent } from './pages/contact/contact.component';
 import { AboutComponent } from './pages/about/about.component';
 import { AdminComponent } from './features/admin/admin.component';
+import { BookDetailComponent } from './features/books/components/book-detail/book-detail.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: AboutComponent },
+    { path: 'book/:id', component: BookDetailComponent },
 
   {
     path: 'admin',

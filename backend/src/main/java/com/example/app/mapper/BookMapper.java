@@ -1,5 +1,6 @@
 package com.example.app.mapper;
 
+import com.example.app.dto.bookDTO.BookDetailDTO;
 import com.example.app.dto.bookDTO.ListAllBookDTO;
 import com.example.app.dto.sanPhamDTO.GetAllSanPhamDTO;
 import com.example.app.entity.Book;
@@ -28,7 +29,10 @@ ListAllBookDTO listAllBooktoDTO(Book book);
         listAllBookDTO.setHinhAnh(imageUrl);
     }
 }
-
+    @Mapping(source = "theLoai.tenTheLoai", target = "theLoai")
+    @Mapping(source = "kichThuoc.kichThuoc", target = "kichThuoc")
+    @Mapping(source = "nhaXuatBan.tenNhaXuatBan", target = "nhaXuatBan")
+BookDetailDTO getBookByIDDTO(Book book);
 
 }
 //    GetAllSanPhamDTO getAllSanPhamtoDTO(SanPham sanPham);

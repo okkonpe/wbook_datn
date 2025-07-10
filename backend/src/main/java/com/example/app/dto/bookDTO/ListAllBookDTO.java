@@ -18,6 +18,4 @@ public class ListAllBookDTO {
     private String tenSanPham;
     private String hinhAnh;
     private BigDecimal donGia;
-
-
 }

@@ -58,7 +58,7 @@ public class NhanVienController {
         NhanVienDTO updatedNhanVien = nhanVienService.updateNhanVien(id, nhanVienDTO);
         return ResponseEntity.ok(updatedNhanVien);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNhanVien(@PathVariable Integer id) {
         nhanVienService.deleteNhanVien(id);

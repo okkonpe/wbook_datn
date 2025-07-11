@@ -26,11 +26,11 @@ public class BookService {
         System.out.println("BOOKS: " + dto);
    return dto;
     }
-    public BookDetailDTO getByID(Integer id) {
-        return bookRepository.findById(id)
-                .map(bookMapper::getBookByIDDTO)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sách với id = " + id));
-    }
+//    public BookDetailDTO getByID(Integer id) {
+//        return bookRepository.findById(id)
+//                .map(bookMapper::getBookByIDDTO)
+//                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sách với id = " + id));
+//    }
 
 
 

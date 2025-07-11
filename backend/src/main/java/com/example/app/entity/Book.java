@@ -5,6 +5,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -85,4 +86,7 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "id_san_pham_chi_tiet")
     )
     private Set<TacGia> tacGia = new HashSet<>();
+    @OneToMany(mappedBy = "book")
+    private List<HoaDonChiTiet> chiTietHoaDons;
+
 }

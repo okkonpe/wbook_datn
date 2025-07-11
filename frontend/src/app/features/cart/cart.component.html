@@ -1,0 +1,57 @@
+<div class="container mt-4">
+  <h3 class="mb-4 text-primary">🛒 Giỏ hàng của bạn</h3>
+
+  <table class="table table-bordered table-hover" *ngIf="cartItems.length > 0; else emptyCart">
+    <thead class="table-light">
+      <tr>
+        <th>Ảnh</th>
+        <th>Tên sách</th>
+        <th>Đơn giá</th>
+        <th>Số lượng</th>
+        <th>Thành tiền</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of cartItems">
+        <td><img [src]="item.hinhAnh" alt="..." width="60" height="80" style="object-fit: cover;"></td>
+        <td>{{ item.tenSanPham }}</td>
+        <td>{{ item.donGia | number }} đ</td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="decrease(item)"
+              [disabled]="item.soLuongMua <= 1"
+            >–</button>
+
+            <span>{{ item.soLuongMua }}</span>
+
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="increase(item)"
+            >+</button>
+          </div>
+        </td>
+        <td>{{ item.tongTien | number }} đ</td>
+        <td>
+          <button class="btn btn-sm btn-danger" (click)="removeItem(item)">
+            🗑 Xóa
+          </button>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+        <td colspan="2" class="fw-bold text-danger">
+          {{ getTotal() | number }} đ
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <ng-template #emptyCart>
+    <div class="alert alert-info">🛒 Giỏ hàng trống. Quay lại mua sách nhé!</div>
+  </ng-template>
+</div>

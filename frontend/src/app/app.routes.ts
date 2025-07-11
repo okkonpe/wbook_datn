@@ -4,12 +4,14 @@ import { ContactComponent } from './pages/contact/contact.component';
 import { AboutComponent } from './pages/about/about.component';
 import { AdminComponent } from './features/admin/admin.component';
 import { BookDetailComponent } from './features/books/components/book-detail/book-detail.component';
+import { CartComponent } from './features/cart/cart.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: AboutComponent },
-    { path: 'book/:id', component: BookDetailComponent },
+    { path: 'book/:id/:slug', component: BookDetailComponent },
+  { path: 'cart', component: CartComponent },
 
   {
     path: 'admin',

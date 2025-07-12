@@ -20,8 +20,8 @@ public class BookController {
         List<ListAllBookDTO> books = bookService.getAllBook();
         return ResponseEntity.ok(books);
     }
-//    @GetMapping("/{id}")
-//    public ResponseEntity<BookDetailDTO> getByID(@PathVariable Integer id){
-//        return ResponseEntity.ok(bookService.getByID(id));
-//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<BookDetailDTO> getByID(@PathVariable Integer id){
+        return ResponseEntity.ok(bookService.getByID(id));
+    }
 }

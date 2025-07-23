@@ -2,41 +2,46 @@ package com.example.app.mapper;
 
 import com.example.app.dto.bookDTO.BookDetailDTO;
 import com.example.app.dto.bookDTO.ListAllBookDTO;
-import com.example.app.dto.sanPhamDTO.GetAllSanPhamDTO;
 import com.example.app.entity.Book;
 import com.example.app.entity.SanPham;
 import com.example.app.entity.TacGia;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
+
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Mapper(componentModel = "spring")
 public interface BookMapper {
-//    @Mapping(source = "donGia", target = "donGia")
-//    @Mapping(source = "id", target = "id")
-@Mapping(source = "sanPham.tenSanPham", target = "tenSanPham")
-@Mapping(target = "hinhAnh", ignore = true)
-ListAllBookDTO listAllBooktoDTO(Book book);
-@AfterMapping
-    default void buildImgUrl(Book book, @MappingTarget ListAllBookDTO listAllBookDTO){
-    if (book.getHinhAnh().getHinhAnh() != null && !book.getHinhAnh().getHinhAnh().isEmpty()) {
-        String imageUrl = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/uploads/")
-                .path(book.getHinhAnh().getHinhAnh())
-                .toUriString();
-        listAllBookDTO.setHinhAnh(imageUrl);
+
+    // ========== LIST ALL ==========
+    @Mapping(source = "sanPham.tenSanPham", target = "tenSanPham")
+    @Mapping(target = "hinhAnh", ignore = true)
+    ListAllBookDTO listAllBookToDTO(Book book);
+
+    @AfterMapping
+    default void mapHinhAnh(Book book, @MappingTarget ListAllBookDTO dto) {
+        if (book.getHinhAnh() != null && book.getHinhAnh().getHinhAnh() != null) {
+            String imageUrl = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/uploads/")
+                    .path(book.getHinhAnh().getHinhAnh())
+                    .toUriString();
+            dto.setHinhAnh(imageUrl);
+        }
     }
-}
+
     @Mapping(source = "theLoai.tenTheLoai", target = "theLoai")
+    @Mapping(source = "sanPham.tenSanPham", target = "tenSanPham")
+    @Mapping(source = "loaiGiay.tenGiay", target = "loaiGiay")
+    @Mapping(source = "loaiBia.tenBia", target = "loaiBia")
+    @Mapping(target = "hinhAnh", expression = "java(buildImgUrlDetail(book.getHinhAnh()))")
+    @Mapping(source = "tacGia", target = "tacGia")
     @Mapping(source = "kichThuoc.chiSoKichThuoc", target = "kichThuoc")
     @Mapping(source = "nhaXuatBan.tenNhaXuatBan", target = "nhaXuatBan")
-    @Mapping(source = "hinhAnh.hinhAnh", target = "hinhAnh")
     BookDetailDTO getBookByIDDTO(Book book);
     @AfterMapping
     default void buildImgUrlDetail(Book book, @MappingTarget BookDetailDTO detailDTO){
@@ -49,12 +54,20 @@ ListAllBookDTO listAllBooktoDTO(Book book);
             detailDTO.setHinhAnh(imageUrl);
         }
     }
+
+
     default List<String> map(Set<TacGia> tacGiaSet) {
         if (tacGiaSet == null) return null;
         return tacGiaSet.stream()
-                .map(TacGia::getTenTacGia)
-                .toList();
+                .map(TacGia::getTenTacGia).collect(Collectors.toList());
     }
-}
-//    GetAllSanPhamDTO getAllSanPhamtoDTO(SanPham sanPham);
 
+
+    // ========== DTO TO ENTITY ==========
+    @InheritInverseConfiguration(name = "getBookByIDDTO")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "sanPham", ignore = true)
+    @Mapping(target = "tacGia", ignore = true) // ánh xạ ngược cần xử lý riêng nếu cần
+    @Mapping(target = "hinhAnh", ignore = true)
+    Book bookDetailDtoToEntity(BookDetailDTO dto);
+}

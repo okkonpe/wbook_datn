@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ Thống Thống Kê Doanh Thu</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .tabs button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #eee;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .tabs button.active {
+            background: #007bff;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📊 HỆ THỐNG THỐNG KÊ DOANH THU</h1>
+
+<div class="tabs">
+    <button class="tab-btn active" data-tab="ban-chay">📚 Sách bán chạy</button>
+    <button class="tab-btn" data-tab="ngay">📅 Doanh thu theo ngày</button>
+    <button class="tab-btn" data-tab="tuan">📈 Doanh thu theo tuần</button>
+</div>
+
+<!-- Nội dung từng tab -->
+<div id="ban-chay" class="tab-content active">
+    <h2>📚 Danh sách sách bán chạy</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Tên sách</th>
+            <th>Tổng số lượng bán</th>
+            <th>Giá bán</th>
+        </tr>
+        </thead>
+        <tbody id="tableBanChay"></tbody>
+    </table>
+</div>
+
+<div id="ngay" class="tab-content">
+    <h2>📅 Doanh thu theo ngày</h2>
+    <canvas id="chartNgay" height="100"></canvas>
+</div>
+
+<div id="tuan" class="tab-content">
+    <h2>📈 Doanh thu theo tuần</h2>
+    <canvas id="chartTuan" height="100"></canvas>
+</div>
+
+<script>
+    // ==== Handle TAB ====
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+        btn.onclick = () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        };
+    });
+
+    // ==== Gọi API sách bán chạy ====
+    fetch('/thong-ke/api/sach-ban-chay')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById('tableBanChay');
+            data.forEach(sp => {
+                const row = `<tr>
+                    <td>${sp.tenSanPham}</td>
+                    <td>${sp.tongSoLuong}</td>
+                    <td>${sp.giaBan} VNĐ</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        });
+
+    // ==== Gọi API doanh thu theo ngày ====
+    fetch('/thong-ke/api/doanh-thu-theo-ngay')
+        .then(res => res.json())
+        .then(data => {
+            const labels = data.map(d => d.ngay);
+            const values = data.map(d => d.tongDoanhThu);
+            new Chart(document.getElementById('chartNgay'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: values,
+                        backgroundColor: '#28a745'
+                    }]
+                }
+            });
+        });
+
+    // ==== Gọi API doanh thu theo tuần ====
+    fetch('/thong-ke/api/doanh-thu-theo-tuan')
+        .then(res => res.json())
+        .then(data => {
+            const labels = data.map(d => `Tuần ${d.soTuan} - ${d.nam}`);
+            const values = data.map(d => d.tongDoanhThu);
+            new Chart(document.getElementById('chartTuan'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu tuần (VNĐ)',
+                        data: values,
+                        borderColor: '#ffc107',
+                        fill: false
+                    }]
+                }
+            });
+        });
+</script>
+
+</body>
+</html>

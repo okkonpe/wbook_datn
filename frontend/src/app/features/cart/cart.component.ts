@@ -1,59 +1,79 @@
 import { Component, OnInit } from '@angular/core';
 import { CartService, ListGioHangDTO, ThemGioHangDTO } from './cart.service';
 import { CommonModule } from '@angular/common';
+import { jwtDecode } from 'jwt-decode';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,RouterModule],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss'
 })
 export class CartComponent implements OnInit {
   cartItems: ListGioHangDTO[] = [];
+  khachHangId: number | null = null;
 
-  constructor(private cartService: CartService) {}
+  constructor(
+    private cartService: CartService,
+    private router: Router
+
+  ) {}
 
   ngOnInit(): void {
-    this.loadCartFromBackend();
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      this.khachHangId = decoded.id;
+      this.loadCartFromBackend();
+          console.log('Decoded khachHangId:', this.khachHangId);
+          console.log(localStorage.getItem('token'));
+
+
+    }else{
+      this.router.navigate(['/login'])
+    }
   }
 
   loadCartFromBackend(): void {
-    const khachHangId = 11; // tạm thời, sau này lấy từ token
-    this.cartService.getCartByKhachHang(khachHangId).subscribe(data => {
-      this.cartItems = data;
-    });
-  }
+    
+      this.cartService.getCartByKhachHang().subscribe(data => {
+        this.cartItems = data;
+      })
+    }
+  
 
   getTotal(): number {
     return this.cartItems.reduce((total, item) => total + item.tongTien, 0);
   }
 
   increase(item: ListGioHangDTO): void {
+      console.log('Gọi increase()', item); // ✅ log này cần xuất hiện
+
+    if (!this.khachHangId) return;
     const dto: ThemGioHangDTO = {
       id: item.idSanPham,
+      khachHangId: this.khachHangId,
       soLuong: 1
     };
-    console.log('INCREASE item:', item);
-
     this.cartService.addToCart(dto).subscribe(() => this.loadCartFromBackend());
   }
 
   decrease(item: ListGioHangDTO): void {
-    if (item.soLuongMua > 1) {
-      const dto: ThemGioHangDTO = {
-        id: item.idSanPham,
-        soLuong: -1 // bạn cần xử lý `-1` ở backend để giảm số lượng
-      };
-      this.cartService.addToCart(dto).subscribe(() => this.loadCartFromBackend());
-    }
+    if (!this.khachHangId || item.soLuongMua <= 1) return;
+    const dto: ThemGioHangDTO = {
+      id: item.idSanPham,
+      khachHangId: this.khachHangId,
+      soLuong: -1
+    };
+    this.cartService.addToCart(dto).subscribe(() => this.loadCartFromBackend());
   }
 
   removeItem(item: ListGioHangDTO): void {
-  const khachHangId = 11; // hoặc lấy từ token
-  this.cartService.removeItemFromCart(khachHangId, item.idSanPham).subscribe(() => {
-    this.loadCartFromBackend(); // cập nhật lại danh sách
-  });
-}
-
+    if (!this.khachHangId) return;
+    this.cartService.removeItemFromCart(this.khachHangId, item.idSanPham).subscribe(() => {
+      this.loadCartFromBackend();
+    });
+  }
 }

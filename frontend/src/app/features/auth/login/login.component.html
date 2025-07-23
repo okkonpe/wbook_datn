@@ -1,0 +1,22 @@
+<div class="container mt-5 mb-5" style="max-width: 500px;">
+  <h3 class="text-center text-primary mb-4">🔐 Đăng nhập</h3>
+
+  <form (ngSubmit)="login()" #loginForm="ngForm">
+    <div class="mb-3">
+      <label for="username" class="form-label">Tài khoản</label>
+      <input type="text" id="username" class="form-control" required [(ngModel)]="loginData.taiKhoan" name="taiKhoan">
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">Mật khẩu</label>
+      <input type="password" id="password" class="form-control" required [(ngModel)]="loginData.matKhau" name="matKhau">
+    </div>
+
+    <button class="btn btn-primary w-100" type="submit">Đăng nhập</button>
+
+    <div class="text-center mt-3">
+      <span>Chưa có tài khoản?</span>
+      <a routerLink="/register">Đăng ký</a>
+    </div>
+  </form>
+</div>

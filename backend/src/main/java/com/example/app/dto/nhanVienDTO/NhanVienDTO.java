@@ -46,16 +46,13 @@ public class NhanVienDTO {
     @Pattern(regexp = "[0-9]{12,13}", message = "CCCD không hợp lệ")
     private String cccd;
 
-    @Size(max = 20, message = "Mật khẩu không được vượt quá 20 ký tự")
-    private String matKhau;
 
     @Size(max = 20, message = "Tài khoản không được vượt quá 20 ký tự")
     private String taiKhoan;
 
     private Date ngayBatDau;
 
-    @NotNull(message = "Chức vụ không được để trống")
-    private Integer chucVuId;
+
 
     private Boolean trangThai;
 } 

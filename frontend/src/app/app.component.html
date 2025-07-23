@@ -7,15 +7,24 @@
 <!-- * * * * * * * to get started with your project! * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
- <ng-container *ngIf="!isAdminRoute()">
-      <app-header></app-header>
-    </ng-container>
+ 
+  <ng-container *ngIf="!isAdminRoute()">
+    <app-header></app-header>
+  </ng-container>
+
 
     <router-outlet></router-outlet>
+  
 
-    <ng-container *ngIf="!isAdminRoute()">
-      <app-footer></app-footer>
-    </ng-container>
+  <ng-container *ngIf="!isAdminRoute()">
+    <app-footer></app-footer>
+  </ng-container>
+
+
+
+
+
+
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->

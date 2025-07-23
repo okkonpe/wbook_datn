@@ -1,0 +1,38 @@
+<div class="container mt-5">
+  <h2 class="text-primary mb-4">📦 Đơn hàng của tôi</h2>
+
+  <div *ngIf="donHangs.length === 0" class="alert alert-info">
+    Bạn chưa có đơn hàng nào.
+  </div>
+
+  <div *ngFor="let donHang of donHangs" class="card mb-4 shadow-sm">
+    <div class="card-header d-flex justify-content-between">
+      <div><strong>Mã đơn:</strong> {{ donHang.maHoaDon }}</div>
+      <div><strong>Ngày đặt:</strong> {{ donHang.ngayTao | date:'dd/MM/yyyy' }}</div>
+
+    </div>
+    <div class="card-body">
+      <div><strong>Trạng thái:</strong> {{ donHang.trangThai }}</div>
+      <div><strong>Tổng tiền:</strong> {{ donHang.tongTien | number }}₫</div>
+<button class="btn btn-sm btn-outline-primary"
+              (click)="moChiTiet(donHang.id)">
+        {{ donHang.id === idDonHangDangXem ? 'Ẩn chi tiết' : 'Xem chi tiết' }}
+      </button>
+      <hr>
+       <div class="card-body" *ngIf="donHang.id === idDonHangDangXem">
+      <p><strong>Tổng tiền:</strong> {{ donHang.tongTien | number }}₫</p>
+
+      <h5>Sản phẩm:</h5>
+      <ul class="list-group">
+        <li *ngFor="let sp of donHang.sanPhams" class="list-group-item d-flex justify-content-between">
+          <div>
+            <img [src]="sp.hinhAnh" width="50" class="me-2" />
+            {{ sp.tenSanPham }} (x{{ sp.soLuongMua }})
+          </div>
+          <div>{{ sp.donGia | number }}₫</div>
+        </li>
+      </ul>
+    </div>
+    </div>
+  </div>
+</div>

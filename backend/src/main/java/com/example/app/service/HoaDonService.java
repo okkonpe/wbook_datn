@@ -1,11 +1,13 @@
 package com.example.app.service;
 
-import com.example.app.dto.banHangDTO.ListGioHangDTO;
-import com.example.app.dto.banHangDTO.ThemGioHangDTO;
+import com.example.app.dto.banHangDTO.*;
 import com.example.app.entity.*;
 import com.example.app.mapper.banHangMapper.GioHangMapper;
+import com.example.app.mapper.banHangMapper.HoaDonMapper;
 import com.example.app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +30,12 @@ public class HoaDonService {
     @Autowired
     GioHangMapper gioHangMapper;
     @Autowired
+    HoaDonMapper hoaDonMapper;
+    @Autowired
     BookRepository bookRepository;
     @Autowired
     KhachHangRepo khachHangRepo;
-    KhachHang kh = new KhachHang();
+
     public HoaDon createHoaDon(KhachHang khachHang){
         HoaDon hoaDon = new HoaDon();
                 hoaDon.setKhachHang(khachHang);
@@ -42,10 +46,84 @@ public class HoaDonService {
         hoaDon = hoaDonRepository.save(hoaDon);
     return hoaDon;
 }
+
+public Page<ListDonHangDTO> getDonHang(Pageable pageable){
+        return hoaDonRepository.findByTrangThaiIdNot(1,pageable).map(hoaDonMapper::donHangtoDTO);
+
+}
+
+public List<ListGioHangDTO> getListItemHD(Integer id){
+      return   gioHangRepo.findByHoaDonId(id).stream().map(gioHangMapper::toDTOListGH).collect(Collectors.toList());
+
+}
+    
+    
+@Transactional
+public HoaDonRequestDTO thanhToanCOD(HoaDonRequestDTO request){
+    System.out.println(request.getKhachHangID());
+    HoaDon hoaDon = hoaDonRepository.findByKhachHangIdAndTrangThaiId(
+            request.getKhachHangID(), 1).
+            orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn giỏ hàng"));
+
+    // 2. Cập nhật thông tin từ FE
+    hoaDon.setHoTenNguoiNhan(request.getHoTen());
+    hoaDon.setDiaChiGiaoHang(request.getDiaChi());
+    hoaDon.setSdtNguoiNhan(request.getSoDienThoai());
+    hoaDon.setGhiChu(request.getGhiChu());
+    hoaDon.setLoaiThanhToan(request.getPhuongThucThanhToan());
+//    hoaDon.setTongTienSauGiam(tinhTongTienGioHang(hoaDon)); // hoặc request.getTongTienSauGiam()
+
+    // 3. Set trạng thái = 2 (đã giao hàng)
+    TrangThaiHoaDon trangThaiDaGiao = trangThaiHoaDonRepo.findById(2)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái"));
+
+    hoaDon.setTrangThai(trangThaiDaGiao);
+
+    // 4. Lưu lại
+    hoaDonRepository.save(hoaDon);
+
+    // 5. Trả lại thông tin xác nhận (hoặc bạn có thể tạo HoaDonResponseDTO)
+    return request;
+
+}
+public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD){
+    HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
+        TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(3).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
+    if (hd.getTrangThai().getId()==4){
+        throw new IllegalArgumentException("Đơn hàng đã giao!");
+    }
+    if (hd.getTrangThai().getId()==5){
+        throw new IllegalArgumentException("Đơn hàng đã huỷ!");
+    }
+    hd.setTrangThai(trangThaiHoaDon);
+
+        hoaDonRepository.save(hd);
+        return hoaDonMapper.donHangtoDTO(hd);
+}
+    public ListDonHangDTO chuyenTrangThaiDaGiaoHang(Integer idHD){
+        HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
+        TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(4).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
+        if (hd.getTrangThai().getId()==5){
+            throw new IllegalArgumentException("Đơn hàng đã huỷ!");
+        }
+        hd.setTrangThai(trangThaiHoaDon);
+        hoaDonRepository.save(hd);
+        return hoaDonMapper.donHangtoDTO(hd);
+    }
+    public ListDonHangDTO chuyenTrangThaiDaHuy(Integer idHD){
+        HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
+        TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(5).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
+
+        if (hd.getTrangThai().getId()==4){
+            throw new IllegalArgumentException("Đơn hàng đã giao, không được huỷ!");
+        }
+        hd.setTrangThai(trangThaiHoaDon);
+        hoaDonRepository.save(hd);
+        return hoaDonMapper.donHangtoDTO(hd);
+    }
 public ThemGioHangDTO themGioHang(ThemGioHangDTO gioHangDTO){
 
-    kh.setId(11);
-
+KhachHang kh =khachHangRepo.findById(gioHangDTO.getKhachHangId()).orElseThrow(()-> new RuntimeException("Không tìm khách hàng"));
     Book book =  bookRepository.findById(gioHangDTO.getId()).orElseThrow(() -> new RuntimeException("Không tìm thấy sách"));
     TrangThaiHoaDon trangThaiGio = trangThaiHoaDonRepo.findByTrangThai("GIO_HANG")
             .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái GIỎ_HÀNG"));
@@ -91,6 +169,9 @@ public ThemGioHangDTO themGioHang(ThemGioHangDTO gioHangDTO){
     hoaDonRepository.save(hoaDon);
 return gioHangDTO;
 }
+//public List<ListHoaDonDTO> getHoaDonByKhachHangID(){
+//
+//}
 
     public List<ListGioHangDTO> getGioHangByKhachHangId(Integer khachHangId) {
         KhachHang kh = khachHangRepo.findById(khachHangId)

@@ -2,6 +2,7 @@ package com.example.app.controller;
 
 import com.example.app.dto.nhanVienDTO.NhanVienDTO;
 import com.example.app.service.NhanVienService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public class NhanVienController {
     }
     
     @PostMapping
-    public ResponseEntity<NhanVienDTO> createNhanVien(@Valid @RequestBody NhanVienDTO nhanVienDTO) {
+    public ResponseEntity<NhanVienDTO> createNhanVien(@Valid @RequestBody NhanVienDTO nhanVienDTO) throws JsonProcessingException {
         NhanVienDTO createdNhanVien = nhanVienService.createNhanVien(nhanVienDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNhanVien);
     }

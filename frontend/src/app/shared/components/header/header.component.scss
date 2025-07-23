@@ -9,6 +9,10 @@
   display: none;
   position: absolute;
 }
+a{
+ cursor: pointer;
+  text-decoration: none;
+}
 a[routerLink] {
   cursor: pointer;
   text-decoration: none;

@@ -1,5 +1,6 @@
 package com.example.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jdk.jfr.Enabled;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,13 @@ public class HoaDonChiTiet {
 
     // FK đến hóa đơn
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "ma_hoa_don", nullable = false)
     private HoaDon hoaDon;
 
     // FK đến sản phẩm chi tiết
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "ma_san_pham", nullable = false)
     private Book book;  // hoặc `SanPhamChiTiet` nếu bạn dùng tên khác
 

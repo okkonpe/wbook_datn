@@ -1,0 +1,113 @@
+<div class="container-fluid px-4 py-3 mt-4">
+  <h2 class="mb-4">📦 Quản lý đơn hàng</h2>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover text-center align-middle">
+      <thead class="table-success">
+        <tr>
+          <th>#</th>
+          <th>Mã hóa đơn</th>
+          <th>Khách hàng</th>
+          <th>Ngày tạo</th>
+          <th>Tổng tiền</th>
+          <th>Địa chỉ giao hàng</th>
+          <th>SDT</th>
+          <th>Ghi chú</th>
+          <th>Lí do huỷ</th>
+          <th>Trạng thái</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let hoaDon of hoaDons; index as i">
+          <td>{{ i + 1 }}</td>
+          <td>{{ hoaDon.maHoaDon }}</td>
+          <td>{{ hoaDon.khachHang }}</td>
+          <td>{{ hoaDon.ngayTao | date:'dd/MM/yyyy' }}</td>
+          <td>{{ hoaDon.tongTien | number }} đ</td>
+          <td>{{ hoaDon.diaChiGiaoHang }}</td>
+          <td>{{ hoaDon.sdtNguoiNhan }}</td>
+          <td>{{ hoaDon.ghiChu }}</td>
+          <td>{{ hoaDon.lyDoHuy }}</td>
+          <td>
+            <span class="badge px-3 py-2 fs-6"
+              [ngClass]="{
+                'bg-warning text-dark': hoaDon?.trangThaiID == 2,
+                'bg-primary': hoaDon?.trangThaiID == 3,
+                'bg-success': hoaDon?.trangThaiID == 4,
+                'bg-danger': hoaDon?.trangThaiID == 5
+              }">
+              {{ hoaDon?.trangThai }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-info me-2 mb-1" (click)="xemChiTietDonHang(hoaDon.id)">Chi tiết</button>
+            
+            <div class="btn-group dropup">
+              <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                Chuyển trạng thái
+              </button>
+              <ul class="dropdown-menu">
+                <li><button class="dropdown-item" (click)="dangGiaoHang(hoaDon)">🚚 Đang giao hàng</button></li>
+                <li><button class="dropdown-item" (click)="daGiaoHang(hoaDon)">✅ Đã giao hàng</button></li>
+                <li><button class="dropdown-item text-danger" (click)="daHuy(hoaDon)">❌ Đã huỷ</button></li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal chi tiết đơn hàng -->
+  <div class="modal fade" tabindex="-1" [ngClass]="{ 'show d-block': isModalOpen }" style="background-color: rgba(0,0,0,0.5)" *ngIf="isModalOpen">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Chi tiết đơn hàng</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+                <th>Tổng tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let sp of chiTietDonHang">
+                <td><img [src]="sp.hinhAnh" width="60" /></td>
+                <td>{{ sp.tenSanPham }}</td>
+                <td>{{ sp.donGia | number }} đ</td>
+                <td>{{ sp.soLuongMua }}</td>
+                <td>{{ sp.tongTien | number }} đ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phân trang -->
+  <nav *ngIf="totalItems > pageSize" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 0">
+        <button class="page-link" (click)="onPageChange(currentPage - 1)">Previous</button>
+      </li>
+      <li class="page-item" *ngFor="let page of getPages(); let i = index" [class.active]="i === currentPage">
+        <button class="page-link" (click)="onPageChange(i)">{{ i + 1 }}</button>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage >= totalPages - 1">
+        <button class="page-link" (click)="onPageChange(currentPage + 1)">Next</button>
+      </li>
+    </ul>
+  </nav>
+</div>

@@ -1,0 +1,104 @@
+<!-- 🛍️ Hiển thị lại giỏ hàng đã chọn -->
+<div class="container mt-2 ">
+  <h4 class="text-primary">🧾 Sản phẩm đã chọn</h4>
+
+  <table class="table table-bordered table-hover mt-3" *ngIf="cartItems.length > 0; else emptyCart">
+    <thead class="table-light">
+      <tr>
+        <th>Ảnh</th>
+        <th>Tên sách</th>
+        <th>Đơn giá</th>
+        <th>Số lượng</th>
+        <th>Thành tiền</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of cartItems">
+        <td><img [src]="item.hinhAnh" width="60" height="80" style="object-fit: cover;"></td>
+        <td>{{ item.tenSanPham }}</td>
+        <td>{{ item.donGia | number }} đ</td>
+        <td>{{ item.soLuongMua }}</td>
+        <td>{{ item.soLuongMua * item.donGia | number }} đ</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+        <td class="fw-bold text-danger">{{ tongTien | number }} đ</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <ng-template #emptyCart>
+    <div class="alert alert-warning">Giỏ hàng trống. Vui lòng quay lại trang sản phẩm.</div>
+  </ng-template>
+</div>
+
+<div class="container mt-3">
+
+
+  <h2 class="mb-4 text-primary">🛒 Xác nhận đơn hàng</h2>
+
+  <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" class="row g-3">
+    <div class="row mb-3 mt-3 align-items-center">
+  <!-- Label: chiếm 2 cột -->
+  <label for="hoTen" class="col-md-3 col-form-label">Họ và tên người nhận</label>
+
+  <!-- Input: chiếm 10 cột -->
+  <div class="col-md-9">
+    <input type="text" class="form-control" id="hoTen" formControlName="hoTen" placeholder="Nguyễn Văn A">
+  </div>
+</div>
+
+
+    <div class="row mb-3 mt-3 align-items-center">
+       
+       <label for="diaChi" class="col-md-3 col-form-label">Địa chỉ giao hàng *</label>
+       <div class="col-md-9">      <input id="diaChi" type="text" class="form-control" formControlName="diaChi" placeholder="Ví dụ: 123 Lê Lợi, Quận 1">
+<div *ngIf="checkoutForm.get('diaChi')?.invalid && checkoutForm.get('diaChi')?.touched" class="text-danger">
+        Vui lòng nhập địa chỉ giao hàng.
+      </div>
+      </div>
+      
+    </div>
+
+    <!-- Số điện thoại -->
+    <div class="row mb-3 mt-3 align-items-center">
+      <label for="soDienThoai" class="col-md-3 form-label">Số điện thoại *</label>
+      <div class="col-md-9">      <input id="soDienThoai" type="text" class="form-control" formControlName="soDienThoai" placeholder="0901234567">
+         <div *ngIf="checkoutForm.get('soDienThoai')?.invalid && checkoutForm.get('soDienThoai')?.touched" class="text-danger">
+        Vui lòng nhập số điện thoại hợp lệ.
+      </div>
+</div>
+     
+    </div>
+
+    <!-- Ghi chú -->
+    <div class="row mb-3 mt-3 align-items-center">
+      <label for="ghiChu" class="col-md-3 form-label">Ghi chú (tuỳ chọn)</label>
+      <div class="col-md-9">      <textarea id="ghiChu" class="form-control" formControlName="ghiChu" rows="3" placeholder="Ví dụ: Giao vào buổi sáng, gọi trước khi giao"></textarea>
+</div>
+    </div>
+
+    <!-- Phương thức thanh toán -->
+     <div class="row mb-5 mt-2 align-items-center">
+      <label class="col-md-3 form-label">Phương thức thanh toán</label>
+      <div class="col-md-6">
+        <select class="form-select" formControlName="phuongThucThanhToan">
+        <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+        <option value="VNPAY">VNPay</option>
+      </select>
+      </div>
+<div class="col-md-3 ">
+      <button type="submit" class="btn btn-success" [disabled]="checkoutForm.invalid">
+        ✅ Thanh toán
+      </button>
+    </div>
+     </div>
+    
+
+    <!-- Nút đặt hàng -->
+    
+
+  </form>
+</div> 

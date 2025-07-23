@@ -5,16 +5,37 @@ import { AboutComponent } from './pages/about/about.component';
 import { AdminComponent } from './features/admin/admin.component';
 import { BookDetailComponent } from './features/books/components/book-detail/book-detail.component';
 import { CartComponent } from './features/cart/cart.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { roleGuard } from './core/guards/auth.guard';
+import { OrderComponent } from './features/order/order.component';
+import { CustomerPurchaseComponent } from './features/customer-purchase/customer-purchase.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: AboutComponent },
     { path: 'book/:id/:slug', component: BookDetailComponent },
-  { path: 'cart', component: CartComponent },
+  { path: 'cart',
+     canActivate: [roleGuard],
+  data: { roles: ['ROLE_KHACH_HANG'] },
+    component: CartComponent },
+     { path: 'order',
+     canActivate: [roleGuard],
+  data: { roles: ['ROLE_KHACH_HANG'] },
+    component: OrderComponent },
+     { path: 'activityPurchase',
+     canActivate: [roleGuard],
+  data: { roles: ['ROLE_KHACH_HANG'] },
+    component: CustomerPurchaseComponent },
+    { path: 'login', component: LoginComponent },
+        { path: 'register', component: RegisterComponent },
+
 
   {
     path: 'admin',
+    canActivate: [roleGuard],
+  data: { roles: ['ROLE_ADMIN'] },
     component: AdminComponent,
     children: [
       {
@@ -22,11 +43,19 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
-        path: 'users',
+        path: 'customer',
         loadComponent: () => import('./features/admin/users/users.component').then(m => m.UsersComponent)
       },
+      {
+        path: 'employee',
+        loadComponent: () => import('./features/admin/employees/employees.component').then(m => m.EmployeesComponent)
+      },
        {
-        path: 'products/authors',
+        path: 'list-order',
+        loadComponent: () => import('./features/admin/list-order/list-order.component').then(m => m.ListOrderComponent)
+      },
+       {
+        path: 'products/author',
         loadComponent: () => import('./features/admin/authors/authors.component').then(m => m.AuthorsComponent)
       },
       {

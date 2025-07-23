@@ -12,6 +12,7 @@ export interface CartItem {
 
 export interface ThemGioHangDTO {
   id: number;
+  khachHangId: number;
   soLuong: number;
 }
 
@@ -28,7 +29,7 @@ export interface ListGioHangDTO {
   providedIn: 'root',
 })
 export class CartService {
-  private apiUrl = 'http://localhost:8080/api/gio-hang'; // đổi theo IP backend của bạn
+  private apiUrl = 'http://localhost:8080/api/gio-hang';
 
   constructor(private http: HttpClient) {}
 
@@ -36,16 +37,16 @@ export class CartService {
     return this.http.post(`${this.apiUrl}/add`, dto);
   }
 
-  getCartByKhachHang(idKhachHang: number): Observable<ListGioHangDTO[]> {
+  getCartByKhachHang(): Observable<ListGioHangDTO[]> {
     return this.http.get<ListGioHangDTO[]>(`${this.apiUrl}/khach-hang`);
   }
-  removeItemFromCart(khachHangId: number, idSanPham: number): Observable<void> {
-  return this.http.delete<void>(`${this.apiUrl}/delete`, {
-    params: {
-      khachHangId: khachHangId,
-      idSanPham: idSanPham
-    }
-  });
-}
 
+  removeItemFromCart(khachHangId: number, idSanPham: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/delete`, {
+      params: {
+        khachHangId,
+        idSanPham
+      }
+    });
+  }
 }

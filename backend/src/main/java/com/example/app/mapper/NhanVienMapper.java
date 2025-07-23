@@ -30,14 +30,14 @@ public class NhanVienMapper {
         dto.setEmail(entity.getEmail());
         dto.setGioiTinh(entity.getGioiTinh());
         dto.setCccd(entity.getCccd());
-        dto.setMatKhau(entity.getMatKhau());
+//        dto.setMatKhau(entity.getMatKhau());
         dto.setTaiKhoan(entity.getTaiKhoan());
         dto.setNgayBatDau(entity.getNgayBatDau());
         dto.setTrangThai(entity.getTrangThai());
         
-        if (entity.getChucVu() != null) {
-            dto.setChucVuId(entity.getChucVu().getId());
-        }
+//        if (entity.getChucVu() != null) {
+//            dto.setChucVuId(entity.getChucVu().getId());
+//        }
         
         return dto;
     }
@@ -62,16 +62,16 @@ public class NhanVienMapper {
         entity.setEmail(dto.getEmail());
         entity.setGioiTinh(dto.getGioiTinh());
         entity.setCccd(dto.getCccd());
-        entity.setMatKhau(dto.getMatKhau());
+//        entity.setMatKhau(dto.getMatKhau());
         entity.setTaiKhoan(dto.getTaiKhoan());
         entity.setNgayBatDau(dto.getNgayBatDau());
         entity.setTrangThai(dto.getTrangThai());
         
-        if (dto.getChucVuId() != null) {
-            ChucVu chucVu = chucVuRepository.findById(dto.getChucVuId())
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy chức vụ với id = " + dto.getChucVuId()));
-            entity.setChucVu(chucVu);
-        }
+//        if (dto.getChucVuId() != null) {
+//            ChucVu chucVu = chucVuRepository.findById(dto.getChucVuId())
+//                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy chức vụ với id = " + dto.getChucVuId()));
+//            entity.setChucVu(chucVu);
+//        }
         
         return entity;
     }

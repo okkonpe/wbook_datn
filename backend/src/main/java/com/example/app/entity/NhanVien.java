@@ -61,7 +61,7 @@ public class NhanVien {
     private Date ngayBatDau;
 
     @ManyToOne
-    @JoinColumn(name = "chuc_vu", referencedColumnName = "ID")
+    @JoinColumn(name = "chuc_vu", referencedColumnName = "id")
     private ChucVu chucVu;
 
     @Column(name = "trang_thai")

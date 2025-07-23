@@ -36,11 +36,14 @@
     <!-- Đã đăng nhập -->
     <ng-container *ngIf="isLoggedIn()">
       <li><a class="dropdown-item" routerLink="/account">Thông tin tài khoản</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" routerLink="/activityPurchase">Hoạt động</a></li>
       <li><hr class="dropdown-divider"></li>
       <li><a class="dropdown-item text-danger" (click)="logout()">Đăng xuất</a></li>
     </ng-container>
   </ul>
 </li>
+<li class="nav-item"> <a class="nav-link" routerLink="/cart">Giỏ hàng</a></li>
 
       </ul>
     </div>

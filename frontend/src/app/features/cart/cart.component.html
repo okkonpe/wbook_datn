@@ -46,6 +46,12 @@
         <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
         <td colspan="2" class="fw-bold text-danger">
           {{ getTotal() | number }} đ
+         
+<button class="btn btn-success" style="margin-left: 150px;" [routerLink]="'/order'">
+  Đặt hàng
+</button>
+
+          
         </td>
       </tr>
     </tfoot>

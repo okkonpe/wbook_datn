@@ -1,0 +1,44 @@
+<div class="container mt-5 mb-5" style="max-width: 600px;">
+  <h3 class="text-center text-success mb-4">📝 Đăng ký</h3>
+
+  <form (ngSubmit)="register()" #registerForm="ngForm">
+    <div class="row">
+      <div class="mb-3 col-md-6">
+        <label class="form-label">Tài khoản</label>
+        <input type="text" class="form-control" required [(ngModel)]="registerData.taiKhoan" name="taiKhoan">
+      </div>
+
+      <div class="mb-3 col-md-6">
+        <label class="form-label">Mật khẩu</label>
+        <input type="password" class="form-control" required [(ngModel)]="registerData.matKhau" name="matKhau">
+      </div>
+
+      <div class="mb-3 col-md-6">
+        <label class="form-label">Họ tên</label>
+        <input type="text" class="form-control" required [(ngModel)]="registerData.tenKhachHang" name="tenKhachHang">
+      </div>
+
+      <div class="mb-3 col-md-6">
+        <label class="form-label">Số điện thoại</label>
+        <input type="text" class="form-control" required [(ngModel)]="registerData.sdt" name="sdt">
+      </div>
+
+      <div class="mb-3 col-12">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" required [(ngModel)]="registerData.email" name="email">
+      </div>
+
+      <div class="mb-3 col-12">
+        <label class="form-label">Địa chỉ</label>
+        <textarea rows="2" class="form-control" required [(ngModel)]="registerData.diaChi" name="diaChi"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-success w-100" type="submit">Đăng ký</button>
+
+    <div class="text-center mt-3">
+      <span>Đã có tài khoản?</span>
+      <a routerLink="/login">Đăng nhập</a>
+    </div>
+  </form>
+</div>

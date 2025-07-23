@@ -32,5 +32,5 @@ public interface HoaDonChiTietRepo extends JpaRepository<HoaDonChiTiet,Integer> 
     List<ListGioHangDTO> getGioHangDTOByHoaDon(@Param("hoaDon") HoaDon hoaDon);
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);
     void deleteByHoaDonAndBook(HoaDon hoaDon, Book book);
-
+List<HoaDonChiTiet> findByHoaDonId(Integer id);
 }

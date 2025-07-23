@@ -1,5 +1,6 @@
 package com.example.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,25 +35,44 @@ public class HoaDon {
     @Column(name = "ngay_tao")
     private LocalDate ngayTao;
 
+    @Column(name = "ho_ten_nguoi_nhan")
+    private String hoTenNguoiNhan;
+    @Column(name = "dia_chi_giao_hang")
+    private String diaChiGiaoHang;
+    @Column(name = "sdt_nguoi_nhan")
+    private String sdtNguoiNhan;
+    @Column(name = "ghi_chu")
+    private String ghiChu;
+    @Column(name = "ly_do_huy")
+    private String lyDoHuy;
+    @Column(name = "loai_thanh_toan")
+    private String loaiThanhToan;
+
+
     // 🔗 FK: nhân viên
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "nhan_vien", referencedColumnName = "id")
     private NhanVien nhanVien;
 
     // 🔗 FK: khách hàng
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "khach_hang", referencedColumnName = "id")
     private KhachHang khachHang;
 
     // 🔗 FK: phiếu giảm giá
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "phieu_giam_gia", referencedColumnName = "id")
     private PhieuGiamGia phieuGiamGia;
 
     // 🔗 FK: trạng thái hóa đơn
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "trang_thai", referencedColumnName = "id")
     private TrangThaiHoaDon trangThai;
+    @JsonIgnoreProperties({"hoaDon", "hibernateLazyInitializer", "handler"})
     @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HoaDonChiTiet> chiTietHoaDons = new ArrayList<>();
 

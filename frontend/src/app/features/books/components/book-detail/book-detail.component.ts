@@ -1,26 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BookService } from '../../services/book.services';
-import { Book } from '../../model/book.model';
-import { CartItem, CartService } from '../../../cart/cart.service';
+import { CartService, ThemGioHangDTO } from '../../../cart/cart.service';
 import { FormsModule } from '@angular/forms';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-book-detail',
+  standalone: true,
   imports: [FormsModule],
   templateUrl: './book-detail.component.html',
   styleUrl: './book-detail.component.scss'
 })
 export class BookDetailComponent implements OnInit {
-book: any;
- soLuong: number = 1;
- constructor(
+  book: any;
+  soLuong: number = 1;
+
+  constructor(
     private route: ActivatedRoute,
     private bookService: BookService,
-   private cartService: CartService
+    private cartService: CartService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.bookService.getBookById(id).subscribe((data) => {
@@ -29,17 +33,31 @@ book: any;
     }
   }
 
-  addToCart() {
-    const item: CartItem = {
-      id: this.book.id,
-      tenSanPham: this.book.tenSanPham,
-      donGia: this.book.donGia,
-      soLuongMua: this.soLuong,
-      hinhAnh: this.book.hinhAnh, // nếu có
-    };
-   this.cartService.addToCart({ id: this.book.id, soLuong: this.soLuong }).subscribe(() => {
-  alert('Đã thêm vào giỏ hàng!');
-});
+  getKhachHangIdFromToken(): number | null {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      return decoded.id;
+    }
+    return null;
+  }
 
+  addToCart() {
+    const khachHangId = this.getKhachHangIdFromToken();
+    if (!khachHangId) {
+      alert('Bạn cần đăng nhập trước');
+      return;
+    }
+
+    const dto: ThemGioHangDTO = {
+      khachHangId,
+      id: this.book.id,
+      soLuong: this.soLuong
+    };
+
+    this.cartService.addToCart(dto).subscribe(() => {
+      alert('✅ Đã thêm vào giỏ hàng!');
+      this.router.navigate(['/cart'])
+    });
   }
 }

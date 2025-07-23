@@ -3,14 +3,23 @@ package com.example.app.service;
 import com.example.app.dto.nhanVienDTO.NhanVienDTO;
 import com.example.app.entity.NhanVien;
 import com.example.app.mapper.NhanVienMapper;
+import com.example.app.repository.KhachHangRepo;
 import com.example.app.repository.NhanVienRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,9 +27,16 @@ public class NhanVienService {
 
     @Autowired
     private NhanVienRepository nhanVienRepository;
+
+    @Autowired
+    private KhachHangRepo khachHangRepo;
     
     @Autowired
     private NhanVienMapper nhanVienMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailService emailService;
 
     public List<NhanVienDTO> getAllNhanVien() {
         return nhanVienRepository.findAll().stream()
@@ -44,16 +60,31 @@ public class NhanVienService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy nhân viên với id = " + id));
     }
 
-    public NhanVienDTO createNhanVien(NhanVienDTO nhanVienDTO) {
+    public NhanVienDTO createNhanVien(NhanVienDTO nhanVienDTO) throws JsonProcessingException {
         // Tạo mã nhân viên tự động
         nhanVienDTO.setMaNv(generateUniqueMaNhanVien());
         
         // Kiểm tra thông tin trùng lặp
         validateUniqueConstraints(nhanVienDTO);
+        String rawPassword = generateRandomPassword(8);
+
 
         NhanVien nhanVien = nhanVienMapper.toEntity(nhanVienDTO);
+        nhanVien.setMatKhau(passwordEncoder.encode(rawPassword));
+
         NhanVien saved = nhanVienRepository.save(nhanVien);
+        emailService.sendPasswordToNhanVien(nhanVienDTO.getEmail(), nhanVienDTO.getTaiKhoan(), rawPassword);
+        nhanVien.setMatKhau(null);
         return nhanVienMapper.toDTO(saved);
+    }
+    private String generateRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
     public NhanVienDTO updateNhanVien(Integer id, NhanVienDTO nhanVienDTO) {
@@ -79,20 +110,33 @@ public class NhanVienService {
     }
     
     // Kiểm tra các ràng buộc duy nhất khi tạo mới
-    private void validateUniqueConstraints(NhanVienDTO nhanVienDTO) {
+    private void validateUniqueConstraints(NhanVienDTO nhanVienDTO) throws JsonProcessingException {
         // Kiểm tra email
+        // 1. Kiểm tra Email
+        Map<String, String> errors = new HashMap<>();
+
+// 1. Email
         if (nhanVienDTO.getEmail() != null && nhanVienRepository.existsByEmail(nhanVienDTO.getEmail())) {
-            throw new IllegalArgumentException("Email đã được sử dụng");
+            errors.put("email", "Email đã được sử dụng");
         }
-        
-        // Kiểm tra CCCD
+
+// 2. CCCD
         if (nhanVienDTO.getCccd() != null && nhanVienRepository.existsByCccd(nhanVienDTO.getCccd())) {
-            throw new IllegalArgumentException("CCCD đã được sử dụng");
+            errors.put("cccd", "CCCD đã được sử dụng");
         }
-        
-        // Kiểm tra tài khoản
-        if (nhanVienDTO.getTaiKhoan() != null && nhanVienRepository.existsByTaiKhoan(nhanVienDTO.getTaiKhoan())) {
-            throw new IllegalArgumentException("Tài khoản đã tồn tại");
+
+// 3. Tài khoản
+        String taiKhoan = nhanVienDTO.getTaiKhoan();
+        boolean existsNV = nhanVienRepository.existsByTaiKhoan(taiKhoan);
+        boolean existsKH = khachHangRepo.existsByTaiKhoan(taiKhoan);
+
+        if (taiKhoan != null && (existsNV || existsKH)) {
+            errors.put("taiKhoan", "Tài khoản đã tồn tại");
+        }
+
+// ❗ Nếu có lỗi → ném custom exception chứa map lỗi
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException(new ObjectMapper().writeValueAsString(errors));
         }
     }
     

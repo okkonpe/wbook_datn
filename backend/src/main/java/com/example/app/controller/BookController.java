@@ -17,18 +17,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = "*")
 public class BookController {
 
     @Autowired
     private BookService bookService;
     private UploadService uploadService;
 
-    @GetMapping()
-    public ResponseEntity<List<ListAllBookDTO>> getAllBooks() {
-        List<ListAllBookDTO> books = bookService.getAllBook();
-        return ResponseEntity.ok(books);
-    }
+//    @GetMapping()
+//    public ResponseEntity<List<ListAllBookDTO>> getAllBooks() {
+//        List<ListAllBookDTO> books = bookService.getAllBook();
+//        return ResponseEntity.ok(books);
+//    }
 
     @GetMapping("")
     public ResponseEntity<Page<ListAllBookDTO>> getBooks(

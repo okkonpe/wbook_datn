@@ -9,7 +9,8 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { roleGuard } from './core/guards/auth.guard';
 import { OrderComponent } from './features/order/order.component';
-import { CustomerPurchaseComponent } from './features/customer-purchase/customer-purchase.component';
+import { CustomerPurchaseComponent } from './features/customer/customer-purchase/customer-purchase.component';
+import { CustomerInfoComponent } from './features/customer/customer-info/customer-info.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -20,6 +21,10 @@ export const routes: Routes = [
      canActivate: [roleGuard],
   data: { roles: ['ROLE_KHACH_HANG'] },
     component: CartComponent },
+     { path: 'customer-info',
+     canActivate: [roleGuard],
+  data: { roles: ['ROLE_KHACH_HANG'] },
+    component: CustomerInfoComponent },
      { path: 'order',
      canActivate: [roleGuard],
   data: { roles: ['ROLE_KHACH_HANG'] },

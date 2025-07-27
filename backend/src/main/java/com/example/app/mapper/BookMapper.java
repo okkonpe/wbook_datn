@@ -38,10 +38,10 @@ public interface BookMapper {
     @Mapping(source = "sanPham.tenSanPham", target = "tenSanPham")
     @Mapping(source = "loaiGiay.tenGiay", target = "loaiGiay")
     @Mapping(source = "loaiBia.tenBia", target = "loaiBia")
-    @Mapping(target = "hinhAnh", expression = "java(buildImgUrlDetail(book.getHinhAnh()))")
     @Mapping(source = "tacGia", target = "tacGia")
     @Mapping(source = "kichThuoc.chiSoKichThuoc", target = "kichThuoc")
     @Mapping(source = "nhaXuatBan.tenNhaXuatBan", target = "nhaXuatBan")
+    @Mapping(target = "hinhAnh", ignore = true)
     BookDetailDTO getBookByIDDTO(Book book);
     @AfterMapping
     default void buildImgUrlDetail(Book book, @MappingTarget BookDetailDTO detailDTO){

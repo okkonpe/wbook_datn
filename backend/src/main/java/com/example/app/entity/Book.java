@@ -86,8 +86,18 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "ID_tac_gia")
     )
     private Set<TacGia> tacGia = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "sach_chu_de",
+            joinColumns = @JoinColumn(name = "ID_san_pham_chi_tiet"),
+            inverseJoinColumns = @JoinColumn(name = "id_chu_de")
+    )
+    private Set<ChuDe> chuDes;
+
     @OneToMany(mappedBy = "book")
     private List<HoaDonChiTiet> chiTietHoaDons;
+
 
 
 }

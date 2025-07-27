@@ -1,6 +1,7 @@
 package com.example.app.service;
 
 import com.example.app.dto.banHangDTO.ListDonHangDTO;
+import com.example.app.dto.khachHangDTO.KhachHangInfoDTO;
 import com.example.app.dto.khachHangDTO.KhachHangRegisterDTO;
 import com.example.app.entity.HoaDon;
 import com.example.app.entity.KhachHang;
@@ -48,6 +49,11 @@ public class KhachHangService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 List<Integer> list = List.of(1,2);
         return hoaDonRepository.findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(kh,list).stream().map(hoaDonMapper::donHangtoDTO).collect(Collectors.toList());
+    }
+    public KhachHangInfoDTO thongTinKhachHang(String username){
+        KhachHang kh = repo.findByTaiKhoan(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+    return mapper.khInfoToDTO(kh);
     }
 
 }

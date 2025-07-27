@@ -3,6 +3,9 @@ import { CartService, ListGioHangDTO, ThemGioHangDTO } from './cart.service';
 import { CommonModule } from '@angular/common';
 import { jwtDecode } from 'jwt-decode';
 import { Router, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { OrderService } from '../order/order.service';
 
 @Component({
   selector: 'app-cart',
@@ -17,7 +20,9 @@ export class CartComponent implements OnInit {
 
   constructor(
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+private http: HttpClient,
+  private orderService: OrderService // ✅ inject service, không phải component
 
   ) {}
 
@@ -35,7 +40,17 @@ export class CartComponent implements OnInit {
       this.router.navigate(['/login'])
     }
   }
-
+fillInfoOrder() {
+    this.http.get<any>('http://localhost:8080/api/khach-hang/info').subscribe({
+      next: (data) => {
+        this.orderService.setKhachHang(data);
+        this.router.navigate(['/order']);
+      },
+      error: (err) => {
+        console.error('Không lấy được thông tin khách hàng:', err);
+      }
+    });
+  }
   loadCartFromBackend(): void {
     
       this.cartService.getCartByKhachHang().subscribe(data => {

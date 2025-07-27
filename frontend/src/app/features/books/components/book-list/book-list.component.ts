@@ -14,12 +14,28 @@ import { RouterModule } from '@angular/router';
 })
 export class BookListComponent implements OnInit {
   books: Book[]=[];
+  currentPage = 0;
+totalPages = 0;
   constructor(private bookService: BookService){}
-  ngOnInit(): void {
-    this.bookService.getBooks().subscribe(data=>{
-         console.log('📦 Dữ liệu sách:', data); 
-      this.books=data});
+  ngOnInit() {
+  this.loadBooks();
+}
+
+loadBooks(page: number = 0) {
+  this.bookService.getBooks(page).subscribe(res => {
+    this.books = res.content;
+    this.totalPages = res.totalPages;
+    this.currentPage = res.number;
+  });
+}
+
+changePage(page: number) {
+  if (page >= 0 && page < this.totalPages) {
+    this.loadBooks(page);
   }
+}
+
+  
   slugify(title: string): string {
   return title.toLowerCase().normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // remove accents

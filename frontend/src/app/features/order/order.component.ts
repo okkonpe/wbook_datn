@@ -5,29 +5,43 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Router } from '@angular/router';
 import { CartService, ListGioHangDTO } from '../cart/cart.service';
 import { jwtDecode } from 'jwt-decode';
+import { BehaviorSubject } from 'rxjs';
+import { OrderService } from './order.service';
 
+export interface KhachHang {
+  tenKhachHang: string;
+  sdt: string;
+  ngaySinh: string; // Nếu backend trả kiểu ISO string, dùng string
+  diaChi: string;
+  email: string;
+}
 @Component({
+  standalone:true,
   selector: 'app-order',
   imports: [FormsModule,CommonModule,ReactiveFormsModule],
   templateUrl: './order.component.html',
   styleUrl: './order.component.scss'
 })
+
 export class OrderComponent implements OnInit {
 checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
 
  cartItems: ListGioHangDTO[] = [];
   tongTien: number = 0;
  khID: number=0;
+   khachHang!: KhachHang;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
     private cartService: CartService,
-    // private authService: AuthService
+    private orderService: OrderService
   ) {}
 
   ngOnInit(): void {
      this.checkoutForm = this.fb.group({
+      hoTen: [''],
     diaChi: ['', Validators.required],
     soDienThoai: ['', [Validators.required, Validators.pattern('^0[0-9]{9,10}$')]],
     ghiChu: [''],
@@ -42,7 +56,31 @@ checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
         console.error('Lỗi khi lấy giỏ hàng:', err);
       }
     });
+          this.orderService.fetchKhachHang().subscribe({
+    next: (data) => {
+      this.khachHang = data;
+      console.log('Thông tin KH:', this.khachHang);
+
+      // Đổ dữ liệu vào form
+      this.checkoutForm.patchValue({
+        hoTen: this.khachHang.tenKhachHang,
+        diaChi: this.khachHang.diaChi,
+        soDienThoai: this.khachHang.sdt
+      });
+    },
+    error: (err) => {
+      console.error('Lỗi khi lấy thông tin KH:', err);
+    }
+  });
+
   }
+// fill Info Customer
+// private khachHangSubject = new BehaviorSubject<KhachHang | null>(null);
+//   khachHang$ = this.khachHangSubject.asObservable();
+
+//   setKhachHang(data: KhachHang) {
+//     this.khachHangSubject.next(data);
+//   }
 
    tinhTongTien() {
     this.tongTien = this.cartItems.reduce((total, item) => total + item.tongTien, 0);

@@ -1,0 +1,54 @@
+<div class="container mt-5">
+  <div class="card shadow rounded p-4">
+    <h3 class="text-center mb-4">Thông tin khách hàng</h3>
+    
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Họ và tên:</label>
+        <div class="form-control">{{ khachHang.tenKhachHang }}</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Số điện thoại:</label>
+        <div class="form-control">{{ khachHang.sdt }}</div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Ngày sinh:</label>
+        <div class="form-control">{{ khachHang.ngaySinh | date: 'dd/MM/yyyy' }}</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Email:</label>
+        <div class="form-control">{{ khachHang.email }}</div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Địa chỉ:</label>
+      <div class="form-control">{{ khachHang.diaChi }}</div>
+    </div>
+
+    <div class="text-center mt-4">
+      <button class="btn btn-primary" (click)="editMode = true">Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+<form *ngIf="editMode" (ngSubmit)="saveChanges()">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Họ và tên:</label>
+      <input type="text" class="form-control" [(ngModel)]="khachHang.tenKhachHang" name="tenKhachHang">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Số điện thoại:</label>
+      <input type="text" class="form-control" [(ngModel)]="khachHang.sdt" name="sdt">
+    </div>
+  </div>
+  <!-- ...các field khác tương tự -->
+  <div class="text-center mt-3">
+    <button class="btn btn-success me-2" type="submit">Lưu thay đổi</button>
+    <button class="btn btn-secondary" type="button" (click)="editMode = false">Huỷ</button>
+  </div>
+</form>
+

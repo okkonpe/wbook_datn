@@ -1,6 +1,7 @@
 package com.example.app.controller;
 
 import com.example.app.dto.banHangDTO.ListDonHangDTO;
+import com.example.app.dto.khachHangDTO.KhachHangInfoDTO;
 import com.example.app.entity.HoaDon;
 import com.example.app.mapper.banHangMapper.HoaDonMapper;
 import com.example.app.security.KhachHangUserDetails;
@@ -26,6 +27,12 @@ public class KhachHangController {
         String username = user.getUsername();
         List<ListDonHangDTO> danhSach = khachHangService.layDonHangTheoKhachHang(username);
         return ResponseEntity.ok(danhSach);
+    }
+    @GetMapping("/info")
+    public ResponseEntity<KhachHangInfoDTO> getInfoKH(@AuthenticationPrincipal KhachHangUserDetails user) {
+        String username = user.getUsername();
+        KhachHangInfoDTO info = khachHangService.thongTinKhachHang(username);
+        return ResponseEntity.ok(info);
     }
 
 }

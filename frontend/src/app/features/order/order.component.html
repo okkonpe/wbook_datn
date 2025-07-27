@@ -46,7 +46,7 @@
 
   <!-- Input: chiếm 10 cột -->
   <div class="col-md-9">
-    <input type="text" class="form-control" id="hoTen" formControlName="hoTen" placeholder="Nguyễn Văn A">
+    <input  id="hoTen" type="text" class="form-control" formControlName="hoTen">
   </div>
 </div>
 
@@ -54,7 +54,8 @@
     <div class="row mb-3 mt-3 align-items-center">
        
        <label for="diaChi" class="col-md-3 col-form-label">Địa chỉ giao hàng *</label>
-       <div class="col-md-9">      <input id="diaChi" type="text" class="form-control" formControlName="diaChi" placeholder="Ví dụ: 123 Lê Lợi, Quận 1">
+       <div class="col-md-9">   
+           <input id="diaChi" type="text" class="form-control" formControlName="diaChi" placeholder="Ví dụ: 123 Lê Lợi, Quận 1">
 <div *ngIf="checkoutForm.get('diaChi')?.invalid && checkoutForm.get('diaChi')?.touched" class="text-danger">
         Vui lòng nhập địa chỉ giao hàng.
       </div>
@@ -65,7 +66,7 @@
     <!-- Số điện thoại -->
     <div class="row mb-3 mt-3 align-items-center">
       <label for="soDienThoai" class="col-md-3 form-label">Số điện thoại *</label>
-      <div class="col-md-9">      <input id="soDienThoai" type="text" class="form-control" formControlName="soDienThoai" placeholder="0901234567">
+      <div class="col-md-9">      <input id="soDienThoai" type="text" class="form-control" formControlName="soDienThoai" placeholder="0901234567" >
          <div *ngIf="checkoutForm.get('soDienThoai')?.invalid && checkoutForm.get('soDienThoai')?.touched" class="text-danger">
         Vui lòng nhập số điện thoại hợp lệ.
       </div>
@@ -90,7 +91,7 @@
       </select>
       </div>
 <div class="col-md-3 ">
-      <button type="submit" class="btn btn-success" [disabled]="checkoutForm.invalid">
+      <button type="submit" class="btn btn-success" >
         ✅ Thanh toán
       </button>
     </div>

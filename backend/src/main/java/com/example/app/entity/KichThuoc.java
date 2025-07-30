@@ -18,7 +18,7 @@ public class KichThuoc {
     @Column(name = "ma_kich_thuoc", nullable = false, length = 15)
     private String maKichThuoc;
 
-    @Column(name = "chi_so_kich_thuoc", nullable = false, length = 10)
+    @Column(name = "kich_thuoc", nullable = false, length = 10)
     private String chiSoKichThuoc;
 
     @Column(name = "trang_thai")

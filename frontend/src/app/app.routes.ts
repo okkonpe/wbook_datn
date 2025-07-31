@@ -64,6 +64,34 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/authors/authors.component').then(m => m.AuthorsComponent)
       },
       {
+        path: 'products/category',
+        loadComponent: () => import('./features/admin/category/category.component').then(m => m.CategoryComponent)
+      },
+       {
+        path: 'products/topic',
+        loadComponent: () => import('./features/admin/topic/topic.component').then(m => m.TopicComponent)
+      },
+       {
+        path: 'products/paper',
+        loadComponent: () => import('./features/admin/paper/paper.component').then(m => m.PaperComponent)
+      },
+       {
+        path: 'products/cover',
+        loadComponent: () => import('./features/admin/cover/cover.component').then(m => m.CoverComponent)
+      },
+       {
+        path: 'products/size',
+        loadComponent: () => import('./features/admin/size/size.component').then(m => m.SizeComponent)
+      },
+       {
+        path: 'products/publisher',
+        loadComponent: () => import('./features/admin/publisher/publisher.component').then(m => m.PublisherComponent)
+      },
+      {
+        path: 'products/product-book',
+        loadComponent: () => import('./features/admin/product-book/product-book.component').then(m => m.ProductBookComponent)
+      },
+      {
         path: 'products/book',
         loadComponent: () => import('./features/admin/book-management/book-management.component').then(m => m.BookManagementComponent)
       },

@@ -32,5 +32,8 @@ public class SanPham {
 
     @Column(name = "trang_thai")
     private Boolean trangThai;
+
+    @Column(name = "phien_ban")
+    private Integer phienBan;
 }
 

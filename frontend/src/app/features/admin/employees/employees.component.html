@@ -14,6 +14,7 @@
         <th>Ngày sinh</th>
         <th>Giới tính</th>
         <th>Username</th>
+        <th>Chức vụ</th>
                 <th>Trạng thái</th>
         <th>SĐT</th>
         <th class="text-center">Hành động</th>
@@ -26,6 +27,7 @@
         <td>{{a.ngaySinh}}</td>
         <td>{{a.gioiTinh ? 'Nam':'Nữ'}}</td>
         <td>{{ a.taiKhoan }}</td>
+        <td>{{a.chucVu}}</td>
         <td>{{ a.trangThai? 'Đang làm':'Nghỉ làm' }}</td>
                 <td>{{ a.sdt }}</td>
         <td class="text-center">
@@ -60,6 +62,7 @@
   {{ backendErrors.tenNv }}
 </div>
             </div>
+           
             <div class="mb-3">
               <label class="form-label">Ngày sinh</label>
               <input type="date" class="form-control" [(ngModel)]="emp.ngaySinh" name="ngaySinh" required>
@@ -105,10 +108,29 @@
                <div *ngIf="backendErrors?.cccd" class="text-danger">
   {{ backendErrors.cccd }}
 </div>
-<div *ngIf="errorMessage" class="alert alert-danger mt-2">
+<!-- <div *ngIf="errorMessage" class="alert alert-danger mt-2">
   {{ errorMessage }}
+</div> -->
+
+            </div>
+             <div class="mb-3">
+  <label class="form-label">Trạng thái</label>
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="trangThai" [value]="true" [(ngModel)]="emp.trangThai" id="dangLam">
+    <label class="form-check-label" for="dangLam">Đang làm</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="trangThai" [value]="false" [(ngModel)]="emp.trangThai" id="nghiLam">
+    <label class="form-check-label" for="nghiLam">Nghỉ làm</label>
+  </div>
 </div>
 
+             <div class="mb-3">
+              <label class="form-label">Chức vụ</label>
+                  <select class="form-control form-select" [(ngModel)]="emp.chucVu" name="chucVu" id="chucVu">
+  <option [value]="'2'">Nhân viên</option>
+  <option [value]="'11'">Shipper</option>
+</select>
             </div>
           </div>
           <div class="modal-footer">

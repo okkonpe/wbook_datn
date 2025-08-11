@@ -1,6 +1,7 @@
 package com.example.app.security;
 
 import com.example.app.entity.KhachHang;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -56,6 +57,19 @@ public class JwtService {
                 .getBody()
                 .getSubject();
     }
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Integer extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("id", Integer.class);
+    }
+
 
     public boolean isValid(String token, UserDetails userDetails) {
         return extractUsername(token).equals(userDetails.getUsername()) && !isExpired(token);

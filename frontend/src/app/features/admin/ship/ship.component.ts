@@ -2,16 +2,23 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
-import { WebsocketService } from '../../../core/services/websocket.service';
+import { jwtDecode } from 'jwt-decode'; 
 
+interface DecodedToken {
+  sub: string;
+  id: number;
+  role: string;
+  iat: number;
+  exp: number;
+}
 @Component({
-  selector: 'app-list-order',
+  selector: 'app-ship',
   imports: [CommonModule],
-  templateUrl: './list-order.component.html',
-  styleUrl: './list-order.component.scss'
+  templateUrl: './ship.component.html',
+  styleUrl: './ship.component.scss'
 })
-export class ListOrderComponent {
-  hoaDons: any[]=[];
+export class ShipComponent {
+    hoaDons: any[]=[];
    totalItems = 0;
   totalPages = 0;
   chiTietDonHang: any[] = [];
@@ -19,24 +26,40 @@ export class ListOrderComponent {
   currentPage = 0;
   pageSize = 10;
     private apiUrl = 'http://localhost:8080/api/hoa-don';
-     constructor(private http: HttpClient,
-      private websocketService: WebsocketService
-     ) {}
+     constructor(private http: HttpClient) {}
 
  
    
 
 ngOnInit(): void {
-   this.loadDanhSachDonHang();
- this.websocketService.order$
-  .subscribe((donHangMoi) => {
-    if (donHangMoi) {
-      this.hoaDons.unshift(donHangMoi);
-    }
-  });
 
- 
+  this.loadDanhSachDonHang();
 }
+
+getRole():any{
+ const  role=localStorage.getItem('role');
+return role;
+}
+getUserIdFromToken(): number {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+       return Number(decoded.id);    
+    } catch (e) {
+      console.error('Decode token lỗi:', e);
+    }
+  }
+  return 0; // fallback nếu lỗi
+}
+nhanDon(hoaDon: any): void {
+  this.http.put(`${this.apiUrl}/shipper/nhan-don/${hoaDon.id}`, { idShipper: this.getUserIdFromToken() })
+    .subscribe(() => {
+      this.loadDanhSachDonHang(); // reload lại danh sách sau khi nhận đơn
+    });
+}
+
+
 getChiTietDonHang(idHoaDon: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/chi-tiet/${idHoaDon}`);
   }
@@ -55,7 +78,7 @@ xemChiTietDonHang(id: number): void {
 
 loadDanhSachDonHang(): void {
     this.http
-      .get<any>(`${this.apiUrl}/don-hang?page=${this.currentPage}&size=${this.pageSize}`)
+      .get<any>(`${this.apiUrl}/giao-hang?page=${this.currentPage}&size=${this.pageSize}`)
       .subscribe(res => {
         this.hoaDons = res.content;
         this.totalItems = res.totalElements;
@@ -73,26 +96,7 @@ loadDanhSachDonHang(): void {
   }
     
 // Trong don-hang.component.ts
-giaoHang(hoaDon: any): void {
-    // 1. Sửa lại nội dung confirm cho khớp với hành động
-    const message = `Bạn có chắc muốn chuyển trạng thái đơn hàng #${hoaDon.ma} sang "Giao hàng"?`;
 
-    if (confirm(message)) {
-      const url = `${this.apiUrl}/cap-nhat-trang-thai/giao-hang/${hoaDon.id}`;
-
-      // 2. Thêm body rỗng {} và 3. Xử lý lỗi
-      this.http.put(url, {}).subscribe({
-        next: () => {
-          console.log('Cập nhật trạng thái thành công!');
-          this.loadDanhSachDonHang();
-        },
-        error: (err) => {
-          console.error('Có lỗi xảy ra khi cập nhật trạng thái:', err);
-          alert('Thao tác thất bại, vui lòng thử lại!');
-        }
-      });
-    }
-}
 dangGiaoHang(hoaDon: any): void {
     // 1. Sửa lại nội dung confirm cho khớp với hành động
     const message = `Bạn có chắc muốn chuyển trạng thái đơn hàng #${hoaDon.ma} sang "Đang giao hàng"?`;
@@ -156,6 +160,6 @@ daHuy(hoaDon: any): void {
     }
 }
 
-
-
 }
+
+

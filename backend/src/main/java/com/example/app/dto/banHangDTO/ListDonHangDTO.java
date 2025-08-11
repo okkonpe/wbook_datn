@@ -28,11 +28,12 @@ private String maHoaDon;
     private String ghiChu;
     private String lyDoHuy;
     private String loaiThanhToan;
-    private String nhanVien;
+    private List<String> nhanVien;
     private String khachHang;
 //    private PhieuGiamGia phieuGiamGia;
     private String trangThai;
     private Integer trangThaiID;
-
+    private  Integer idShipper;
+    private  Integer idNhanVien;
     private List<ListGioHangDTO> sanPhams;
 }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { WebsocketService } from '../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-side-bar',
@@ -11,4 +12,11 @@ import { RouterModule } from '@angular/router';
 })
 export class SideBarComponent {
 isProductMenuOpen = false;
+
+hasRole(roles: string[]): boolean {
+  const currentRole = localStorage.getItem('role'); // Ex: "ROLE_SHIPPER"
+  return currentRole !== null && roles.includes(currentRole);
+}
+
+
 }

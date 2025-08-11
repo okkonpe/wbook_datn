@@ -1,10 +1,16 @@
 .sidebar {
-  width: 250px;
+  width: 200px;
   background-color: #212529;
 }
 
 .sidebar .nav-link {
   padding: 10px 15px;
+}
+/* styles.css hoặc component CSS tương ứng */
+.custom-sidebar-scroll {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar .nav-link:hover,

@@ -1,8 +1,10 @@
 package com.example.app.service;
 
 import com.example.app.dto.nhanVienDTO.NhanVienDTO;
+import com.example.app.entity.ChucVu;
 import com.example.app.entity.NhanVien;
 import com.example.app.mapper.NhanVienMapper;
+import com.example.app.repository.ChucVuRepository;
 import com.example.app.repository.KhachHangRepo;
 import com.example.app.repository.NhanVienRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,6 +32,9 @@ public class NhanVienService {
 
     @Autowired
     private KhachHangRepo khachHangRepo;
+
+    @Autowired
+    private ChucVuRepository chucVuRepository;
     
     @Autowired
     private NhanVienMapper nhanVienMapper;
@@ -45,10 +50,11 @@ public class NhanVienService {
     }
 
     public Page<NhanVienDTO> getAllNhanVienPaged(Pageable pageable) {
-        return nhanVienRepository.findAll(pageable)
-                .map(nhanVienMapper::toDTO);
+        return nhanVienRepository.getAllNhanVienDTO(pageable);
     }
-    
+
+
+
     public Page<NhanVienDTO> searchNhanVienByName(String name, Pageable pageable) {
         return nhanVienRepository.findByTenNvContaining(name, pageable)
                 .map(nhanVienMapper::toDTO);
@@ -70,6 +76,12 @@ public class NhanVienService {
 
 
         NhanVien nhanVien = nhanVienMapper.toEntity(nhanVienDTO);
+        if (nhanVienDTO.getChucVu() != null) {
+            Integer chucVuId = Integer.parseInt(nhanVienDTO.getChucVu());
+            ChucVu chucVu = chucVuRepository.findById(chucVuId)
+                    .orElseThrow(() -> new IllegalArgumentException("Chức vụ không tồn tại"));
+            nhanVien.setChucVu(chucVu);
+        }
         nhanVien.setMatKhau(passwordEncoder.encode(rawPassword));
 
         NhanVien saved = nhanVienRepository.save(nhanVien);
@@ -116,9 +128,9 @@ public class NhanVienService {
         Map<String, String> errors = new HashMap<>();
 
 // 1. Email
-        if (nhanVienDTO.getEmail() != null && nhanVienRepository.existsByEmail(nhanVienDTO.getEmail())) {
-            errors.put("email", "Email đã được sử dụng");
-        }
+//        if (nhanVienDTO.getEmail() != null && nhanVienRepository.existsByEmail(nhanVienDTO.getEmail())) {
+//            errors.put("email", "Email đã được sử dụng");
+//        }
 
 // 2. CCCD
         if (nhanVienDTO.getCccd() != null && nhanVienRepository.existsByCccd(nhanVienDTO.getCccd())) {

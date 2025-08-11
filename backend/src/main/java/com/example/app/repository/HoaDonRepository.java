@@ -18,7 +18,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
     boolean existsByMaHoaDon(String maHoaDon);
     Optional<HoaDon> findByKhachHangAndTrangThai(KhachHang kh, TrangThaiHoaDon trangThaiHoaDon);
     Optional<HoaDon> findByKhachHangIdAndTrangThaiId(Integer khachHangId, Integer trangThaiId);
-    Page<HoaDon> findByTrangThaiIdNot(Integer trangThaiId, Pageable pageable);
+    Page<HoaDon> findByTrangThaiIdNotIn(List<Integer> trangThaiId, Pageable pageable);
     @EntityGraph(attributePaths = {"chiTietHoaDons", "chiTietHoaDons.book", "chiTietHoaDons.book.sanPham", "chiTietHoaDons.book.hinhAnh"})
     List<HoaDon> findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(KhachHang khachHang,List<Integer> id);
 }

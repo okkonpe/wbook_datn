@@ -1,6 +1,6 @@
 <div class="main-content container-fluid mt-4 px-3" >
 
-  <h2 class="mb-4">📦 Quản lý đơn hàng</h2>
+  <h2 class="mb-4">📦 Giao hàng</h2>
 
  <div class="table-responsive">
     <table class="table table-bordered table-hover text-center align-middle">
@@ -22,38 +22,40 @@
         <tr *ngFor="let hoaDon of hoaDons; index as i">
           <td>{{ i + 1 }}</td>
           <!-- <td>{{ hoaDon.maHoaDon }}</td> -->
-          <td>{{ hoaDon?.khachHang }}</td>
-          <td>{{ hoaDon?.ngayTao | date:'dd/MM/yyyy' }}</td>
-          <td>{{ hoaDon?.tongTien | number }} đ</td>
-          <td>{{ hoaDon?.diaChiGiaoHang }}</td>
-          <td>{{ hoaDon?.sdtNguoiNhan }}</td>
+          <td>{{ hoaDon.khachHang }}</td>
+          <td>{{ hoaDon.ngayTao | date:'dd/MM/yyyy' }}</td>
+          <td>{{ hoaDon.tongTien | number }} đ</td>
+          <td>{{ hoaDon.diaChiGiaoHang }}</td>
+          <td>{{ hoaDon.sdtNguoiNhan }}</td>
           <td></td>
           <td>
             <span class="badge px-3 py-2 fs-6"
               [ngClass]="{
-                'bg-warning text-dark': hoaDon?.trangThaiID == 2,
+                'bg-warning text-dark': hoaDon?.trangThaiID == 11,
                 'bg-primary': hoaDon?.trangThaiID == 3,
-                'bg-success': hoaDon?.trangThaiID == 4,
-                'bg-danger': hoaDon?.trangThaiID == 5
+            
               }">
               {{ hoaDon?.trangThai }}
             </span>
           </td>
           <td>
-            <button class="btn btn-sm btn-info me-2 mb-1" (click)="xemChiTietDonHang(hoaDon.id)">Chi tiết</button>
-            
-            <div class="btn-group dropup">
-              <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                Chuyển trạng thái
-              </button>
-              <ul class="dropdown-menu">
-                                <li><button class="dropdown-item" (click)="giaoHang(hoaDon)">🚚 Giao hàng</button></li>
-                <li><button class="dropdown-item" (click)="dangGiaoHang(hoaDon)">🚚 Đang giao hàng</button></li>
-                <li><button class="dropdown-item" (click)="daGiaoHang(hoaDon)">✅ Đã giao hàng</button></li>
-                <li><button class="dropdown-item text-danger" (click)="daHuy(hoaDon)">❌ Đã huỷ</button></li>
-              </ul>
-            </div>
-          </td>
+  <button class="btn btn-sm btn-info me-2 mb-1" (click)="xemChiTietDonHang(hoaDon.id)">Chi tiết</button>
+
+  <!-- Nếu đơn chưa được nhận (chưa gán cho shipper nào) -->
+  <button *ngIf="!hoaDon.idShipper||getRole()!=='ROLE_ADMIN'" class="btn btn-sm btn-success" (click)="nhanDon(hoaDon)">📦 Nhận đơn</button>
+  <!-- Nếu đơn đã được nhận bởi shipper hiện tại -->    
+  <div *ngIf="hoaDon.idShipper === getUserIdFromToken()" class="btn-group dropup">
+    <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+      Chuyển trạng thái
+    </button>
+    <ul class="dropdown-menu">
+      <li><button class="dropdown-item" (click)="dangGiaoHang(hoaDon)">🚚 Đang giao hàng</button></li>
+      <li><button class="dropdown-item" (click)="daGiaoHang(hoaDon)">✅ Đã giao hàng</button></li>
+      <li><button class="dropdown-item text-danger" (click)="daHuy(hoaDon)">❌ Đã huỷ</button></li>
+    </ul>
+  </div>
+</td>
+
         </tr>
       </tbody>
     </table>

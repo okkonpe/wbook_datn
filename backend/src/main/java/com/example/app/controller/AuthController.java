@@ -5,6 +5,7 @@ import com.example.app.dto.authDTO.LoginResponeDTO;
 import com.example.app.dto.khachHangDTO.KhachHangRegisterDTO;
 import com.example.app.security.JwtService;
 import com.example.app.security.KhachHangUserDetails;
+import com.example.app.security.NhanVienUserDetails;
 import com.example.app.service.KhachHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,13 +38,15 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(request.getTaiKhoan(), request.getMatKhau())
         );
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
+
         String token = jwtService.generateToken(userDetails);
 
         // Optional: Lấy role để trả về
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        Integer id = jwtService.extractUserId(token);
         System.out.println("🔐 Tạo token cho user: " + userDetails.getUsername());
 
-        return ResponseEntity.ok(new LoginResponeDTO(token, role));
+        return ResponseEntity.ok(new LoginResponeDTO(token, role,id));
     }
     @PostMapping("/register-khach")
     public ResponseEntity<?> register(@RequestBody KhachHangRegisterDTO dto) {

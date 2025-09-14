@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "nhan_vien")
@@ -59,6 +61,9 @@ public class NhanVien {
     @Column(name = "ngay_bat_dau")
     @Temporal(TemporalType.DATE)
     private Date ngayBatDau;
+
+    @ManyToMany(mappedBy = "nhanVien")
+    private Set<HoaDon> hoaDons = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "chuc_vu", referencedColumnName = "id")

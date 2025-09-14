@@ -1,4 +1,12 @@
-/* Tùy chỉnh dropdown nhỏ gọn */
-.btn-group .dropdown-menu {
-  min-width: 160px;
+
+/* Main content */
+.main-content {
+  height: 100vh;
 }
+
+/* Ngăn body bị scroll ngang */
+body {
+  overflow-x: hidden;
+  margin: 0;
+}
+

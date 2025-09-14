@@ -10,7 +10,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "hoa_don")
@@ -50,10 +52,13 @@ public class HoaDon {
 
 
     // 🔗 FK: nhân viên
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @JoinColumn(name = "nhan_vien", referencedColumnName = "id")
-    private NhanVien nhanVien;
+    @ManyToMany
+    @JoinTable(
+            name = "hoa_don_nhan_vien",
+            joinColumns = @JoinColumn(name = "ma_hoa_don"),
+            inverseJoinColumns = @JoinColumn(name = "nhan_vien")
+    )
+    private Set<NhanVien> nhanVien = new HashSet<>();
 
     // 🔗 FK: khách hàng
     @ManyToOne(fetch = FetchType.LAZY)

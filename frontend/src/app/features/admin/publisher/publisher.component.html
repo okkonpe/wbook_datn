@@ -1,1 +1,99 @@
-<p>publisher works!</p>
+<div class="container mt-4">
+  <h3 class="mb-3 text-primary">🏢 Quản lý nhà xuất bản</h3>
+
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-success" (click)="openModal()">➕ Thêm mới</button>
+  </div>
+
+  <!-- BẢNG DỮ LIỆU -->
+  <table class="table table-bordered table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Mã NXB</th>
+        <th>Tên nhà xuất bản</th>
+        <th>Ngày thành lập</th>
+        <th>Trụ sở chính</th>
+        <th>Mô tả</th>
+        <th>Trạng thái</th>
+        <th class="text-center">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of publishers">
+        <td>{{ p.id }}</td>
+        <td>{{ p.maNhaXuatBan }}</td>
+        <td>{{ p.tenNhaXuatBan }}</td>
+        <td>{{ p.ngayThanhLap | date:'dd/MM/yyyy' }}</td>
+        <td>{{ p.truSoChinh }}</td>
+        <td>{{ p.moTa }}</td>
+        <td>{{ p.trangThai ? 'Hoạt Động' : 'Không Hoạt Động' }}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-primary me-1" (click)="editPublisher(p)">Sửa</button>
+          <button class="btn btn-sm btn-danger" (click)="deletePublisher(p.id ?? 0)">Xóa</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PHÂN TRANG -->
+  <div class="d-flex justify-content-between align-items-center">
+    <button class="btn btn-outline-primary" (click)="prevPage()" [disabled]="currentPage === 0">« Trước</button>
+    <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+    <button class="btn btn-outline-primary" (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages">Sau »</button>
+  </div>
+
+  <!-- FORM MODAL -->
+  <div class="modal fade show d-block" *ngIf="isModalOpen" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form (ngSubmit)="savePublisher()">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ isEditMode ? 'Cập nhật nhà xuất bản' : 'Thêm mới nhà xuất bản' }}</h5>
+            <button type="button" class="btn-close" (click)="closeModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Tên nhà xuất bản</label>
+                  <input type="text" class="form-control" [(ngModel)]="publisher.tenNhaXuatBan" name="tenNhaXuatBan" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Ngày thành lập</label>
+                  <input type="date" class="form-control" [(ngModel)]="publisher.ngayThanhLap" name="ngayThanhLap">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Trụ sở chính</label>
+              <input type="text" class="form-control" [(ngModel)]="publisher.truSoChinh" name="truSoChinh">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Mô tả</label>
+              <textarea class="form-control" [(ngModel)]="publisher.moTa" name="moTa" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Trạng thái</label>
+              <select class="form-select" [(ngModel)]="publisher.trangThai" name="trangThai" required>
+                <option [ngValue]="true">Hoạt động</option>
+                <option [ngValue]="false">Không hoạt động</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">
+              {{ isEditMode ? 'Cập nhật' : 'Thêm mới' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Hủy</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

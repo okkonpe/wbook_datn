@@ -3,18 +3,25 @@ package com.example.app.service;
 import com.example.app.dto.bookDTO.BookDetailDTO;
 import com.example.app.dto.bookDTO.ListAllBookDTO;
 import com.example.app.entity.Book;
+import com.example.app.entity.HinhAnh;
 import com.example.app.mapper.BookMapper;
 import com.example.app.repository.BookRepository;
+import com.example.app.repository.HinhAnhRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +35,12 @@ public class BookService {
     @Autowired
     private BookMapper bookMapper;
 
+    @Autowired
+    private HinhAnhRepository hinhAnhRepository;
+
+    @Value("${upload.dir:src/main/resources/images}")
+    private String UPLOAD_DIR;
+
     // ================== READ ==================
     public Page<ListAllBookDTO> getBooks(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -38,7 +51,6 @@ public class BookService {
             spec = spec.and((root, query, cb) -> {
                 query.distinct(true);
 
-                // Subquery cho tìm theo tên tác giả
                 Subquery<Integer> subquery = query.subquery(Integer.class);
                 Root<Book> bookSubRoot = subquery.from(Book.class);
                 Join<Object, Object> joinTacGia = bookSubRoot.join("tacGia");
@@ -56,11 +68,9 @@ public class BookService {
             });
         }
 
-
         return bookRepository.findAll(spec, pageable)
                 .map(bookMapper::listAllBookToDTO);
     }
-
 
     public BookDetailDTO getByID(Integer id) {
         return bookRepository.findById(id)
@@ -87,6 +97,20 @@ public class BookService {
             throw new EntityNotFoundException("Không tìm thấy sách với id = " + id);
         }
 
+        Book existingBook = existing.get();
+        // Xóa ảnh cũ nếu có ảnh mới
+        if (dto.getHinhAnh() != null && !dto.getHinhAnh().isEmpty() && existingBook.getHinhAnh() != null) {
+            try {
+                // Xóa tệp ảnh cũ trong thư mục images
+                Path oldFilePath = Paths.get(UPLOAD_DIR, existingBook.getHinhAnh().getHinhAnh());
+                Files.deleteIfExists(oldFilePath);
+                // Xóa bản ghi ảnh cũ trong bảng hinh_anh
+                hinhAnhRepository.delete(existingBook.getHinhAnh());
+            } catch (IOException e) {
+                throw new RuntimeException("Không thể xóa ảnh cũ: " + e.getMessage());
+            }
+        }
+
         Book book = bookMapper.bookDetailDtoToEntity(dto);
         book.setId(id); // Giữ ID cũ
         book = bookRepository.save(book);
@@ -96,9 +120,23 @@ public class BookService {
 
     // ================== DELETE ==================
     public void delete(Integer id) {
-        if (!bookRepository.existsById(id)) {
+        Optional<Book> existing = bookRepository.findById(id);
+        if (existing.isEmpty()) {
             throw new EntityNotFoundException("Không tìm thấy sách với id = " + id);
         }
+
+        Book book = existing.get();
+        // Xóa ảnh liên quan nếu có
+        if (book.getHinhAnh() != null) {
+            try {
+                Path filePath = Paths.get(UPLOAD_DIR, book.getHinhAnh().getHinhAnh());
+                Files.deleteIfExists(filePath);
+                hinhAnhRepository.delete(book.getHinhAnh());
+            } catch (IOException e) {
+                throw new RuntimeException("Không thể xóa ảnh: " + e.getMessage());
+            }
+        }
+
         bookRepository.deleteById(id);
     }
 }

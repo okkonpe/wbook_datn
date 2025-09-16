@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BookDetailDTO {
     private Integer id;
+    private Integer idSanPham; // Thêm trường để gửi ID của SanPham
     private String tenSanPham;
     private String isbn;
     private String maSanPhamChiTiet;

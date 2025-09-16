@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,4 +18,7 @@ public class HoaDonRequestDTO {
     private String soDienThoai;
     private String ghiChu;
     private String phuongThucThanhToan;
+    private BigDecimal tongTien;
+    private BigDecimal tongTienSauGiam;
+    private String maVoucher;
 }

@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/payment/**").permitAll()
                                 .requestMatchers("/api/hoa-don/thanh-toan-cod").hasRole("KHACH_HANG")
+                                .requestMatchers("/api/admin/voucher/apply").hasRole("KHACH_HANG")
                                 .requestMatchers("/api/gio-hang/**").hasRole("KHACH_HANG")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/hoa-don/**").hasAnyRole("ADMIN","NHAN_VIEN","SHIPPER")

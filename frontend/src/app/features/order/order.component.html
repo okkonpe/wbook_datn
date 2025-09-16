@@ -23,18 +23,38 @@
     </tbody>
     <tfoot>
       <tr>
-                <!-- <td colspan="4" class="text-end fw-bold">Phí ship:{{phiShip}} </td>
-                 <td colspan="4" class="text-end fw-bold">{{phiShip}} </td>
-
-        <td colspan="4" class="text-end fw-bold">Tiền hàng:</td>
-        <td class="fw-bold text-danger">{{ tongTien | number }} đ</td> -->
-
-        <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+        <td colspan="4" class="text-end fw-bold">Tổng:</td>
         <td class="fw-bold text-danger">{{ tongTien | number }} đ</td>
+      </tr>
+       <tr>
+        <td colspan="4" class="text-end fw-bold">Phí ship:</td>
+        <td class="fw-bold text-danger">{{phiShip|number}} đ</td>
+      </tr>
+        <tr>
+        <td colspan="4" class="text-end fw-bold">Giảm giá:</td>
+        <td class="fw-bold text-primary">-{{ giamGia | currency:'VND' }} </td>
+      </tr>
+      <tr>
+        <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+        <td class="fw-bold text-danger">{{ getTongTienSauGiam() | currency:'VND' }} </td>
       </tr>
     </tfoot>
   </table>
-
+<div class="mb-3">
+  <label for="voucherSelect" class="form-label">Chọn voucher</label>
+  <select id="voucherSelect" class="form-select" [(ngModel)]="selectedVoucher" (change)="applyVoucher()">
+    <option [ngValue]="null">-- Chọn voucher --</option>
+    <option *ngFor="let v of validVouchers" [ngValue]="v">
+      {{ v.maVoucher }} - 
+      <span *ngIf="v.loaiGiam === 'PERCENT'">
+        Giảm {{ v.giaTri }}% (Tối đa {{ v.giamToiDa | currency:'VND' }})
+      </span>
+      <span *ngIf="v.loaiGiam === 'AMOUNT'">
+        Giảm {{ v.giaTri | currency:'VND' }}-{{v.moTa}}
+      </span>
+    </option>
+  </select>
+</div>
   <ng-template #emptyCart>
     <div class="alert alert-warning">Giỏ hàng trống. Vui lòng quay lại trang sản phẩm.</div>
   </ng-template>

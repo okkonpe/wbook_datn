@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 @Repository
-public interface VoucherRepo extends JpaRepository<Voucher,Integer> {
+public interface VoucherRepo extends JpaRepository<Voucher,Long> {
     Optional<Voucher> findByMaVoucher(String maVoucher);
 }

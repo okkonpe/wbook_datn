@@ -49,7 +49,7 @@ public class VNPayController {
         hoaDonService.updateDatHang(hoaDon.getId(),dto);
         System.out.println(paymentUrl);
         return ResponseEntity.ok(Collections.singletonMap("url", paymentUrl));
-    }
+    }   
 
     @PutMapping("/da-thanh-toan")
     public ResponseEntity<?> capNhatDaThanhToan(@RequestParam Integer orderID){

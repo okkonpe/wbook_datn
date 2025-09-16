@@ -53,7 +53,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/hoa-don/thanh-toan").hasRole("KHACH_HANG")
+                                .requestMatchers("/api/payment/**").permitAll()
+                                .requestMatchers("/api/hoa-don/thanh-toan-cod").hasRole("KHACH_HANG")
                                 .requestMatchers("/api/gio-hang/**").hasRole("KHACH_HANG")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/hoa-don/**").hasAnyRole("ADMIN","NHAN_VIEN","SHIPPER")

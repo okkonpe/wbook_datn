@@ -49,6 +49,8 @@ public class NhanVienService {
                 .collect(Collectors.toList());
     }
 
+
+
     public Page<NhanVienDTO> getAllNhanVienPaged(Pageable pageable) {
         return nhanVienRepository.getAllNhanVienDTO(pageable);
     }
@@ -76,12 +78,11 @@ public class NhanVienService {
 
 
         NhanVien nhanVien = nhanVienMapper.toEntity(nhanVienDTO);
-        if (nhanVienDTO.getChucVu() != null) {
-            Integer chucVuId = Integer.parseInt(nhanVienDTO.getChucVu());
-            ChucVu chucVu = chucVuRepository.findById(chucVuId)
+
+            ChucVu chucVu = chucVuRepository.findById(2)
                     .orElseThrow(() -> new IllegalArgumentException("Chức vụ không tồn tại"));
             nhanVien.setChucVu(chucVu);
-        }
+
         nhanVien.setMatKhau(passwordEncoder.encode(rawPassword));
 
         NhanVien saved = nhanVienRepository.save(nhanVien);

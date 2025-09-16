@@ -1,20 +1,54 @@
 <div class="main-content container-fluid mt-4 px-3" >
 
   <h2 class="mb-4">📦 Quản lý đơn hàng</h2>
+  <div class="d-flex justify-content-end mb-2 gap-2">
+  <input type="text" [(ngModel)]="maHoaDon" placeholder="Lọc theo mã hoá đơn">
+   <input type="date" name="" id="" >
+  </div>
+  <div class="d-flex justify-content-end mb-2 gap-2">
+    <div class="d-flex align-items-center gap-2">
+  <label class="mb-0">Loại thanh toán:</label>
+  <select  class="form-select form-select-sm" style="width: 150px;" [(ngModel)]="loaiTT">
+    <option value="">Tất cả</option>
+    <option value="COD">COD</option>
+    <option value="VNPAY">VNPAY</option>
+  </select>
+</div>
+<div class="d-flex align-items-center gap-2">
+  <label  class="mb-0">Nhân viên:</label>
+  <select  class="form-select form-select-sm" style="width: 150px;" [(ngModel)]="selectNhanVien">
+    <option value="">Tất cả</option>
+    <option *ngFor="let item of listNhanVien" [value]="item.taiKhoan"> {{ item.taiKhoan }}</option>
+  </select>
+</div>
+<div class="d-flex align-items-center gap-2">
+    <label  class="mb-0">Trạng thái:</label>
+    <select class="form-select form-select-sm" style="width: 150px;"  [(ngModel)]="status" >
+      <option value=""> Tất cả</option>
+      <option value="CHO_XAC_NHAN">Chờ xác nhận</option>
+      <option value="DA_XAC_NHAN">Đã xác nhận</option>
+      <option value="DANG_GIAO_HANG">Đang giao</option>
+      <option value="GIAO_HANG_THANH_CONG">Đã giao</option>
+      <option value="GIAO_HANG_THAT_BAI">Giao hàng thất bại</option>
+     <option value="NHAN_VIEN_HUY">Nhân viên huỷ</option>
+     <option value="KHACH_HANG_DA_HUY">Khách hàng huỷ</option>
+    </select>
+    </div>
+      <button class="btn btn-success"(click)="applyFilter()" >Lọc</button>
 
+  </div>
  <div class="table-responsive">
     <table class="table table-bordered table-hover text-center align-middle">
       <thead class="table-success">
         <tr>
           <th>#</th>
           <!-- <th>Mã hóa đơn</th> -->
-          <th>Khách hàng</th>
+          <th>Mã hoá đơn</th>
           <th>Ngày tạo</th>
           <th>Tổng tiền</th>
-          <th>Địa chỉ giao hàng</th>
-          <th>SDT</th>
           <th>Thanh toán</th>
           <th>Trạng thái</th>
+          <!-- <th *ngIf="hoaDons?.===12">Hoàn tiền shipper</th> -->
           <th>Hành động</th>
         </tr>
       </thead>
@@ -22,38 +56,40 @@
         <tr *ngFor="let hoaDon of hoaDons; index as i">
           <td>{{ i + 1 }}</td>
           <!-- <td>{{ hoaDon.maHoaDon }}</td> -->
-          <td>{{ hoaDon?.khachHang }}</td>
+          <td>{{ hoaDon?.maHoaDon }}</td>
           <td>{{ hoaDon?.ngayTao | date:'dd/MM/yyyy' }}</td>
           <td>{{ hoaDon?.tongTien | number }} đ</td>
-          <td>{{ hoaDon?.diaChiGiaoHang }}</td>
-          <td>{{ hoaDon?.sdtNguoiNhan }}</td>
-          <td></td>
+          <td>{{hoaDon?.loaiThanhToan}}</td>
           <td>
             <span class="badge px-3 py-2 fs-6"
               [ngClass]="{
-                'bg-warning text-dark': hoaDon?.trangThaiID == 2,
+                'bg-info': hoaDon?.trangThaiID == 11,
+                'bg-warning': hoaDon?.trangThaiID == 2,
                 'bg-primary': hoaDon?.trangThaiID == 3,
                 'bg-success': hoaDon?.trangThaiID == 4,
-                'bg-danger': hoaDon?.trangThaiID == 5
+                'bg-danger': hoaDon?.trangThaiID == 5 || hoaDon?.trangThaiID == 14 || hoaDon?.trangThaiID == 15
+
+            
               }">
               {{ hoaDon?.trangThai }}
             </span>
           </td>
           <td>
-            <button class="btn btn-sm btn-info me-2 mb-1" (click)="xemChiTietDonHang(hoaDon.id)">Chi tiết</button>
-            
-            <div class="btn-group dropup">
+  <button class="btn btn-sm btn-info me-2 mb-1" (click)="xemChiTietDonHang(hoaDon.id,hoaDon)">Chi tiết</button>
+<div class="btn-group dropdown">
               <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                 Chuyển trạng thái
               </button>
-              <ul class="dropdown-menu">
-                                <li><button class="dropdown-item" (click)="giaoHang(hoaDon)">🚚 Giao hàng</button></li>
-                <li><button class="dropdown-item" (click)="dangGiaoHang(hoaDon)">🚚 Đang giao hàng</button></li>
-                <li><button class="dropdown-item" (click)="daGiaoHang(hoaDon)">✅ Đã giao hàng</button></li>
-                <li><button class="dropdown-item text-danger" (click)="daHuy(hoaDon)">❌ Đã huỷ</button></li>
-              </ul>
+             <ul class="dropdown-menu">
+                    <li><button class="dropdown-item text-primary" (click)="daXacNhan(hoaDon)">✅ Đã xác nhận</button></li>
+      <li><button class="dropdown-item text-primary" (click)="dangGiaoHang(hoaDon)">🚚 Đang giao hàng</button></li>
+      <li><button class="dropdown-item text-success" (click)="daGiaoHang(hoaDon)">✅ Đã giao hàng</button></li>
+      <li><button class="dropdown-item text-danger" (click)="giaoHangThatBai(hoaDon)">❌ Giao hàng thất bại</button></li>
+      <li><button class="dropdown-item text-danger" (click)="daHuy(hoaDon)">❌ Huỷ</button></li>
+    </ul>
             </div>
-          </td>
+</td>
+
         </tr>
       </tbody>
     </table>
@@ -68,6 +104,11 @@
           <button type="button" class="btn-close" (click)="closeModal()"></button>
         </div>
         <div class="modal-body">
+          <h6>Nhân viên:  {{selectedHoaDon.nhanVien}}</h6>
+          <h6>Khách hàng: {{selectedHoaDon.khachHang}}</h6>
+          <h6>SDT khách: {{selectedHoaDon.sdtNguoiNhan}}</h6>
+          <h6>Địa chỉ giao hàng:  {{selectedHoaDon.diaChiGiaoHang}}</h6>
+          <h6>Tổng tiền: {{selectedHoaDon.tongTien| number}} đ</h6>
           <table class="table table-bordered text-center align-middle">
             <thead class="table-light">
               <tr>
@@ -75,7 +116,7 @@
                 <th>Tên sách</th>
                 <th>Đơn giá</th>
                 <th>Số lượng</th>
-                <th>Tổng tiền</th>
+                <th>Thành tiền</th>
               </tr>
             </thead>
             <tbody>

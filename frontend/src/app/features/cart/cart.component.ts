@@ -40,17 +40,17 @@ private http: HttpClient,
       this.router.navigate(['/login'])
     }
   }
-fillInfoOrder() {
-    this.http.get<any>('http://localhost:8080/api/khach-hang/info').subscribe({
-      next: (data) => {
-        this.orderService.setKhachHang(data);
-        this.router.navigate(['/order']);
-      },
-      error: (err) => {
-        console.error('Không lấy được thông tin khách hàng:', err);
-      }
-    });
-  }
+// fillInfoOrder() {
+//     this.http.get<any>('http://localhost:8080/api/khach-hang/info').subscribe({
+//       next: (data) => {
+//         this.orderService.setKhachHang(data);
+//         this.router.navigate(['/order']);
+//       },
+//       error: (err) => {
+//         console.error('Không lấy được thông tin khách hàng:', err);
+//       }
+//     });
+//   }
   loadCartFromBackend(): void {
     
       this.cartService.getCartByKhachHang().subscribe(data => {

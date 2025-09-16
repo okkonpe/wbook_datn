@@ -37,6 +37,7 @@ public class NhanVienDTO {
 
     @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Email không hợp lệ")
     @Size(max = 50, message = "Email không được vượt quá 50 ký tự")
+    @NotBlank(message = "Email không được để trống!")
     private String email;
 
     private Boolean gioiTinh;
@@ -45,18 +46,20 @@ public class NhanVienDTO {
     @Pattern(regexp = "[0-9]{12,13}", message = "CCCD không hợp lệ")
     private String cccd;
 
-
+    @NotBlank(message = "Tài khoản không được để trống")
     @Size(max = 20, message = "Tài khoản không được vượt quá 20 ký tự")
     private String taiKhoan;
 
-    private Date ngayBatDau;
-    private String chucVu;
+private  String chucVu;
+private Date ngayBatDau;
 
 
     private Boolean trangThai;
 
-    public NhanVienDTO(Integer id, String maNv, @NotBlank(message = "Tên nhân viên không được để trống") @Size(max = 30, message = "Tên nhân viên không được vượt quá 30 ký tự") String tenNv, BigDecimal luong, @Pattern(regexp = "(^$|[0-9]{10,13})", message = "Số điện thoại không hợp lệ") String sdt, Date ngaySinh, @Size(max = 50, message = "Địa chỉ không được vượt quá 50 ký tự") String diaChi, @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Email không hợp lệ") @Size(max = 50, message = "Email không được vượt quá 50 ký tự") String email, Boolean gioiTinh, @NotBlank(message = "CCCD không được để trống") @Pattern(regexp = "[0-9]{12,13}", message = "CCCD không hợp lệ") String cccd, @Size(max = 20, message = "Tài khoản không được vượt quá 20 ký tự") String taiKhoan, Date ngayBatDau, String chucVu, Boolean trangThai) {
+    public NhanVienDTO(Integer id, String chucVu,Date ngayBatDau,String maNv, @NotBlank(message = "Tên nhân viên không được để trống") @Size(max = 30, message = "Tên nhân viên không được vượt quá 30 ký tự") String tenNv, BigDecimal luong, @Pattern(regexp = "(^$|[0-9]{10,13})", message = "Số điện thoại không hợp lệ") String sdt, Date ngaySinh, @Size(max = 50, message = "Địa chỉ không được vượt quá 50 ký tự") String diaChi, @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Email không hợp lệ") @Size(max = 50, message = "Email không được vượt quá 50 ký tự") String email, Boolean gioiTinh, @NotBlank(message = "CCCD không được để trống") @Pattern(regexp = "[0-9]{12,13}", message = "CCCD không hợp lệ") String cccd, @Size(max = 20, message = "Tài khoản không được vượt quá 20 ký tự") String taiKhoan, Boolean trangThai) {
         this.id = id;
+        this.chucVu=chucVu;
+        this.ngayBatDau=ngayBatDau;
         this.maNv = maNv;
         this.tenNv = tenNv;
         this.luong = luong;
@@ -67,8 +70,6 @@ public class NhanVienDTO {
         this.gioiTinh = gioiTinh;
         this.cccd = cccd;
         this.taiKhoan = taiKhoan;
-        this.ngayBatDau = ngayBatDau;
-        this.chucVu = chucVu;
         this.trangThai = trangThai;
     }
 }

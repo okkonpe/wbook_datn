@@ -1,0 +1,92 @@
+<div class="container-fluid mt-3">
+  <div class="row">
+    <!-- Bên trái: Giỏ hàng -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          🛒 Giỏ hàng
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-bordered mb-0 text-center">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Sản phẩm</th>
+                <th>SL</th>
+                <th>Giá</th>
+                <th>Tổng</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of cart; index as i">
+                <td>{{ i + 1 }}</td>
+                <td>{{ item.tenSach }}</td>
+                <td>
+                  <input type="number" [(ngModel)]="item.soLuong" 
+                         (change)="updateCart(item)" 
+                         class="form-control form-control-sm w-50 mx-auto"/>
+                </td>
+                <td>{{ item.gia | number }}</td>
+                <td>{{ item.soLuong * item.gia | number }}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="removeFromCart(i)">❌</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer text-end fw-bold">
+          Tổng tiền: {{ getCartTotal() | number }} ₫
+        </div>
+      </div>
+    </div>
+
+    <!-- Bên phải: Hóa đơn chờ -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          📑 Hóa đơn chờ
+        </div>
+        <div class="card-body" style="max-height: 350px; overflow-y: auto;">
+          <div *ngFor="let hd of hoaDonCho" 
+               class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
+            <div>
+              <strong>HĐ#{{ hd.id }}</strong><br/>
+              {{ hd.tenKhach }} - {{ hd.tongTien | number }} ₫
+            </div>
+            <div>
+              <button class="btn btn-sm btn-success me-2" (click)="chonHoaDon(hd)">💳 Thanh toán</button>
+              <button class="btn btn-sm btn-danger" (click)="huyHoaDon(hd)">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dưới cùng: Danh sách sản phẩm -->
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning fw-bold">
+          📚 Danh sách sản phẩm
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3 mb-3" *ngFor="let sp of sanPhams">
+              <div class="card h-100">
+                <img [src]="sp.hinhAnh" class="card-img-top" alt="sach">
+                <div class="card-body">
+                  <h6 class="card-title">{{ sp.tenSach }}</h6>
+                  <p class="card-text">{{ sp.gia | number }} ₫</p>
+                  <button class="btn btn-sm btn-primary w-100" (click)="addToCart(sp)">➕ Thêm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

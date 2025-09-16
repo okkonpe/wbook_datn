@@ -3,6 +3,7 @@ import { SideBarComponent } from "./side-bar/side-bar.component";
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { WebsocketService } from '../../core/services/websocket.service';
+import { Toast, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-admin',
@@ -11,13 +12,27 @@ import { WebsocketService } from '../../core/services/websocket.service';
   styleUrl: './admin.component.scss'
 })
 export class AdminComponent implements OnInit {
-constructor(private wsService: WebsocketService) {}
+    toastMessage: string | null = null;
+
+constructor(private wsService: WebsocketService,
+  private toastr: ToastrService
+) {}
 
   ngOnInit() {
-    this.wsService.order$.subscribe(order => {
+    this.wsService.newOrder$.subscribe(order => {
       if (order) {
-        alert('📢 Có đơn hàng mới!');
+          const role = localStorage.getItem('role'); // Ex: "ROLE_SHIPPER"
+
+        if(role==='ROLE_ADMIN'||role==='ROLE_NHAN_VIEN'){
+
+  this.showToast();
+        }
+            
+
       }
     });
+  }
+   showToast() {
+    this.toastr.success('Có đơn hàng mới!', 'Thông báo');
   }
 }

@@ -82,9 +82,9 @@ prevPage() {
     });
   } else {
     this.empService.create(this.emp).subscribe({
-      next: (res) => {
-        console.log('Kết quả từ backend:', res);
-        alert('Thêm nhân viên thành công!');
+      next: res => {
+         console.log("✅ API thành công:", res);
+window.alert("Thêm nhân viên thành công!");
         this.loadPage(this.currentPage);
         this.resetForm();
         this.closeModal(); // thêm dòng này nếu muốn ẩn modal sau khi thêm

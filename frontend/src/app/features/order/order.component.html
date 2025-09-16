@@ -23,6 +23,12 @@
     </tbody>
     <tfoot>
       <tr>
+                <!-- <td colspan="4" class="text-end fw-bold">Phí ship:{{phiShip}} </td>
+                 <td colspan="4" class="text-end fw-bold">{{phiShip}} </td>
+
+        <td colspan="4" class="text-end fw-bold">Tiền hàng:</td>
+        <td class="fw-bold text-danger">{{ tongTien | number }} đ</td> -->
+
         <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
         <td class="fw-bold text-danger">{{ tongTien | number }} đ</td>
       </tr>
@@ -83,9 +89,9 @@
 
     <!-- Phương thức thanh toán -->
      <div class="row mb-5 mt-2 align-items-center">
-      <label class="col-md-3 form-label">Phương thức thanh toán</label>
+      <label for="paymentMethod" class="col-md-3 form-label">Phương thức thanh toán</label>
       <div class="col-md-6">
-        <select class="form-select" formControlName="phuongThucThanhToan">
+        <select  id="paymentMethod" class="form-select" formControlName="paymentMethod">
         <option value="COD">Thanh toán khi nhận hàng (COD)</option>
         <option value="VNPAY">VNPay</option>
       </select>

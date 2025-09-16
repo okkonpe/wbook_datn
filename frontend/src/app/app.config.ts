@@ -4,13 +4,24 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@a
 import { routes } from './app.routes';
 import { LOCALE_ID } from '@angular/core';
 import { AuthInterceptor } from './core/guards/auth.interceptor';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
+import { importProvidersFrom } from '@angular/core';
 
 
 export const appConfig: ApplicationConfig = {
   providers: [provideZoneChangeDetection({ eventCoalescing: true }),
      provideRouter(routes),provideHttpClient(), { provide: LOCALE_ID, useValue: 'vi' } ,
       provideHttpClient(withInterceptorsFromDi()),
-          { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+          { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+           importProvidersFrom(
+      BrowserAnimationsModule,
+      ToastrModule.forRoot({
+        timeOut: 3000,
+        positionClass: 'toast-top-right',
+        preventDuplicates: true,
+      })
+    )
 
     
     ]

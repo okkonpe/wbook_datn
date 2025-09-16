@@ -1,6 +1,9 @@
 <div class="d-flex">
 <app-side-bar></app-side-bar>
 <div class="main-content flex-grow-1 ms-250 p-4">
+    <div class="toast-container" *ngIf="toastMessage">
+  {{ toastMessage }}
+</div>
     <router-outlet></router-outlet>
 </div>
 </div>

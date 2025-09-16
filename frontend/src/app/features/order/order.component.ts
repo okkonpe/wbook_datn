@@ -5,8 +5,9 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Router } from '@angular/router';
 import { CartService, ListGioHangDTO } from '../cart/cart.service';
 import { jwtDecode } from 'jwt-decode';
-import { BehaviorSubject } from 'rxjs';
-import { OrderService } from './order.service';
+import { map } from 'rxjs/operators'; 
+  import { OrderService } from './order.service';
+import { Observable } from 'rxjs';
 
 export interface KhachHang {
   tenKhachHang: string;
@@ -25,11 +26,13 @@ export interface KhachHang {
 
 export class OrderComponent implements OnInit {
 checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
-
+  // paymentMethod: string = 'COD';
  cartItems: ListGioHangDTO[] = [];
   tongTien: number = 0;
  khID: number=0;
    khachHang!: KhachHang;
+       private apiUrl = 'http://localhost:8080/api/payment';
+hoaDon: any;
 
   constructor(
     private fb: FormBuilder,
@@ -42,10 +45,11 @@ checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
   ngOnInit(): void {
      this.checkoutForm = this.fb.group({
       hoTen: [''],
+       paymentMethod: ['COD'],
     diaChi: ['', Validators.required],
     soDienThoai: ['', [Validators.required, Validators.pattern('^0[0-9]{9,10}$')]],
     ghiChu: [''],
-    phuongThucThanhToan: ['COD', Validators.required]
+    // phuongThucThanhToan: ['COD', Validators.required]
   });
   this.cartService.getCartByKhachHang().subscribe({
       next: (data) => {
@@ -74,13 +78,7 @@ checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
   });
 
   }
-// fill Info Customer
-// private khachHangSubject = new BehaviorSubject<KhachHang | null>(null);
-//   khachHang$ = this.khachHangSubject.asObservable();
 
-//   setKhachHang(data: KhachHang) {
-//     this.khachHangSubject.next(data);
-//   }
 
    tinhTongTien() {
     this.tongTien = this.cartItems.reduce((total, item) => total + item.tongTien, 0);
@@ -98,19 +96,22 @@ checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
           console.log('Decoded khachHangId:', this.khID);
           console.log(localStorage.getItem('token'));}
 
-    const hoaDon = {
+    this.hoaDon = {
       khachHangID: this.khID, // hoặc token decode nếu dùng JWT
       diaChi: this.checkoutForm.value.diaChi,
       soDienThoai: this.checkoutForm.value.soDienThoai,
       ghiChu: this.checkoutForm.value.ghiChu,
-      phuongThucThanhToan: this.checkoutForm.value.phuongThucThanhToan,
+      phuongThucThanhToan: this.checkoutForm.value.paymentMethod,
       cartItems: this.cartItems.map(item => ({
         sanPhamId: item.idSanPham,
         soLuong: item.soLuongMua
       }))
     };
+      const method = this.checkoutForm.value.paymentMethod; // Lấy từ form
 
-    this.http.put('http://localhost:8080/api/hoa-don/thanh-toan', hoaDon).subscribe({
+if (method === 'COD') {
+      // Gọi API backend tạo đơn hàng COD
+       this.http.put('http://localhost:8080/api/hoa-don/thanh-toan-cod', this.hoaDon).subscribe({
       next: () => {
         alert('🛍️ Đặt hàng thành công!');
         // this.cartService.clearCart();
@@ -121,5 +122,21 @@ checkoutForm!: FormGroup; // <-- chỉ khai báo thôi, chưa khởi tạo
         alert('❌ Đã xảy ra lỗi khi đặt hàng.');
       }
     });
+    } else if (method === 'VNPAY') {
+      // Gọi API backend để lấy link VNPay
+      this.getVNPayUrl(this.tongTien, 'Thanh toan',this.hoaDon.khachHangID).subscribe(url => {
+                console.log(url)
+
+        window.location.href = url; // chuyển hướng sang VNPAY
+      });
+    }
+   
+  }
+
+    getVNPayUrl(amount: number, orderInfo: string,khid: number): Observable<string> {
+    return this.http.post<{ url: string }>(
+      `${this.apiUrl}/create`,this.hoaDon,
+      { params: { amount, orderInfo,khid} }
+    ).pipe(map(res => res.url));
   }
 }

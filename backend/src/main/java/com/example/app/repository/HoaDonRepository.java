@@ -1,5 +1,6 @@
 package com.example.app.repository;
 
+import com.example.app.dto.banHangDTO.ListDonHangDTO;
 import com.example.app.entity.HoaDon;
 import com.example.app.entity.KhachHang;
 import com.example.app.entity.TrangThaiHoaDon;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +23,17 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
     Page<HoaDon> findByTrangThaiIdNotIn(List<Integer> trangThaiId, Pageable pageable);
     @EntityGraph(attributePaths = {"chiTietHoaDons", "chiTietHoaDons.book", "chiTietHoaDons.book.sanPham", "chiTietHoaDons.book.hinhAnh"})
     List<HoaDon> findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(KhachHang khachHang,List<Integer> id);
+    @Query("SELECT h FROM HoaDon h " +
+            "WHERE (:status IS NULL OR h.trangThai.trangThai = :status) "+
+            "and (:loaiTT IS NULL OR h.loaiThanhToan=:loaiTT)"+
+            "and (:maHoaDon IS NULL OR h.maHoaDon=:maHoaDon)"
+             )
+    Page<HoaDon> searchHoaDon(@Param("loaiTT") String loaiTT,
+                              @Param("status") String status,
+                              @Param("maHoaDon") String maHoaDon,
+                              Pageable pageable);
+
+
+
+
 }

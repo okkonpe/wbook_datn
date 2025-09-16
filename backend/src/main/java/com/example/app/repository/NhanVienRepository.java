@@ -17,11 +17,13 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     Optional<NhanVien> findByEmail(String email);
     Optional<NhanVien> findByCccd(String cccd);
     Optional<NhanVien> findByTaiKhoan(String taiKhoan);
+    List<NhanVien> findByChucVu_TenChucVu(String tenChucVu);
+
     @Query("""
     SELECT new com.example.app.dto.nhanVienDTO.NhanVienDTO(
-        n.id, n.maNv, n.tenNv, n.luong, n.sdt, n.ngaySinh, n.diaChi,
-        n.email, n.gioiTinh, n.cccd, n.taiKhoan, n.ngayBatDau,
-        c.tenChucVu,
+        n.id,c.tenChucVu,n.ngayBatDau,
+        n.maNv, n.tenNv, n.luong, n.sdt, n.ngaySinh, n.diaChi,
+        n.email, n.gioiTinh, n.cccd, n.taiKhoan,
         n.trangThai
     )
     FROM NhanVien n

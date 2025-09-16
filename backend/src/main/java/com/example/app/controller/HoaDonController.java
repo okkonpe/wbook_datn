@@ -5,15 +5,19 @@ import com.example.app.dto.banHangDTO.ListDonHangDTO;
 import com.example.app.dto.banHangDTO.ListGioHangDTO;
 import com.example.app.entity.HoaDon;
 import com.example.app.entity.NhanVien;
+import com.example.app.entity.TrangThaiHoaDon;
+import com.example.app.mapper.banHangMapper.HoaDonMapper;
 import com.example.app.repository.HoaDonRepository;
 import com.example.app.repository.NhanVienRepository;
+import com.example.app.repository.TrangThaiHoaDonRepo;
 import com.example.app.service.HoaDonService;
+import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,70 +27,72 @@ import java.util.Map;
 @RequestMapping("/api/hoa-don")
 public class HoaDonController {
     @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
     HoaDonService hoaDonService;
+    @Autowired
+    TrangThaiHoaDonRepo trangThaiHoaDonRepo;
+    @Autowired
+    HoaDonMapper hoaDonMapper;
     @Autowired
     HoaDonRepository hoaDonRepository;
     @Autowired
     NhanVienRepository nhanVienRepository;
-    @GetMapping("/don-hang")
-    public ResponseEntity<Page<ListDonHangDTO>> getAlldonHang( @RequestParam(defaultValue = "0") int page,
-                                                               @RequestParam(defaultValue = "10") int size){
+    @GetMapping("/order")
+    public ResponseEntity<Page<ListDonHangDTO>> getAllOrderShipper( @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<ListDonHangDTO> result = hoaDonService.getDonHang(pageable);
+        Page<ListDonHangDTO> result = hoaDonService.getAllOrder(pageable);
         return ResponseEntity.ok(result);    }
-    @GetMapping("/giao-hang")
-    public ResponseEntity<Page<ListDonHangDTO>> getAllGiaoHang( @RequestParam(defaultValue = "0") int page,
-                                                               @RequestParam(defaultValue = "10") int size){
+
+    @GetMapping("/loc-tim-kiem")
+    public ResponseEntity<Page<ListDonHangDTO>> locTimKiem(
+            @RequestParam(required = false) String loaiTT,
+            @RequestParam(required = false) String maHoaDon,
+            @RequestParam(required = false) String status,@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<ListDonHangDTO> result = hoaDonService.getGiaoHang(pageable);
-        return ResponseEntity.ok(result);    }
-    @PutMapping("/shipper/nhan-don/{idHoaDon}")
-    public ResponseEntity<?> nhanDon(@PathVariable Integer idHoaDon, @RequestBody Map<String, Integer> data) {
-        Integer idShipper = data.get("idShipper");
-        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon).orElseThrow();
-
-        // Nếu đơn đã được nhận rồ  i thì không cho nhận tiếp
-//        if (hoaDon.getShipper() != null) {
-//            return ResponseEntity.badRequest().body("Đơn hàng đã được nhận");
-//        }
-
-        NhanVien shipper = nhanVienRepository.findById(idShipper).orElseThrow();
-      hoaDon.getNhanVien().add(shipper);
-      hoaDonRepository.save(hoaDon);
-
-        return ResponseEntity.ok().build();
+        Page<ListDonHangDTO> pagea = hoaDonRepository.searchHoaDon(loaiTT,status,maHoaDon,pageable).map(hoaDonMapper::donHangtoDTO);
+        return ResponseEntity.ok(pagea);
     }
+
 
     @GetMapping("/chi-tiet/{id}")
     public ResponseEntity<List<ListGioHangDTO>> getChiTietHD(@PathVariable Integer id){
         List<ListGioHangDTO> hd = hoaDonService.getListItemHD(id);
         return  ResponseEntity.ok(hd);
     } 
-    @PutMapping("/thanh-toan")
+    @PutMapping("/thanh-toan-cod")
     public ResponseEntity<HoaDonRequestDTO> thanhToan(@RequestBody HoaDonRequestDTO dto){
         System.out.println(dto.getKhachHangID());
         HoaDonRequestDTO hd = hoaDonService.thanhToanCOD(dto);
         return  ResponseEntity.ok(hd);
     }
-    @PutMapping("/cap-nhat-trang-thai/giao-hang/{id}")
-    public ResponseEntity<ListDonHangDTO> giaoHang(@PathVariable Integer id){
+    @PutMapping("/cap-nhat-trang-thai/da-xac-nhan/{id}")
+    public ResponseEntity<ListDonHangDTO> daXacNhan(@PathVariable Integer id,@RequestParam Integer idNhanVien){
 
-        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiGiaoHang(id));
+        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiDaXacNhan(id,idNhanVien));
     }
-    @PutMapping("/cap-nhat-trang-thai/dang-giao-hang/{id}")
-    public ResponseEntity<ListDonHangDTO> dangGiaoHang(@PathVariable Integer id){
 
-        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiDangGiaoHang(id));
+    @PutMapping("/cap-nhat-trang-thai/dang-giao-hang/{id}")
+    public ResponseEntity<ListDonHangDTO> dangGiaoHang(@PathVariable Integer id,@RequestParam Integer idNhanVien){
+
+        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiDangGiaoHang(id,idNhanVien));
     }
     @PutMapping("/cap-nhat-trang-thai/da-giao-hang/{id}")
-    public ResponseEntity<ListDonHangDTO> daGiaoHang(@PathVariable Integer id){
+    public ResponseEntity<ListDonHangDTO> daGiaoHang(@PathVariable Integer id,@RequestParam Integer idNhanVien){
 
-        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiDaGiaoHang(id));
+        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiDaGiaoHang(id,idNhanVien));
     }
-    @PutMapping("/cap-nhat-trang-thai/da-huy/{id}")
-    public ResponseEntity<ListDonHangDTO> daHuy(@PathVariable Integer id){
+    @PutMapping("/cap-nhat-trang-thai/nhan-vien-huy/{id}")
+    public ResponseEntity<ListDonHangDTO> nhanVienHuy(@PathVariable Integer id,@RequestParam Integer idNhanVien){
 
-        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiDaHuy(id));
+        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiNhanVienHuy(id,idNhanVien));
+    }
+    @PutMapping("/cap-nhat-trang-thai/giao-hang-that-bai/{id}")
+    public ResponseEntity<ListDonHangDTO> giaoHangThatBai(@PathVariable Integer id,@RequestParam Integer idNhanVien){
+
+        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiGHThatBai(id,idNhanVien));
     }
 
 }

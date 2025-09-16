@@ -17,34 +17,13 @@ public interface HoaDonMapper {
     HoaDonRequestDTO hoaDonReqtoDTO(HoaDon hoaDon);
     HoaDon hoaDonReqtoEntity(HoaDonRequestDTO dto);
     @Mapping(source = "khachHang.tenKhachHang", target = "khachHang")
-    @Mapping(source = "nhanVien", target = "nhanVien")
+    @Mapping(source = "nhanVien.taiKhoan", target = "nhanVien")
     @Mapping(source = "trangThai.id", target = "trangThaiID")
     @Mapping(source = "trangThai.trangThai", target = "trangThai")
     @Mapping(source = "chiTietHoaDons", target = "sanPhams")
-    @Mapping(target = "idNhanVien", expression = "java(getNhanVienId(hoaDon))")
-    @Mapping(target = "idShipper", expression = "java(getShipperId(hoaDon))")
     ListDonHangDTO donHangtoDTO(HoaDon hoaDon);
 //    HoaDon donHangtoEntity();
-default List<String> mapNhanVienSetToTenList(Set<NhanVien> nhanVien) {
-    if (nhanVien == null) return new ArrayList<>();
-    return nhanVien.stream()
-            .map(NhanVien::getTenNv)
-            .collect(Collectors.toList());
-}
-    default Integer getNhanVienId(HoaDon hoaDon) {
-        return hoaDon.getNhanVien().stream()
-                .filter(nv -> nv.getChucVu() != null && ("ROLE_NHAN_VIEN".equalsIgnoreCase(nv.getChucVu().getTenChucVu())||"ROLE_ADMIN".equalsIgnoreCase(nv.getChucVu().getTenChucVu())))
-                .map(NhanVien::getId)
-                .findFirst()
-                .orElse(null);
-    }
 
-    default Integer getShipperId(HoaDon hoaDon) {
-        return hoaDon.getNhanVien().stream()
-                .filter(nv -> nv.getChucVu() != null && "ROLE_SHIPPER".equalsIgnoreCase(nv.getChucVu().getTenChucVu()))
-                .map(NhanVien::getId)
-                .findFirst()
-                .orElse(null);
-    }
+
 
 }

@@ -10,8 +10,15 @@ import { BehaviorSubject, Subject } from 'rxjs';
 export class WebsocketService {
     private stompClient: Client;
 private orderSubject = new Subject<any>(); // không cần BehaviorSubject
-  order$ = this.orderSubject.asObservable(); // cho nhiều component cùng subscribe
-
+  newOrder$ = this.orderSubject.asObservable(); // cho nhiều component cùng subscribe
+private donHangDaXacNhanSubject = new Subject<any>();
+donHangDaXacNhan$ = this.donHangDaXacNhanSubject.asObservable();
+private myOrderSubject = new Subject<any>();
+myOrder$ = this.myOrderSubject.asObservable();
+private removeOrderSubject = new Subject<any>();
+removeOrder$ = this.removeOrderSubject.asObservable();
+private daGiaoShipperSubject = new Subject<any>();
+daGiaoShipper$ = this.daGiaoShipperSubject.asObservable();
   constructor() {
     this.stompClient = new Client({
       brokerURL: 'ws://localhost:8080/ws', // URL WebSocket
@@ -19,7 +26,11 @@ private orderSubject = new Subject<any>(); // không cần BehaviorSubject
       debug: (msg) => console.log('STOMP: ', msg),
       onConnect: () => {
         console.log('✅ WebSocket Connected');
+        
         this.subscribeOrders();
+        this.subscribedonHangDaXacNhan();
+        this.subscribeMyOrders();
+      
       },
       onStompError: (frame) => {
         console.error('❌ STOMP error: ', frame.headers['message']);
@@ -38,4 +49,20 @@ private orderSubject = new Subject<any>(); // không cần BehaviorSubject
       this.orderSubject.next(donHangMoi); // phát thông báo cho tất cả subscriber
     });
   }
+  
+private subscribedonHangDaXacNhan() {
+  this.stompClient.subscribe('/topic/admin/da-xac-nhan', (message: IMessage) => {
+    const trangThaiGiaoHang = JSON.parse(message.body);
+    console.log('🚚 Trạng thái giao hàng mới:', trangThaiGiaoHang);
+    this.donHangDaXacNhanSubject.next(trangThaiGiaoHang);
+  });
+}
+private subscribeMyOrders() {
+  this.stompClient.subscribe('/user/queue/don-duoc-nhan', (message: IMessage) => {
+    const don = JSON.parse(message.body);
+    this.myOrderSubject.next(don);
+  });
+}
+
+
 }

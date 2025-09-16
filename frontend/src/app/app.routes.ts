@@ -11,7 +11,9 @@ import { roleGuard } from './core/guards/auth.guard';
 import { OrderComponent } from './features/order/order.component';
 import { CustomerPurchaseComponent } from './features/customer/customer-purchase/customer-purchase.component';
 import { CustomerInfoComponent } from './features/customer/customer-info/customer-info.component';
-import { ShipComponent } from './features/admin/ship/ship.component';
+import { CheckoutComponent } from './features/checkout/checkout.component';
+import { OfflineComponent } from './features/admin/offline/offline.component';
+import { VoucherComponent } from './features/admin/voucher/voucher.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -35,6 +37,7 @@ export const routes: Routes = [
   data: { roles: ['ROLE_KHACH_HANG'] },
     component: CustomerPurchaseComponent },
     { path: 'login', component: LoginComponent },
+       { path: 'checkout-success', component: CheckoutComponent },
         { path: 'register', component: RegisterComponent },
 
 
@@ -49,9 +52,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
+        path: 'order-management',
+        loadComponent: () => import('./features/admin/order-mangagement/order-management.component').then(m => m.OrderManagementComponent)
+      },
+      
+      {
         path: 'customer',
-          canActivate: [roleGuard],
-  data: { roles: ['ROLE_ADMIN'] },
         loadComponent: () => import('./features/admin/users/users.component').then(m => m.UsersComponent)
       },
       {
@@ -60,16 +66,12 @@ export const routes: Routes = [
   data: { roles: ['ROLE_ADMIN'] },
         loadComponent: () => import('./features/admin/employees/employees.component').then(m => m.EmployeesComponent)
       },
-       {
-        path: 'list-order',
-          canActivate: [roleGuard],
-  data: { roles: ['ROLE_NHAN_VIEN','ROLE_ADMIN'] },
-        loadComponent: () => import('./features/admin/list-order/list-order.component').then(m => m.ListOrderComponent)
-      },
-       { path: 'ship',
-     canActivate: [roleGuard],
-  data: { roles: ['ROLE_SHIPPER','ROLE_ADMIN'] },
-    component: ShipComponent },
+       
+     
+     { path: 'offline',
+    component: OfflineComponent },
+     { path: 'voucher',
+    component: VoucherComponent },
        {
         path: 'products/author',
           canActivate: [roleGuard],
@@ -125,8 +127,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/product-book/product-book.component').then(m => m.ProductBookComponent)
       },
       { path: '',
-  //         canActivate: [roleGuard],
-  // data: { roles: ['ROLE_ADMIN'] },  
         redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

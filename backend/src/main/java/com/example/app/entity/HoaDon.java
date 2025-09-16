@@ -51,14 +51,11 @@ public class HoaDon {
     private String loaiThanhToan;
 
 
+
     // 🔗 FK: nhân viên
-    @ManyToMany
-    @JoinTable(
-            name = "hoa_don_nhan_vien",
-            joinColumns = @JoinColumn(name = "ma_hoa_don"),
-            inverseJoinColumns = @JoinColumn(name = "nhan_vien")
-    )
-    private Set<NhanVien> nhanVien = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "nhan_vien")
+    private NhanVien nhanVien;
 
     // 🔗 FK: khách hàng
     @ManyToOne(fetch = FetchType.LAZY)

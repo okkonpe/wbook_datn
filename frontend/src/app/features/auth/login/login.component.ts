@@ -25,8 +25,7 @@ export class LoginComponent {
 
         switch (res.role) {
           case 'ROLE_ADMIN': this.router.navigate(['/admin']); break;
-          case 'ROLE_NHAN_VIEN': this.router.navigate(['/admin/list-order']); break;
-            case 'ROLE_SHIPPER': this.router.navigate(['/admin/ship']); break;
+          case 'ROLE_NHAN_VIEN': this.router.navigate(['/admin/order-management']); break;
           default: this.router.navigate(['/']); break;
         }
       },

@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -62,8 +63,9 @@ public class NhanVien {
     @Temporal(TemporalType.DATE)
     private Date ngayBatDau;
 
-    @ManyToMany(mappedBy = "nhanVien")
-    private Set<HoaDon> hoaDons = new HashSet<>();
+    @OneToMany(mappedBy = "nhanVien")
+    private List<HoaDon> hoaDonsNhanVien;
+
 
     @ManyToOne
     @JoinColumn(name = "chuc_vu", referencedColumnName = "id")

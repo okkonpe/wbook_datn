@@ -30,7 +30,7 @@
 <!-- Main Content -->
 <div class="variants-content">
   <div class="container-fluid">
-    
+
     <!-- Add Variant Form -->
     <div class="form-card">
       <div class="form-header">
@@ -40,7 +40,7 @@
         </h3>
         <p>Nhập thông tin biến thể và thêm vào danh sách staging</p>
       </div>
-      
+
       <div class="form-content">
         <div class="row g-4">
           <div class="col-md-6">
@@ -49,73 +49,73 @@
                 <i class="bi bi-upc-scan me-2"></i>
                 ISBN
               </label>
-              <input 
-                type="text" 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.isbn" 
+              <input
+                type="text"
+                class="form-control-modern"
+                [(ngModel)]="newDraft.isbn"
                 placeholder="978-0-123456-78-9"
                 maxlength="13">
               <div class="input-help">Mã ISBN 13 số</div>
             </div>
           </div>
-          
+
           <div class="col-md-6">
             <div class="input-group-modern">
               <label class="input-label">
                 <i class="bi bi-tag me-2"></i>
                 Mã sản phẩm chi tiết
               </label>
-              <input 
-                type="text" 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.maSanPhamChiTiet" 
+              <input
+                type="text"
+                class="form-control-modern"
+                [(ngModel)]="newDraft.maSanPhamChiTiet"
                 placeholder="SPCT001">
               <div class="input-help">Mã định danh duy nhất</div>
             </div>
           </div>
-          
+
           <div class="col-md-4">
             <div class="input-group-modern">
               <label class="input-label">
                 <i class="bi bi-currency-dollar me-2"></i>
                 Đơn giá (VNĐ)
               </label>
-              <input 
-                type="number" 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.donGia" 
+              <input
+                type="number"
+                class="form-control-modern"
+                [(ngModel)]="newDraft.donGia"
                 placeholder="100000"
                 min="0">
               <div class="input-help">Giá bán lẻ</div>
             </div>
           </div>
-          
+
           <div class="col-md-4">
             <div class="input-group-modern">
               <label class="input-label">
                 <i class="bi bi-boxes me-2"></i>
                 Số lượng
               </label>
-              <input 
-                type="number" 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.soLuong" 
+              <input
+                type="number"
+                class="form-control-modern"
+                [(ngModel)]="newDraft.soLuong"
                 placeholder="100"
                 min="0">
               <div class="input-help">Tồn kho ban đầu</div>
             </div>
           </div>
-          
+
           <div class="col-md-4">
             <div class="input-group-modern">
               <label class="input-label">
                 <i class="bi bi-file-text me-2"></i>
                 Số trang
               </label>
-              <input 
-                type="number" 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.soTrang" 
+              <input
+                type="number"
+                class="form-control-modern"
+                [(ngModel)]="newDraft.soTrang"
                 placeholder="200"
                 min="1">
               <div class="input-help">Tổng số trang</div>
@@ -187,22 +187,22 @@
               </select>
             </div>
           </div>
-          
+
           <div class="col-md-12">
             <div class="input-group-modern">
               <label class="input-label">
                 <i class="bi bi-chat-text me-2"></i>
                 Mô tả biến thể
               </label>
-              <textarea 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.moTa" 
+              <textarea
+                class="form-control-modern"
+                [(ngModel)]="newDraft.moTa"
                 rows="3"
                 placeholder="Mô tả chi tiết về biến thể này..."></textarea>
               <div class="input-help">Thông tin mô tả bổ sung</div>
             </div>
           </div>
-          
+
           <div class="col-md-12">
             <div class="form-actions">
               <button class="btn btn-add-variant" (click)="addDraft()">
@@ -225,7 +225,7 @@
         <div class="header-left">
           <h3>
             <i class="bi bi-list-ul me-2"></i>
-            Danh sách staging
+            Preview
           </h3>
           <div class="staging-stats">
             <span class="stat-item">
@@ -238,18 +238,18 @@
             </span>
           </div>
         </div>
-        
+
         <div class="header-actions">
-          <button 
-            class="btn btn-clear" 
-            (click)="clearAll()" 
+          <button
+            class="btn btn-clear"
+            (click)="clearAll()"
             [disabled]="!drafts.length">
             <i class="bi bi-trash me-2"></i>
             Xóa tất cả
           </button>
-          <button 
-            class="btn btn-save-all" 
-            [disabled]="!drafts.length || uploading || saving" 
+          <button
+            class="btn btn-save-all"
+            [disabled]="!drafts.length || uploading || saving"
             (click)="saveAll()">
             <div class="spinner-border spinner-border-sm me-2" *ngIf="saving"></div>
             <i class="bi bi-cloud-upload me-2" *ngIf="!saving"></i>
@@ -257,7 +257,7 @@
           </button>
         </div>
       </div>
-      
+
       <!-- Empty State -->
       <div class="empty-state" *ngIf="!drafts.length">
         <div class="empty-icon">
@@ -266,7 +266,7 @@
         <h4>Chưa có biến thể nào</h4>
         <p>Thêm biến thể đầu tiên bằng form bên trên</p>
       </div>
-      
+
       <!-- Variants Table -->
       <div class="table-responsive" *ngIf="drafts.length">
         <table class="table table-bordered align-middle">

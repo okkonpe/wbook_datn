@@ -7,7 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface KhachHangRepo extends JpaRepository<KhachHang,Integer> {
+public interface KhachHangRepo extends JpaRepository<KhachHang, Integer> {
     Optional<KhachHang> findByTaiKhoan(String taiKhoan);
     boolean existsByTaiKhoan(String tk);
+    boolean existsByMaKhachHang(String maKhachHang);  // 👈 THÊM METHOD NÀY
 }

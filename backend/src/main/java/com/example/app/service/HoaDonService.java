@@ -37,7 +37,8 @@ public class HoaDonService {
     BookRepository bookRepository;
     @Autowired
     KhachHangRepo khachHangRepo;
-
+    @Autowired
+VoucherRepo voucherRepo;
     @Autowired
     private SimpMessagingTemplate   messagingTemplate;
     public HoaDon createHoaDon(KhachHang khachHang){
@@ -75,14 +76,20 @@ public HoaDonRequestDTO thanhToanCOD(HoaDonRequestDTO request){
     HoaDon hoaDon = hoaDonRepository.findByKhachHangIdAndTrangThaiId(
             request.getKhachHangID(), 1).
             orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn giỏ hàng"));
-
+if (request.getMaVoucher()!=null){
+    Voucher voucher = voucherRepo.findByMaVoucher(request.getMaVoucher()).orElseThrow();
+    hoaDon.setVoucher(voucher);
+}
     // 2. Cập nhật thông tin từ FE
     hoaDon.setHoTenNguoiNhan(request.getHoTen());
     hoaDon.setDiaChiGiaoHang(request.getDiaChi());
     hoaDon.setSdtNguoiNhan(request.getSoDienThoai());
     hoaDon.setGhiChu(request.getGhiChu());
     hoaDon.setLoaiThanhToan(request.getPhuongThucThanhToan());
-//    hoaDon.setTongTienSauGiam(tinhTongTienGioHang(hoaDon)); // hoặc request.getTongTienSauGiam()
+    hoaDon.setTongTien(request.getTongTien());
+    hoaDon.setPhiShip(new BigDecimal("30000"));
+
+    hoaDon.setTongTienSauGiam(request.getTongTienSauGiam()); // hoặc request.getTongTienSauGiam()
 
     // 3. Set trạng thái = 2 (đã đat hang)
     TrangThaiHoaDon trangThaiDaDatHang = trangThaiHoaDonRepo.findById(2)
@@ -104,6 +111,13 @@ public HoaDonRequestDTO thanhToanCOD(HoaDonRequestDTO request){
         hd.setDiaChiGiaoHang(request.getDiaChi());
         hd.setSdtNguoiNhan(request.getSoDienThoai());
         hd.setGhiChu(request.getGhiChu());
+        hd.setPhiShip(new BigDecimal("30000"));
+        if (request.getMaVoucher()!=null){
+            Voucher voucher = voucherRepo.findByMaVoucher(request.getMaVoucher()).orElseThrow();
+            hd.setVoucher(voucher);
+        }
+hd.setTongTien(request.getTongTien());
+hd.setTongTienSauGiam(request.getTongTienSauGiam());
         hoaDonRepository.save(hd);
     }
     public void updateTrangThaiDaThanhToan(Integer idHD,String trangThai) {

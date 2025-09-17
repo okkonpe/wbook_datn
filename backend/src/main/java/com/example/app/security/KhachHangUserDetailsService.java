@@ -1,4 +1,4 @@
-package com.example.app.service;
+package com.example.app.security;
 
 import com.example.app.entity.KhachHang;
 import com.example.app.entity.NhanVien;

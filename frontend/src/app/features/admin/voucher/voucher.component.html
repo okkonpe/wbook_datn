@@ -1,1 +1,98 @@
 <h1>Quản lý Voucher</h1>
+
+<button class="btn btn-success mb-3" (click)="addVoucher()">Thêm Voucher</button>
+
+<!-- Form Thêm/Sửa Voucher -->
+<div *ngIf="showForm" class="card mb-3 p-3 border">
+  <h5>{{ isEdit ? 'Sửa Voucher' : 'Thêm Voucher' }}</h5>
+  <form (ngSubmit)="saveVoucher()">
+    <div class="mb-2">
+      <label class="form-label">Mã voucher</label>
+      <input type="text" class="form-control" [(ngModel)]="currentVoucher.maVoucher" name="maVoucher" required>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Mô tả</label>
+      <input type="text" class="form-control" [(ngModel)]="currentVoucher.moTa" name="moTa">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Loại giảm</label>
+      <select class="form-select" [(ngModel)]="currentVoucher.loaiGiam" name="loaiGiam" required>
+        <option value="PERCENT">PERCENT</option>
+        <option value="AMOUNT">AMOUNT</option>
+      </select>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Giá trị</label>
+      <input type="number" class="form-control" [(ngModel)]="currentVoucher.giaTri" name="giaTri" required>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Giảm tối đa</label>
+      <input type="number" class="form-control" [(ngModel)]="currentVoucher.giamToiDa" name="giamToiDa">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Đơn tối thiểu</label>
+      <input type="number" class="form-control" [(ngModel)]="currentVoucher.donToiThieu" name="donToiThieu">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Ngày bắt đầu</label>
+      <input type="date" class="form-control" [(ngModel)]="currentVoucher.ngayBatDau" name="ngayBatDau">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Ngày kết thúc</label>
+      <input type="date" class="form-control" [(ngModel)]="currentVoucher.ngayKetThuc" name="ngayKetThuc">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Số lượng</label>
+      <input type="number" class="form-control" [(ngModel)]="currentVoucher.soLuong" name="soLuong">
+    </div>
+    <div class="mb-2 form-check">
+      <input type="checkbox" class="form-check-input" [(ngModel)]="currentVoucher.trangThai" name="trangThai">
+      <label class="form-check-label">Hoạt động</label>
+    </div>
+    <div class="mb-2 form-check">
+      <input type="checkbox" class="form-check-input" [(ngModel)]="currentVoucher.onlyNewCustomer" name="onlyNewCustomer">
+      <label class="form-check-label">Chỉ khách hàng mới</label>
+    </div>
+    <button type="submit" class="btn btn-primary me-2">{{ isEdit ? 'Cập nhật' : 'Thêm' }}</button>
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Hủy</button>
+  </form>
+</div>
+
+<!-- Bảng voucher -->
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Mã</th>
+      <th>Loại</th>
+      <th>Giá trị</th>
+      <th>Giảm tối đa</th>
+      <th>Đơn tối thiểu</th>
+      <th>Thời gian</th>
+      <th>Số lượng</th>
+      <th>Đã dùng</th>
+      <th>Trạng thái</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let v of vouchers">
+      <td>{{ v.maVoucher }}</td>
+      <td>{{ v.loaiGiam }}</td>
+      <td>{{ v.giaTri }}</td>
+      <td>{{ v.giamToiDa }}</td>
+      <td>{{ v.donToiThieu }}</td>
+      <td>{{ v.ngayBatDau }} - {{ v.ngayKetThuc }}</td>
+      <td>{{ v.soLuong }}</td>
+      <td>{{ v.daDung }}</td>
+      <td>
+        <span class="badge" [ngClass]="v.trangThai ? 'bg-success' : 'bg-danger'">
+          {{ v.trangThai ? 'Hoạt động' : 'Ngừng' }}
+        </span>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1" (click)="editVoucher(v)">Sửa</button>
+        <button class="btn btn-sm btn-danger" (click)="deleteVoucher(v.id)">Xóa</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

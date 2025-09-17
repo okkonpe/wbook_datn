@@ -1,6 +1,6 @@
 package com.example.app.security;
 
-import com.example.app.service.KhachHangUserDetailsService;
+import com.example.app.security.KhachHangUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

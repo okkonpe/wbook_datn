@@ -12,9 +12,9 @@
   background-color: #198754 !important;
 }
 
-/* Fix for HOÀN THÀNH status - Force all variations */
-.badge,
-span.badge {
+/* Fix for HOÀN THÀNH status - Only for order management */
+.order-management .badge,
+.order-management span.badge {
   &[class*="success"],
   &.bg-success,
   &[title*="HOÀN THÀNH"],
@@ -47,9 +47,9 @@ span.badge {
   }
 }
 
-/* Override Angular ngClass bindings */
-.badge[ng-reflect-ng-class*="success"],
-.badge[ng-reflect-ng-class*="completed"] {
+/* Override Angular ngClass bindings - Only for order management */
+.order-management .badge[ng-reflect-ng-class*="success"],
+.order-management .badge[ng-reflect-ng-class*="completed"] {
   background-color: #28a745 !important;
   color: #ffffff !important;
   font-weight: bold !important;
@@ -57,11 +57,22 @@ span.badge {
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
 }
 
-/* Specific fix for status ID 16 (HOÀN THÀNH) */
-.badge.bg-success {
+/* Specific fix for status ID 16 (HOÀN THÀNH) - Only for order management */
+.order-management .badge.bg-success {
   background-color: #28a745 !important;
   color: #ffffff !important;
   font-weight: bold !important;
   border: 1px solid #1e7e34 !important;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
+}
+
+/* Voucher component - Keep original Bootstrap colors */
+.voucher .badge.bg-success {
+  background-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+.voucher .badge.bg-danger {
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
 }

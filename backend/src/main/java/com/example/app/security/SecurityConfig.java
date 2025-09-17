@@ -1,6 +1,6 @@
 package com.example.app.security;
 
-import com.example.app.service.KhachHangUserDetailsService;
+import com.example.app.security.KhachHangUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

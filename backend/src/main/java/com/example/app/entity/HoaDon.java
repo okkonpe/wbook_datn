@@ -50,7 +50,8 @@ public class HoaDon {
     @Column(name = "loai_thanh_toan")
     private String loaiThanhToan;
 
-
+    @Column(name = "phi_ship")
+    private BigDecimal phiShip;
 
     // 🔗 FK: nhân viên
     @ManyToOne
@@ -67,7 +68,7 @@ public class HoaDon {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "voucher", referencedColumnName = "id")
-    private PhieuGiamGia phieuGiamGia;
+    private Voucher voucher;
 
     // 🔗 FK: trạng thái hóa đơn
     @ManyToOne(fetch = FetchType.LAZY)

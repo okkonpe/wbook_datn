@@ -23,53 +23,6 @@
 <div class="main-content">
   <div class="container-fluid">
     
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="stats-card primary">
-          <div class="stats-icon">
-            <i class="bi bi-book"></i>
-          </div>
-          <div class="stats-content">
-            <h3>{{ productBooks.length }}</h3>
-            <p>Tổng sách</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="stats-card success">
-          <div class="stats-icon">
-            <i class="bi bi-check-circle"></i>
-          </div>
-          <div class="stats-content">
-            <h3>{{ (productBooks | filter:'trangThai':true).length }}</h3>
-            <p>Đang hoạt động</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-          <div class="stats-card warning">
-            <div class="stats-icon">
-              <i class="bi bi-layers"></i>
-            </div>
-            <div class="stats-content">
-              <h3>{{ productBooks.length }}</h3>
-              <p>Biến thể</p>
-            </div>
-          </div>
-      </div>
-      <div class="col-md-3">
-        <div class="stats-card info">
-          <div class="stats-icon">
-            <i class="bi bi-layers"></i>
-          </div>
-          <div class="stats-content">
-            <h3>{{ totalPages }}</h3>
-            <p>Trang dữ liệu</p>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Books Table Card -->
     <div class="data-card">

@@ -15,8 +15,12 @@ public class OfflinePaymentResponseDTO {
     private Integer hoaDonId;
     private String maHoaDon;
     private BigDecimal tongTien;
+    private BigDecimal tongTienSauGiam;
     private BigDecimal khachThanhToan;
     private BigDecimal tienThua;
+    private String voucherApDung;
+    private BigDecimal tienGiam;
+    private String message;
 }
 
 

@@ -47,6 +47,21 @@ interface VariantRow {
   qty?: number; // số lượng muốn thêm
 }
 
+interface Voucher {
+  id: number;
+  maVoucher: string;
+  moTa: string;
+  loaiGiam: 'PERCENT' | 'AMOUNT';
+  giaTri: number;
+  giamToiDa?: number;
+  donToiThieu: number;
+  ngayBatDau: string;
+  ngayKetThuc: string;
+  soLuong: number;
+  daDung: number;
+  trangThai: boolean;
+}
+
 @Component({
   selector: 'app-offline',
   standalone: true,
@@ -72,6 +87,11 @@ export class OfflineComponent implements OnInit, AfterViewInit {
   productSearchQuery: string = '';
   availableProducts: VariantRow[] = [];
   isQrScannerOpen: boolean = false;
+  
+  // Voucher states
+  showVoucherModal: boolean = false;
+  availableVouchers: Voucher[] = [];
+  selectedVoucher: Voucher | null = null;
   private cookieKeyInvoices = 'offline_pending_invoices';
   private cookieKeySelectedIndex = 'offline_selected_index';
   
@@ -113,11 +133,27 @@ export class OfflineComponent implements OnInit, AfterViewInit {
 
     this.pendingInvoices.push(newInvoice);
     this.selectedInvoiceIndex = this.pendingInvoices.length - 1;
+    
+    // Reset voucher và discount cho hóa đơn mới
+    this.selectedVoucher = null;
+    this.discount = 0;
+    this.customerPayment = 0;
+    this.change = 0;
+    
+    console.log('🆕 Created new invoice - reset voucher and discount');
     this.saveToCookie();
   }
 
   selectInvoice(index: number): void {
     this.selectedInvoiceIndex = index;
+    
+    // Reset voucher và discount khi chuyển hóa đơn
+    this.selectedVoucher = null;
+    this.discount = 0;
+    this.customerPayment = 0;
+    this.change = 0;
+    
+    console.log('🔄 Switched to invoice:', index, '- reset voucher and discount');
     this.saveSelectedIndex();
   }
 
@@ -483,11 +519,17 @@ export class OfflineComponent implements OnInit, AfterViewInit {
       soDienThoai: paymentData.soDienThoai,
       diaChi: paymentData.diaChi,
       tongTien: this.selectedInvoice.totalAmount,
+      tongTienSauGiam: this.selectedInvoice.totalAmount - this.discount,
       giamGia: this.discount,
       khachThanhToan: this.customerPayment,
       tienThua: this.change,
+      voucherId: this.selectedVoucher?.id || null,
       items: (this.selectedInvoice.items || []).map(it => ({ id: it.id, soLuong: it.soLuong, donGia: it.donGia }))
     };
+
+    console.log('💳 Payment request body:', reqBody);
+    console.log('🎫 Selected voucher:', this.selectedVoucher);
+    console.log('💰 Discount amount:', this.discount);
 
     this.http.post<any>('http://localhost:8080/api/hoa-don/offline/thanh-toan', reqBody, { headers }).subscribe({
       next: (resp) => {
@@ -497,6 +539,8 @@ export class OfflineComponent implements OnInit, AfterViewInit {
         this.change = 0;
         this.discount = 0;
         this.paymentMethod = 'cash';
+        
+        // Hiển thị thông báo thanh toán thành công
         alert('Thanh toán thành công!');
       },
       error: (err) => {
@@ -594,5 +638,105 @@ export class OfflineComponent implements OnInit, AfterViewInit {
       if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
     }
     return null;
+  }
+
+  // ================= VOUCHER METHODS =================
+  
+  openVoucherModal(): void {
+    this.showVoucherModal = true;
+    this.loadAvailableVouchers();
+  }
+
+  closeVoucherModal(): void {
+    console.log('🔒 Closing voucher modal - selectedVoucher before:', this.selectedVoucher);
+    this.showVoucherModal = false;
+    // Không reset selectedVoucher khi đóng modal, chỉ khi removeVoucher()
+    console.log('🔒 Voucher modal closed - selectedVoucher after:', this.selectedVoucher);
+  }
+
+  loadAvailableVouchers(): void {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.getAuthToken()}`,
+      'Content-Type': 'application/json'
+    });
+
+    this.http.get<Voucher[]>('http://localhost:8080/api/voucher/active', { headers }).subscribe({
+      next: (vouchers) => {
+        this.availableVouchers = vouchers.filter(v => 
+          v.trangThai && 
+          new Date(v.ngayBatDau) <= new Date() && 
+          new Date(v.ngayKetThuc) >= new Date() &&
+          v.soLuong > v.daDung
+        );
+        console.log('📋 Vouchers loaded:', this.availableVouchers);
+      },
+      error: (error) => {
+        console.error('❌ Error loading vouchers:', error);
+        this.availableVouchers = [];
+      }
+    });
+  }
+
+  selectVoucher(voucher: Voucher): void {
+    console.log('🔍 selectVoucher called with:', voucher);
+    
+    // Kiểm tra điều kiện đơn tối thiểu ngay khi chọn
+    if (this.selectedInvoice && voucher.donToiThieu > this.selectedInvoice.totalAmount) {
+      alert(`Voucher ${voucher.maVoucher} yêu cầu đơn tối thiểu ${voucher.donToiThieu.toLocaleString('vi-VN')} VNĐ. Đơn hàng hiện tại: ${this.selectedInvoice.totalAmount.toLocaleString('vi-VN')} VNĐ`);
+      return;
+    }
+    
+    this.selectedVoucher = voucher;
+    console.log('🎫 Selected voucher set to:', this.selectedVoucher);
+  }
+
+  applyVoucher(): void {
+    console.log('applyVoucher called - selectedVoucher:', this.selectedVoucher);
+    console.log('applyVoucher called - selectedInvoice:', this.selectedInvoice);
+    
+    if (!this.selectedVoucher || !this.selectedInvoice) {
+      console.log('Cannot apply voucher - missing data');
+      return;
+    }
+
+    const totalAmount = this.selectedInvoice.totalAmount;
+    
+    // Kiểm tra điều kiện đơn tối thiểu
+    if (this.selectedVoucher.donToiThieu > totalAmount) {
+      alert(`Voucher ${this.selectedVoucher.maVoucher} yêu cầu đơn tối thiểu ${this.selectedVoucher.donToiThieu.toLocaleString('vi-VN')} VNĐ`);
+      // Reset voucher nếu không đáp ứng điều kiện
+      this.selectedVoucher = null;
+      this.discount = 0;
+      console.log('Voucher removed due to minimum order requirement');
+      return;
+    }
+
+    // Tính tiền giảm
+    let discountAmount = 0;
+    if (this.selectedVoucher.loaiGiam === 'PERCENT') {
+      discountAmount = (totalAmount * this.selectedVoucher.giaTri) / 100;
+      if (this.selectedVoucher.giamToiDa && discountAmount > this.selectedVoucher.giamToiDa) {
+        discountAmount = this.selectedVoucher.giamToiDa;
+      }
+    } else if (this.selectedVoucher.loaiGiam === 'AMOUNT') {
+      discountAmount = this.selectedVoucher.giaTri;
+    }
+
+    this.discount = discountAmount;
+    this.closeVoucherModal();
+    
+    console.log('✅ Voucher applied:', {
+      voucher: this.selectedVoucher?.maVoucher || 'Unknown',
+      discount: discountAmount,
+      total: totalAmount,
+      final: totalAmount - discountAmount
+    });
+  }
+
+  removeVoucher(): void {
+    console.log('🗑️ Removing voucher:', this.selectedVoucher);
+    this.selectedVoucher = null;
+    this.discount = 0;
+    console.log('🗑️ Voucher removed - selectedVoucher is now:', this.selectedVoucher);
   }
 }

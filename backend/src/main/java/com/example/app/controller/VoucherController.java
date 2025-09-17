@@ -62,4 +62,5 @@ public class VoucherController {
     public Voucher getById(@PathVariable Long id) {
         return voucherService.getVoucherById(id);
     }
+
 }

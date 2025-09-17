@@ -17,9 +17,11 @@ public class OfflinePaymentRequestDTO {
     private String soDienThoai;
     private String diaChi;
     private BigDecimal tongTien;
+    private BigDecimal tongTienSauGiam; // Tổng tiền sau khi giảm giá
     private BigDecimal giamGia;
     private BigDecimal khachThanhToan;
-    private BigDecimal tienThua; 
+    private BigDecimal tienThua;
+    private Long voucherId; // ID của voucher được chọn
     private List<Item> items;
 
     @Getter

@@ -12,6 +12,8 @@ import java.util.UUID;
 public class UploadService {
     private final String UPLOAD_DIR = "uploads";
     public String saveFile(MultipartFile file) throws IOException {
+        System.out.println("📁 Bắt đầu upload file: " + file.getOriginalFilename() + " (" + file.getSize() + " bytes)");
+        
         String original = file.getOriginalFilename();
         String ext = "";
         if (original != null) {
@@ -21,24 +23,24 @@ public class UploadService {
             }
         }
         String filename = UUID.randomUUID().toString() + ext;
-        
+        System.out.println("📝 Tên file mới: " + filename);
 
         File uploadDir = new File(UPLOAD_DIR);
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
-            System.out.println("Đã tạo thư mục: " + uploadDir.getAbsolutePath());
+            System.out.println("📂 Đã tạo thư mục: " + uploadDir.getAbsolutePath());
         }
         
         Path path = Paths.get(UPLOAD_DIR, filename);
-        System.out.println("Đường dẫn lưu file: " + path.toAbsolutePath());
+        System.out.println("📍 Đường dẫn lưu file: " + path.toAbsolutePath());
         
         try {
             Files.createDirectories(path.getParent());
             Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("Lưu file thành công: " + filename);
+            System.out.println("✅ Lưu file thành công: " + filename);
             return filename;
         } catch (Exception e) {
-            System.err.println("Lỗi lưu file: " + e.getMessage());
+            System.err.println("❌ Lỗi lưu file: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }

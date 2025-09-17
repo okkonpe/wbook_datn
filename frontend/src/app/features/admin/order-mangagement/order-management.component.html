@@ -59,7 +59,7 @@
           <!-- <td>{{ hoaDon.maHoaDon }}</td> -->
           <td>{{ hoaDon?.maHoaDon }}</td>
           <td>{{ hoaDon?.ngayTao | date:'dd/MM/yyyy' }}</td>
-          <td>{{ hoaDon?.tongTien | number }} đ</td>
+          <td>{{ (hoaDon?.tongTienSauGiam || hoaDon?.tongTien) | number }} đ</td>
           <td>{{hoaDon?.loaiThanhToan}}</td>
           <td>
             <span class="badge px-3 py-2 fs-6"
@@ -107,7 +107,7 @@
           <h6>Khách hàng: {{selectedHoaDon.khachHang}}</h6>
           <h6>SDT khách: {{selectedHoaDon.sdtNguoiNhan}}</h6>
           <h6>Địa chỉ giao hàng:  {{selectedHoaDon.diaChiGiaoHang}}</h6>
-          <h6>Tổng tiền: {{selectedHoaDon.tongTien| number}} đ</h6>
+          <h6>Tổng tiền: {{(selectedHoaDon.tongTienSauGiam || selectedHoaDon.tongTien)| number}} đ</h6>
           <table class="table table-bordered text-center align-middle">
             <thead class="table-light">
               <tr>

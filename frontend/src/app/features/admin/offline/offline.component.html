@@ -169,6 +169,31 @@
                   <span>Phí vận chuyển:</span>
                   <span>0 VND</span>
                 </div>
+                
+                <!-- Voucher Selection -->
+                <div class="voucher-section">
+                  <div class="voucher-header">
+                    <span>Phiếu giảm giá:</span>
+                    <button class="btn btn-sm btn-outline-primary" (click)="openVoucherModal()">
+                      <i class="bi bi-ticket-perforated me-1"></i>
+                      Chọn voucher
+                    </button>
+                  </div>
+                  <div class="voucher-info" *ngIf="selectedVoucher">
+                    <small class="text-success">
+                      <i class="bi bi-check-circle me-1"></i>
+                      {{ selectedVoucher.maVoucher }} - {{ selectedVoucher.moTa }}
+                      <button class="btn btn-sm btn-outline-danger ms-2" (click)="removeVoucher()">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </small>
+                  </div>
+                  <!-- Debug info -->
+                  <div class="voucher-debug" *ngIf="selectedVoucher" style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                    Debug: Voucher ID {{ selectedVoucher.id }} - Discount: {{ discount | currency:'VND':'symbol':'1.0-0' }}
+                  </div>
+                </div>
+                
                 <div class="summary-row discount">
                   <span>Giảm giá:</span>
                   <span>- {{ discount | currency:'VND':'symbol':'1.0-0' }}</span>
@@ -343,6 +368,55 @@
         </div>
         <!-- Add more customer items here -->
       </div>
+    </div>
+  </div>
+</div>
+<!-- Voucher Selection Modal -->
+<div class="modal-overlay" *ngIf="showVoucherModal" (click)="closeVoucherModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Chọn phiếu giảm giá</h4>
+      <button class="btn-close" (click)="closeVoucherModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="voucher-list">
+        <div class="voucher-item" 
+             *ngFor="let voucher of availableVouchers" 
+             [class.selected]="selectedVoucher?.id === voucher.id"
+             [class.invalid]="selectedInvoice && voucher.donToiThieu > selectedInvoice.totalAmount"
+             (click)="selectVoucher(voucher)">
+          <div class="voucher-info">
+            <div class="voucher-code">{{ voucher.maVoucher }}</div>
+            <div class="voucher-description">{{ voucher.moTa }}</div>
+            <div class="voucher-conditions">
+              <small class="text-muted">
+                Đơn tối thiểu: {{ voucher.donToiThieu | currency:'VND':'symbol':'1.0-0' }}
+              </small>
+            </div>
+          </div>
+          <div class="voucher-discount">
+            <span class="discount-value" *ngIf="voucher.loaiGiam === 'PERCENT'">
+              -{{ voucher.giaTri }}%
+            </span>
+            <span class="discount-value" *ngIf="voucher.loaiGiam === 'AMOUNT'">
+              -{{ voucher.giaTri | currency:'VND':'symbol':'1.0-0' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="no-vouchers" *ngIf="availableVouchers.length === 0">
+          <i class="bi bi-ticket-perforated"></i>
+          <p>Không có voucher nào khả dụng</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeVoucherModal()">Đóng</button>
+      <button class="btn btn-primary" (click)="applyVoucher()" [disabled]="!selectedVoucher">
+        Áp dụng voucher
+      </button>
     </div>
   </div>
 </div>

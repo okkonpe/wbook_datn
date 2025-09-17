@@ -332,7 +332,9 @@ return gioHangDTO;
     }
 
     // ================= OFFLINE CHECKOUT =================
-    @Transactional
+    
+    
+    @Transactional(rollbackFor = Exception.class)
     public com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO thanhToanOffline(
             com.example.app.dto.banHangDTO.OfflinePaymentRequestDTO request) {
         // Tạo hóa đơn độc lập, không phụ thuộc giỏ hàng hay khách hàng tồn tại
@@ -375,12 +377,109 @@ return gioHangDTO;
         }
 
         hoaDon.setTongTien(tong);
+        
+        // Sử dụng tongTienSauGiam từ frontend nếu có, nếu không thì tính từ voucher
+        java.math.BigDecimal tongTienSauGiam = request.getTongTienSauGiam() != null ? 
+            request.getTongTienSauGiam() : tong;
+        
+        // Xử lý phiếu giảm giá (chỉ khi có voucher được chọn)
+        Voucher appliedVoucher = null;
+        
+        System.out.println("🔍 Request voucherId: " + request.getVoucherId());
+        System.out.println("🔍 Request tongTienSauGiam: " + request.getTongTienSauGiam());
+        System.out.println("🔍 Request giamGia: " + request.getGiamGia());
+        
+        if (request.getVoucherId() != null) {
+            // Sử dụng voucher được chọn từ frontend
+            System.out.println("🎫 Sử dụng voucher được chọn: " + request.getVoucherId());
+            appliedVoucher = voucherRepo.findById(request.getVoucherId()).orElse(null);
+            
+            if (appliedVoucher != null) {
+                System.out.println(" Thông tin voucher: " + appliedVoucher.getMaVoucher() + 
+                                 " - Trạng thái: " + appliedVoucher.getTrangThai() +
+                                 " - Số lượng: " + appliedVoucher.getSoLuong() +
+                                 " - Đã dùng: " + appliedVoucher.getDaDung() +
+                                 " - Đơn tối thiểu: " + appliedVoucher.getDonToiThieu() +
+                                 " - Tổng tiền: " + tong);
+                
+                // Kiểm tra điều kiện voucher
+                boolean isValid = appliedVoucher.getTrangThai() && 
+                    appliedVoucher.getNgayBatDau().compareTo(java.time.LocalDate.now()) <= 0 &&
+                    appliedVoucher.getNgayKetThuc().compareTo(java.time.LocalDate.now()) >= 0 &&
+                    appliedVoucher.getSoLuong() > appliedVoucher.getDaDung() &&
+                    tong.compareTo(appliedVoucher.getDonToiThieu()) >= 0;
+                
+                System.out.println(" Voucher hợp lệ: " + isValid);
+                
+                if (isValid) {
+                    hoaDon.setVoucher(appliedVoucher);
+                    
+                    // Chỉ tính lại tongTienSauGiam nếu frontend không gửi
+                    if (request.getTongTienSauGiam() == null) {
+                        // Tính tiền giảm
+                        java.math.BigDecimal discount = java.math.BigDecimal.ZERO;
+                        if (appliedVoucher.getLoaiGiam() == com.example.app.entity.LoaiGiam.PERCENT) {
+                            discount = tong.multiply(appliedVoucher.getGiaTri()).divide(new java.math.BigDecimal("100"));
+                            if (appliedVoucher.getGiamToiDa() != null && discount.compareTo(appliedVoucher.getGiamToiDa()) > 0) {
+                                discount = appliedVoucher.getGiamToiDa();
+                            }
+                        } else if (appliedVoucher.getLoaiGiam() == com.example.app.entity.LoaiGiam.AMOUNT) {
+                            discount = appliedVoucher.getGiaTri();
+                        }
+                        
+                        tongTienSauGiam = tong.subtract(discount);
+                    }
+                    
+                    System.out.println("✅ Voucher áp dụng thành công: " + appliedVoucher.getMaVoucher() + 
+                                     " - Tổng tiền: " + tong + " - Sau giảm: " + tongTienSauGiam);
+                    
+                    // Giảm số lượng voucher đã sử dụng
+                    try {
+                        int oldDaDung = appliedVoucher.getDaDung();
+                        appliedVoucher.setDaDung(appliedVoucher.getDaDung() + 1);
+                        Voucher savedVoucher = voucherRepo.save(appliedVoucher);
+                        System.out.println("💾 Đã cập nhật voucher: " + appliedVoucher.getMaVoucher() + 
+                                         " - Trước: " + oldDaDung + " - Sau: " + savedVoucher.getDaDung());
+                    } catch (Exception e) {
+                        System.out.println("❌ Lỗi khi cập nhật voucher: " + e.getMessage());
+                        e.printStackTrace();
+                        throw new RuntimeException("Không thể cập nhật voucher: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("❌ Voucher không đáp ứng điều kiện");
+                    appliedVoucher = null;
+                }
+            } else {
+                System.out.println("❌ Không tìm thấy voucher với ID: " + request.getVoucherId());
+            }
+        } else {
+            System.out.println("ℹ️ Không có voucher nào được chọn");
+        }
+        
+        hoaDon.setTongTienSauGiam(tongTienSauGiam);
         hoaDonRepository.save(hoaDon);
 
-        com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO resp =
-                new com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO(
-                        hoaDon.getId(), hoaDon.getMaHoaDon(), tong,
-                        request.getKhachThanhToan(), request.getTienThua());
+        // Tạo response với thông tin phiếu giảm giá
+        com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO resp = 
+                new com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO();
+        resp.setHoaDonId(hoaDon.getId());
+        resp.setMaHoaDon(hoaDon.getMaHoaDon());
+        resp.setTongTien(tong);
+        resp.setTongTienSauGiam(tongTienSauGiam);
+        resp.setKhachThanhToan(request.getKhachThanhToan());
+        resp.setTienThua(request.getTienThua());
+        
+        if (appliedVoucher != null) {
+            resp.setVoucherApDung(appliedVoucher.getMaVoucher());
+            resp.setTienGiam(tong.subtract(tongTienSauGiam));
+            resp.setMessage("Đã áp dụng phiếu giảm giá: " + appliedVoucher.getMaVoucher() + 
+                          " - Tiết kiệm: " + tong.subtract(tongTienSauGiam) + " VNĐ");
+        } else {
+            resp.setVoucherApDung(null);
+            resp.setTienGiam(java.math.BigDecimal.ZERO);
+            resp.setMessage("Không có phiếu giảm giá được áp dụng");
+        }
+        
         return resp;
     }
     @Transactional

@@ -1025,3 +1025,140 @@
 .badge.status-success {
   color: #04f324 !important;
 }
+
+// Voucher Section
+.voucher-section {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+
+  .voucher-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    span {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .btn {
+      font-size: 0.875rem;
+      padding: 0.375rem 0.75rem;
+    }
+  }
+
+  .voucher-info {
+    margin-top: 0.5rem;
+    
+    small {
+      display: flex;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Voucher Modal
+.voucher-list {
+  max-height: 400px;
+  overflow-y: auto;
+
+         .voucher-item {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           padding: 1rem;
+           margin-bottom: 0.5rem;
+           border: 2px solid #e5e7eb;
+           border-radius: 8px;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           background: white;
+
+           &:hover {
+             border-color: var(--pos-primary);
+             background: #f8fafc;
+           }
+
+           &.selected {
+             border-color: var(--pos-primary);
+             background: #eff6ff;
+             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+           }
+
+           &.invalid {
+             border-color: #ef4444;
+             background: #fef2f2;
+             opacity: 0.6;
+             cursor: not-allowed;
+
+             &:hover {
+               border-color: #ef4444;
+               background: #fef2f2;
+             }
+
+             .voucher-code {
+               color: #ef4444;
+             }
+
+             .voucher-conditions {
+               color: #ef4444;
+             }
+           }
+
+    .voucher-info {
+      flex: 1;
+
+      .voucher-code {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--pos-primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .voucher-description {
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+      }
+
+      .voucher-conditions {
+        small {
+          color: #9ca3af;
+        }
+      }
+    }
+
+    .voucher-discount {
+      .discount-value {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--pos-success);
+        background: #ecfdf5;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: 1px solid #d1fae5;
+      }
+    }
+  }
+
+  .no-vouchers {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #9ca3af;
+
+    i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+}

@@ -35,4 +35,8 @@ export class ProductBookService {
     };
     return this.http.get<Page<ProductBook>>(this.baseUrl, { params });
   }
+
+  updateStatus(id: number, status: boolean): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/${id}/status`, { trangThai: status });
+  }
 }

@@ -14,10 +14,10 @@ public class HinhAnh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ma_hinh_anh", nullable = false, length = 15)
+    @Column(name = "ma_hinh_anh", nullable = false, length = 50)
     private String maHinhAnh;
 
-    @Column(name = "hinh_anh", length = 50)
+    @Column(name = "hinh_anh", length = 255)
     private String hinhAnh;
 }
 

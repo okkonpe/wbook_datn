@@ -68,6 +68,15 @@ public class HoaDonController {
         HoaDonRequestDTO hd = hoaDonService.thanhToanCOD(dto);
         return  ResponseEntity.ok(hd);
     }
+
+    @PostMapping("/offline/thanh-toan")
+    public ResponseEntity<com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO> thanhToanOffline(
+            @RequestBody com.example.app.dto.banHangDTO.OfflinePaymentRequestDTO dto) {
+        if (dto.getTienThua() != null && dto.getTienThua().signum() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(hoaDonService.thanhToanOffline(dto));
+    }
     @PutMapping("/cap-nhat-trang-thai/da-xac-nhan/{id}")
     public ResponseEntity<ListDonHangDTO> daXacNhan(@PathVariable Integer id,@RequestParam Integer idNhanVien){
 
@@ -95,4 +104,83 @@ public class HoaDonController {
         return ResponseEntity.ok(hoaDonService.chuyenTrangThaiGHThatBai(id,idNhanVien));
     }
 
+    // ======= Dashboard stats (simple APIs) =======
+    @GetMapping("/stat/summary")
+    public ResponseEntity<java.util.Map<String,Object>> summary() {
+        java.util.Map<String,Object> m = new java.util.HashMap<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.math.BigDecimal todayRev = hoaDonRepository.sumRevenueBetween(today, today);
+        java.math.BigDecimal weekRev = hoaDonRepository.sumRevenueBetween(today.minusDays(6), today);
+        java.math.BigDecimal monthRev = hoaDonRepository.sumRevenueBetween(today.withDayOfMonth(1), today);
+        m.put("todayRevenue", todayRev);
+        m.put("weekRevenue", weekRev);
+        m.put("monthRevenue", monthRev);
+        m.put("totalOrders", hoaDonRepository.countAllOrders());
+        m.put("totalRevenue", weekRev);
+        m.put("activeVouchers", 0);
+        m.put("topSellingCount", 0);
+        m.put("lowStockCount", 0);
+        return ResponseEntity.ok(m);
+    }
+
+    @GetMapping("/stat/revenue")
+    public ResponseEntity<java.util.List<java.util.Map<String,Object>>> revenue(
+            @RequestParam String type,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate start;
+        java.time.LocalDate end;
+        java.util.List<java.util.Map<String,Object>> list = new java.util.ArrayList<>();
+        if ("day".equalsIgnoreCase(type)) {
+            start = today; end = today;
+            java.util.Map<String,Object> row = new java.util.HashMap<>();
+            row.put("label", today.toString());
+            row.put("value", hoaDonRepository.sumRevenueBetween(start, end));
+            list.add(row);
+        } else if ("week".equalsIgnoreCase(type)) {
+            for (int i=6;i>=0;i--) {
+                java.time.LocalDate d = today.minusDays(i);
+                java.util.Map<String,Object> row = new java.util.HashMap<>();
+                row.put("label", d.toString());
+                row.put("value", hoaDonRepository.sumRevenueBetween(d, d));
+                list.add(row);
+            }
+        } else if ("month".equalsIgnoreCase(type)) {
+            java.time.LocalDate first = today.withDayOfMonth(1);
+            java.time.LocalDate cur = first;
+            while (!cur.isAfter(today)) {
+                java.util.Map<String,Object> row = new java.util.HashMap<>();
+                row.put("label", cur.toString());
+                row.put("value", hoaDonRepository.sumRevenueBetween(cur, cur));
+                list.add(row);
+                cur = cur.plusDays(1);
+            }
+        } else {
+            start = java.time.LocalDate.parse(from);
+            end = java.time.LocalDate.parse(to);
+            java.time.LocalDate cur = start;
+            while (!cur.isAfter(end)) {
+                java.util.Map<String,Object> row = new java.util.HashMap<>();
+                row.put("label", cur.toString());
+                row.put("value", hoaDonRepository.sumRevenueBetween(cur, cur));
+                list.add(row);
+                cur = cur.plusDays(1);
+            }
+        }
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/stat/top-selling")
+    public ResponseEntity<List<Map<String, Object>>> getTopSellingProducts(
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(hoaDonService.getTopSellingProducts(limit));
+    }
+
+    @GetMapping("/stat/low-stock")
+    public ResponseEntity<List<Map<String, Object>>> getLowStockProducts(
+            @RequestParam(defaultValue = "50") int limit) {
+        return ResponseEntity.ok(hoaDonService.getLowStockProducts(limit));
+    }
 }

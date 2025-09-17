@@ -316,6 +316,59 @@ return gioHangDTO;
 
         return chiTietList;
     }
+
+    // ================= OFFLINE CHECKOUT =================
+    @Transactional
+    public com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO thanhToanOffline(
+            com.example.app.dto.banHangDTO.OfflinePaymentRequestDTO request) {
+        // Tạo hóa đơn độc lập, không phụ thuộc giỏ hàng hay khách hàng tồn tại
+        HoaDon hoaDon = new HoaDon();
+        hoaDon.setKhachHang(null); // khách lẻ
+        hoaDon.setMaHoaDon(taoMaHoaDonTuDong());
+        hoaDon.setNgayTao(LocalDate.now());
+        hoaDon.setHoTenNguoiNhan(request.getHoTen());
+        hoaDon.setDiaChiGiaoHang(request.getDiaChi());
+        hoaDon.setSdtNguoiNhan(request.getSoDienThoai());
+        hoaDon.setLoaiThanhToan("TAI_QUAY");
+
+        TrangThaiHoaDon trangThai = trangThaiHoaDonRepo.findById(16)
+                .orElseGet(() -> trangThaiHoaDonRepo.findById(4)
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái HOÀN THÀNH (id 16/4)")));
+        hoaDon.setTrangThai(trangThai);
+        hoaDon = hoaDonRepository.save(hoaDon);
+
+        java.math.BigDecimal tong = java.math.BigDecimal.ZERO;
+        if (request.getItems() != null) {
+            for (com.example.app.dto.banHangDTO.OfflinePaymentRequestDTO.Item it : request.getItems()) {
+                Book book = bookRepository.findById(it.getId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sách id=" + it.getId()));
+                int remain = (book.getSoLuong() == null ? 0 : book.getSoLuong()) - it.getSoLuong();
+                if (remain < 0) {
+                    throw new RuntimeException("Số lượng tồn không đủ cho mã: " + book.getMaSanPhamChiTiet());
+                }
+                book.setSoLuong(remain);
+                bookRepository.save(book);
+                HoaDonChiTiet ct = new HoaDonChiTiet();
+                ct.setHoaDon(hoaDon);
+                ct.setBook(book);
+                ct.setSoLuongMua(it.getSoLuong());
+                java.math.BigDecimal donGia = it.getDonGia() != null ? it.getDonGia() : book.getDonGia();
+                ct.setTongTien(donGia.multiply(java.math.BigDecimal.valueOf(it.getSoLuong())));
+                ct.setTrangThai(true);
+                gioHangRepo.save(ct);
+                tong = tong.add(ct.getTongTien());
+            }
+        }
+
+        hoaDon.setTongTien(tong);
+        hoaDonRepository.save(hoaDon);
+
+        com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO resp =
+                new com.example.app.dto.banHangDTO.OfflinePaymentResponseDTO(
+                        hoaDon.getId(), hoaDon.getMaHoaDon(), tong,
+                        request.getKhachThanhToan(), request.getTienThua());
+        return resp;
+    }
     @Transactional
     public void xoaSanPhamKhoiGioHang(Integer khachHangId, Integer idSanPham) {
         KhachHang kh = khachHangRepo.findById(khachHangId)
@@ -348,6 +401,92 @@ return gioHangDTO;
         } while (hoaDonRepository.existsByMaHoaDon(maHoaDon));
 
         return maHoaDon;
+    }
+
+    // Thống kê tổng quan
+    public java.util.Map<String, Object> getSummaryStatistics() {
+        java.util.Map<String, Object> summary = new java.util.HashMap<>();
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+
+        summary.put("totalRevenue", hoaDonRepository.sumRevenueBetween(LocalDate.of(2000, 1, 1), today));
+        summary.put("todayRevenue", hoaDonRepository.sumRevenueBetween(today, today));
+        summary.put("weekRevenue", hoaDonRepository.sumRevenueBetween(startOfWeek, today));
+        summary.put("monthRevenue", hoaDonRepository.sumRevenueBetween(startOfMonth, today));
+        summary.put("totalOrders", hoaDonRepository.countAllOrders());
+        summary.put("activeVouchers", 0); // Placeholder
+        summary.put("topSellingCount", 0); // Placeholder
+        summary.put("lowStockCount", 0); // Placeholder
+        return summary;
+    }
+
+    // Thống kê doanh thu theo thời gian
+    public java.util.List<java.util.Map<String, Object>> getRevenueStatistics(String type, LocalDate from, LocalDate to) {
+        java.util.List<java.util.Map<String, Object>> data = new java.util.ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+
+        switch (type) {
+            case "day":
+                data.add(java.util.Map.of("date", currentDate.format(DateTimeFormatter.ISO_DATE), 
+                        "revenue", hoaDonRepository.sumRevenueBetween(currentDate, currentDate)));
+                break;
+            case "week":
+                for (int i = 6; i >= 0; i--) {
+                    LocalDate date = currentDate.minusDays(i);
+                    data.add(java.util.Map.of("date", date.format(DateTimeFormatter.ISO_DATE), 
+                            "revenue", hoaDonRepository.sumRevenueBetween(date, date)));
+                }
+                break;
+            case "month":
+                for (int i = 29; i >= 0; i--) {
+                    LocalDate date = currentDate.minusDays(i);
+                    data.add(java.util.Map.of("date", date.format(DateTimeFormatter.ISO_DATE), 
+                            "revenue", hoaDonRepository.sumRevenueBetween(date, date)));
+                }
+                break;
+            case "custom":
+                if (from != null && to != null) {
+                    for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+                        data.add(java.util.Map.of("date", date.format(DateTimeFormatter.ISO_DATE), 
+                                "revenue", hoaDonRepository.sumRevenueBetween(date, date)));
+                    }
+                }
+                break;
+        }
+        return data;
+    }
+
+    // Top sản phẩm bán chạy
+    public java.util.List<java.util.Map<String, Object>> getTopSellingProducts(int limit) {
+        java.util.List<Object[]> results = hoaDonRepository.findTopSellingProducts(limit);
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        
+        for (Object[] row : results) {
+            java.util.Map<String, Object> product = new java.util.HashMap<>();
+            product.put("id", row[0]);
+            product.put("maSanPhamChiTiet", row[1]);
+            product.put("tenSanPham", row[2]);
+            product.put("soLuongDaBan", row[3]);
+            products.add(product);
+        }
+        return products;
+    }
+
+    // Sản phẩm sắp hết hàng
+    public java.util.List<java.util.Map<String, Object>> getLowStockProducts(int limit) {
+        java.util.List<Object[]> results = hoaDonRepository.findLowStockProducts(limit);
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        
+        for (Object[] row : results) {
+            java.util.Map<String, Object> product = new java.util.HashMap<>();
+            product.put("id", row[0]);
+            product.put("maSanPhamChiTiet", row[1]);
+            product.put("tenSanPham", row[2]);
+            product.put("soLuong", row[3]);
+            products.add(product);
+        }
+        return products;
     }
 
 }

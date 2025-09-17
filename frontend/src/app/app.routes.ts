@@ -112,6 +112,24 @@ export const routes: Routes = [
   data: { roles: ['ROLE_ADMIN'] },
         loadComponent: () => import('./features/admin/book-management/book-management.component').then(m => m.BookManagementComponent)
       },
+      {
+        path: 'products/book/:id/variants',
+          canActivate: [roleGuard],
+  data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () => import('./features/admin/book-management/variant-list.component').then(m => m.VariantListComponent)
+      },
+      {
+        path: 'products/book/:id/variants/add',
+          canActivate: [roleGuard],
+  data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () => import('./features/admin/book-management/variants.component').then(m => m.VariantsComponent)
+      },
+      {
+        path: 'products/book/:id/variants/edit/:variantId',
+          canActivate: [roleGuard],
+  data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () => import('./features/admin/book-management/variants.component').then(m => m.VariantsComponent)
+      },
        {
         path: 'products/category',
           canActivate: [roleGuard],

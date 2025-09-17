@@ -66,7 +66,7 @@ public class HoaDon {
     // 🔗 FK: phiếu giảm giá
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @JoinColumn(name = "phieu_giam_gia", referencedColumnName = "id")
+    @JoinColumn(name = "voucher", referencedColumnName = "id")
     private PhieuGiamGia phieuGiamGia;
 
     // 🔗 FK: trạng thái hóa đơn

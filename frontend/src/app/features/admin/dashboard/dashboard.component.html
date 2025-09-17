@@ -1,1 +1,93 @@
-<h1>a</h1>
+<div class="dashboard">
+  <h3>Thống kê doanh thu</h3>
+  <div class="cards">
+    <div class="card info">
+      <div class="t">Tổng doanh thu</div>
+      <div class="v">{{ totalRevenue | number }} đ</div>
+    </div>
+    <div class="card success">
+      <div class="t">Doanh thu hôm nay</div>
+      <div class="v">{{ todayRevenue | number }} đ</div>
+    </div>
+    <div class="card info">
+      <div class="t">Doanh thu tuần này</div>
+      <div class="v">{{ weekRevenue | number }} đ</div>
+    </div>
+    <div class="card warning">
+      <div class="t">Doanh thu tháng này</div>
+      <div class="v">{{ monthRevenue | number }} đ</div>
+    </div>
+
+    <div class="card light">
+      <div class="t">Phiếu giảm giá</div>
+      <div class="v">{{ activeVouchers }}</div>
+      <div class="s">Đang hoạt động</div>
+    </div>
+
+    <button class="card clickable" (click)="openTopSelling()">
+      <div class="t">Sản phẩm bán chạy</div>
+      <div class="s">Top 5 tháng này</div>
+    </button>
+
+    <button class="card danger clickable" (click)="openLowStock()">
+      <div class="t">Sản phẩm sắp hết hàng</div>
+      <div class="s">Cần nhập thêm</div>
+    </button>
+
+    <div class="card light">
+      <div class="t">Tổng đơn hàng</div>
+      <div class="v">{{ totalOrders }}</div>
+      <div class="s">Tất cả trạng thái</div>
+    </div>
+  </div>
+
+  <div class="lists" *ngIf="showTopSelling || showLowStock">
+    <h4 *ngIf="showTopSelling">Danh sách bán chạy</h4>
+    <h4 *ngIf="showLowStock">Danh sách sắp hết hàng</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Mã SPCT</th>
+          <th>Tên</th>
+          <th>ISBN</th>
+          <th>Tồn kho</th>
+          <th>Đã bán</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of (showTopSelling ? topSelling : lowStock)">
+          <td>{{ p.maSanPhamChiTiet || p.code }}</td>
+          <td>{{ p.tenSanPham }}</td>
+          <td>{{ p.isbn }}</td>
+          <td>{{ p.soLuong }}</td>
+          <td>{{ p.soLuongDaBan || p.sold }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="range">
+    <h4>Thống kê theo thời gian</h4>
+    <div class="btns">
+      <button (click)="setRange('day')">Hôm nay</button>
+      <button (click)="setRange('week')">Tuần</button>
+      <button (click)="setRange('month')">Tháng</button>
+      <label>Từ: <input type="date" [(ngModel)]="fromDate"></label>
+      <label>Đến: <input type="date" [(ngModel)]="toDate"></label>
+      <button (click)="setRange('custom')">Xem</button>
+    </div>
+    
+    <!-- Chart -->
+    <div class="chart-container">
+      <div *ngIf="!barChartData.labels || barChartData.labels.length === 0" class="chart-placeholder">
+        <p>Đang tải dữ liệu biểu đồ...</p>
+      </div>
+      <canvas baseChart
+              [data]="barChartData"
+              [options]="barChartOptions"
+              [type]="barChartType"
+              *ngIf="barChartData.labels && barChartData.labels.length > 0">
+      </canvas>
+    </div>
+  </div>
+</div>

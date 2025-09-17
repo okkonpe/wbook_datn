@@ -1,1 +1,300 @@
-<p>book-management works!</p>
+<!-- Header Section -->
+<div class="hero-section">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="hero-title">
+          <i class="bi bi-book-fill me-3"></i>
+          Quản lý sách
+        </h1>
+        <p class="hero-subtitle">Quản lý danh mục sách và biến thể sản phẩm</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-gradient-primary btn-lg">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm sách mới
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="container-fluid">
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="stats-card primary">
+          <div class="stats-icon">
+            <i class="bi bi-book"></i>
+          </div>
+          <div class="stats-content">
+            <h3>{{ productBooks.length }}</h3>
+            <p>Tổng sách</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stats-card success">
+          <div class="stats-icon">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="stats-content">
+            <h3>{{ (productBooks | filter:'trangThai':true).length }}</h3>
+            <p>Đang hoạt động</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+          <div class="stats-card warning">
+            <div class="stats-icon">
+              <i class="bi bi-layers"></i>
+            </div>
+            <div class="stats-content">
+              <h3>{{ productBooks.length }}</h3>
+              <p>Biến thể</p>
+            </div>
+          </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stats-card info">
+          <div class="stats-icon">
+            <i class="bi bi-layers"></i>
+          </div>
+          <div class="stats-content">
+            <h3>{{ totalPages }}</h3>
+            <p>Trang dữ liệu</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Books Table Card -->
+    <div class="data-card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title">
+            <i class="bi bi-table me-2"></i>
+            Danh sách sách
+          </h5>
+          <div class="card-actions">
+            <button class="btn btn-outline-primary btn-sm me-2">
+              <i class="bi bi-funnel me-1"></i>
+              Lọc
+            </button>
+            <button class="btn btn-add-product" (click)="addProduct()">
+              <i class="bi bi-plus-circle me-2"></i>
+              Thêm sản phẩm
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>
+                <div class="th-content">
+                  <span>ID</span>
+                  <i class="bi bi-arrow-up-down sort-icon"></i>
+                </div>
+              </th>
+              <th>
+                <div class="th-content">
+                  <span>Mã sản phẩm</span>
+                  <i class="bi bi-arrow-up-down sort-icon"></i>
+                </div>
+              </th>
+              <th>
+                <div class="th-content">
+                  <span>Tên sách</span>
+                  <i class="bi bi-arrow-up-down sort-icon"></i>
+                </div>
+              </th>
+              <th>
+                <div class="th-content">
+                  <span>Ngày tạo</span>
+                  <i class="bi bi-arrow-up-down sort-icon"></i>
+                </div>
+              </th>
+              <th>Mô tả</th>
+              <th>Trạng thái</th>
+              <th class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pb of productBooks; index as i" class="table-row" [class.even]="i % 2 === 0">
+              <td>
+                <span class="id-badge">#{{ pb.id }}</span>
+              </td>
+              <td>
+                <div class="product-code">
+                  <i class="bi bi-tag-fill me-2"></i>
+                  {{ pb.maSanPham }}
+                </div>
+              </td>
+              <td>
+                <div class="product-name">
+                  <strong>{{ pb.tenSanPham }}</strong>
+                </div>
+              </td>
+              <td>
+                <div class="date-info">
+                  <i class="bi bi-calendar3 me-2"></i>
+                  {{ pb.ngayTao | date:'dd/MM/yyyy' }}
+                </div>
+              </td>
+              <td>
+                <div class="description" [title]="pb.moTa">
+                  {{ pb.moTa | slice:0:50 }}{{ (pb.moTa?.length || 0) > 50 ? '...' : '' }}
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [class.active]="pb.trangThai" [class.inactive]="!pb.trangThai">
+                  <i class="bi" [class.bi-check-circle-fill]="pb.trangThai" [class.bi-x-circle-fill]="!pb.trangThai"></i>
+                  {{ pb.trangThai ? 'Hoạt động' : 'Ngừng hoạt động' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="action-buttons">
+                  <button class="btn btn-action details" (click)="goToVariants(pb)" [title]="'Chi tiết sản phẩm ' + pb.tenSanPham">
+                    <i class="bi bi-info-circle"></i>
+                  </button>
+                  <button class="btn btn-action toggle-status" (click)="toggleStatus(pb)" [title]="'Đổi trạng thái ' + pb.tenSanPham">
+                    <i class="bi" [class.bi-toggle-on]="pb.trangThai" [class.bi-toggle-off]="!pb.trangThai"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Enhanced Pagination -->
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span>Hiển thị {{ ((currentPage * pageSize) + 1) }} - {{ Math.min((currentPage + 1) * pageSize, productBooks.length) }} 
+                trong tổng số {{ productBooks.length }} kết quả</span>
+        </div>
+        <div class="pagination-controls">
+          <button class="btn btn-pagination" (click)="prevPage()" [disabled]="currentPage === 0">
+            <i class="bi bi-chevron-left"></i>
+            Trước
+          </button>
+          
+          <div class="page-numbers">
+            <span class="page-number active">{{ currentPage + 1 }}</span>
+            <span class="page-divider">của</span>
+            <span class="page-number">{{ totalPages }}</span>
+          </div>
+          
+          <button class="btn btn-pagination" (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages">
+            Sau
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced QR Modal -->
+<div class="modal-overlay" *ngIf="isQrOpen" (click)="closeQr()">
+  <div class="qr-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="bi bi-qr-code me-2"></i>
+        Mã QR sản phẩm
+      </h3>
+      <button class="btn-close-modal" (click)="closeQr()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    
+    <div class="modal-content">
+      <div class="qr-container">
+        <div class="qr-frame">
+          <img *ngIf="qrSrc" [src]="qrSrc" alt="QR Code" class="qr-image" />
+          <div class="qr-loading" *ngIf="!qrSrc">
+            <div class="spinner"></div>
+            <p>Đang tải mã QR...</p>
+          </div>
+        </div>
+        
+        <div class="qr-info">
+          <h4>Hướng dẫn sử dụng</h4>
+          <ul>
+            <li><i class="bi bi-1-circle me-2"></i>Quét mã QR bằng camera smartphone</li>
+            <li><i class="bi bi-2-circle me-2"></i>Hoặc sử dụng máy quét mã vạch</li>
+            <li><i class="bi bi-3-circle me-2"></i>Hệ thống sẽ tự động nhận diện sản phẩm</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <a *ngIf="qrSrc" [href]="qrSrc" download class="btn btn-gradient-success">
+        <i class="bi bi-download me-2"></i>
+        Tải xuống PNG
+      </a>
+      <button class="btn btn-print" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i>
+        In mã QR
+      </button>
+      <button class="btn btn-secondary" (click)="closeQr()">
+        <i class="bi bi-x-circle me-2"></i>
+        Đóng
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="isAddModalOpen" (click)="closeAddModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="bi bi-plus-circle-fill me-2"></i>
+        Thêm sản phẩm mới
+      </h3>
+      <button class="btn-close-modal" (click)="closeAddModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="mb-4">
+        <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" [(ngModel)]="newProduct.tenSanPham" placeholder="Nhập tên sản phẩm">
+        <div class="form-text">Tên sách sẽ hiển thị cho khách hàng</div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="form-label">Mô tả</label>
+        <textarea class="form-control" rows="3" [(ngModel)]="newProduct.moTa" placeholder="Nhập mô tả sản phẩm"></textarea>
+        <div class="form-text">Mô tả ngắn gọn về sản phẩm</div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="form-label">Trạng thái</label>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="newProduct.trangThai">
+          <label class="form-check-label">{{ newProduct.trangThai ? 'Hoạt động' : 'Ngừng hoạt động' }}</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAddModal()">
+        <i class="bi bi-x-circle me-2"></i>
+        Hủy
+      </button>
+      <button class="btn btn-primary" (click)="saveProduct()">
+        <i class="bi bi-check-circle me-2"></i>
+        Lưu
+      </button>
+    </div>
+  </div>
+</div>

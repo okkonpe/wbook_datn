@@ -47,6 +47,17 @@ public class SanPhamService {
         sanPhamRepository.delete(entity);
     }
 
+    public SanPhamDTO getById(Integer id) {
+        SanPham sp = sanPhamRepository.findById(id).orElseThrow();
+        return sanPhamMapper.toDTO(sp);
+    }
+
+    public void updateStatus(Integer id, Boolean trangThai) {
+        SanPham entity = sanPhamRepository.findById(id).orElseThrow();
+        entity.setTrangThai(trangThai);
+        sanPhamRepository.save(entity);
+    }
+
     private String generateUniqueMaSanPham() {
         String prefix = "SP";
         int number = 1;

@@ -19,6 +19,11 @@ public interface BookMapper {
 
     // ========== LIST ALL ==========
     @Mapping(source = "sanPham.tenSanPham", target = "tenSanPham")
+    @Mapping(source = "soLuong", target = "soLuong")
+    @Mapping(source = "maSanPhamChiTiet", target = "maSanPhamChiTiet")
+    @Mapping(source = "isbn", target = "isbn")
+    @Mapping(source = "theLoai.tenTheLoai", target = "theLoai")
+    @Mapping(source = "nhaXuatBan.tenNhaXuatBan", target = "nhaXuatBan")
     @Mapping(target = "hinhAnh", ignore = true)
     ListAllBookDTO listAllBookToDTO(Book book);
 
@@ -45,7 +50,7 @@ public interface BookMapper {
     BookDetailDTO getBookByIDDTO(Book book);
     @AfterMapping
     default void buildImgUrlDetail(Book book, @MappingTarget BookDetailDTO detailDTO){
-        if (book.getHinhAnh().getHinhAnh() != null && !book.getHinhAnh().getHinhAnh().isEmpty()) {
+        if (book.getHinhAnh() != null && book.getHinhAnh().getHinhAnh() != null && !book.getHinhAnh().getHinhAnh().isEmpty()) {
             String imageUrl = ServletUriComponentsBuilder
                     .fromCurrentContextPath()
                     .path("/uploads/")

@@ -18,4 +18,9 @@ public class ListAllBookDTO {
     private String tenSanPham;
     private String hinhAnh;
     private BigDecimal donGia;
+    private Integer soLuong;
+    private String maSanPhamChiTiet;
+    private String isbn;
+    private String theLoai;
+    private String nhaXuatBan;
 }

@@ -1,0 +1,322 @@
+<!-- Header Section -->
+<div class="variants-hero">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="breadcrumb-nav">
+          <a [routerLink]="['/admin/products/book', productId, 'variants']" class="breadcrumb-link">
+            <i class="bi bi-arrow-left me-2"></i>
+            Danh sách biến thể
+          </a>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current">Thêm biến thể mới</span>
+        </div>
+        <h1 class="hero-title">
+          <i class="bi bi-plus-circle-fill me-3"></i>
+          Thêm biến thể mới
+        </h1>
+        <p class="hero-subtitle">Tạo các biến thể mới cho sản phẩm sách</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <div class="draft-counter">
+          <div class="counter-circle">{{ drafts.length }}</div>
+          <span>Biến thể chờ lưu</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="variants-content">
+  <div class="container-fluid">
+    
+    <!-- Add Variant Form -->
+    <div class="form-card">
+      <div class="form-header">
+        <h3>
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm biến thể mới
+        </h3>
+        <p>Nhập thông tin biến thể và thêm vào danh sách staging</p>
+      </div>
+      
+      <div class="form-content">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-upc-scan me-2"></i>
+                ISBN
+              </label>
+              <input 
+                type="text" 
+                class="form-control-modern" 
+                [(ngModel)]="newDraft.isbn" 
+                placeholder="978-0-123456-78-9"
+                maxlength="13">
+              <div class="input-help">Mã ISBN 13 số</div>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-tag me-2"></i>
+                Mã sản phẩm chi tiết
+              </label>
+              <input 
+                type="text" 
+                class="form-control-modern" 
+                [(ngModel)]="newDraft.maSanPhamChiTiet" 
+                placeholder="SPCT001">
+              <div class="input-help">Mã định danh duy nhất</div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-currency-dollar me-2"></i>
+                Đơn giá (VNĐ)
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern" 
+                [(ngModel)]="newDraft.donGia" 
+                placeholder="100000"
+                min="0">
+              <div class="input-help">Giá bán lẻ</div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-boxes me-2"></i>
+                Số lượng
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern" 
+                [(ngModel)]="newDraft.soLuong" 
+                placeholder="100"
+                min="0">
+              <div class="input-help">Tồn kho ban đầu</div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-file-text me-2"></i>
+                Số trang
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern" 
+                [(ngModel)]="newDraft.soTrang" 
+                placeholder="200"
+                min="1">
+              <div class="input-help">Tổng số trang</div>
+            </div>
+          </div>
+
+          <!-- Thuộc tính bắt buộc -->
+          <!-- Picker pills giống màu sắc & kích cỡ -->
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label"><i class="bi bi-tags me-2"></i>Thể loại</label>
+              <div class="d-flex gap-2 mb-2">
+                <select class="form-control-modern" [(ngModel)]="chosenTheLoaiId">
+                  <option [ngValue]="undefined">-- Chọn thể loại --</option>
+                  <option *ngFor="let t of theLoais" [ngValue]="t.id">{{ t.tenTheLoai }}</option>
+                </select>
+                <button class="btn btn-success" type="button" (click)="addTheLoai()"><i class="bi bi-plus"></i></button>
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <span class="badge rounded-pill bg-primary d-flex align-items-center gap-2" *ngFor="let id of selectedTheLoaiIds">
+                  {{ getTheLoaiName(id) }}
+                  <i class="bi bi-x" role="button" (click)="removeTheLoai(id)"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label"><i class="bi bi-building me-2"></i>Nhà xuất bản</label>
+              <div class="d-flex gap-2 mb-2">
+                <select class="form-control-modern" [(ngModel)]="chosenNxbId">
+                  <option [ngValue]="undefined">-- Chọn NXB --</option>
+                  <option *ngFor="let n of nhaXuatBans" [ngValue]="n.id">{{ n.tenNhaXuatBan }}</option>
+                </select>
+                <button class="btn btn-success" type="button" (click)="addNxb()"><i class="bi bi-plus"></i></button>
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <span class="badge rounded-pill bg-info text-dark d-flex align-items-center gap-2" *ngFor="let id of selectedNxbIds">
+                  {{ getNxbName(id) }}
+                  <i class="bi bi-x" role="button" (click)="removeNxb(id)"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label"><i class="bi bi-aspect-ratio me-2"></i>Kích thước</label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.kichThuoc">
+                <option [ngValue]="undefined">-- Chọn kích thước --</option>
+                <option *ngFor="let k of kichThuocs" [ngValue]="k.id">{{ k.chiSoKichThuoc || k.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label"><i class="bi bi-journal me-2"></i>Loại bìa</label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.loaiBia">
+                <option [ngValue]="undefined">-- Chọn loại bìa --</option>
+                <option *ngFor="let b of loaiBiaList" [ngValue]="b.id">{{ b.tenBia || b.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label"><i class="bi bi-file-earmark-richtext me-2"></i>Loại giấy</label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.loaiGiay">
+                <option [ngValue]="undefined">-- Chọn loại giấy --</option>
+                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="col-md-12">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-chat-text me-2"></i>
+                Mô tả biến thể
+              </label>
+              <textarea 
+                class="form-control-modern" 
+                [(ngModel)]="newDraft.moTa" 
+                rows="3"
+                placeholder="Mô tả chi tiết về biến thể này..."></textarea>
+              <div class="input-help">Thông tin mô tả bổ sung</div>
+            </div>
+          </div>
+          
+          <div class="col-md-12">
+            <div class="form-actions">
+              <button class="btn btn-add-variant" (click)="addDraft()">
+                <i class="bi bi-plus-lg me-2"></i>
+                Thêm vào danh sách
+              </button>
+              <button class="btn btn-reset" (click)="resetForm()">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                Đặt lại
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staging List -->
+    <div class="staging-card">
+      <div class="staging-header">
+        <div class="header-left">
+          <h3>
+            <i class="bi bi-list-ul me-2"></i>
+            Danh sách staging
+          </h3>
+          <div class="staging-stats">
+            <span class="stat-item">
+              <i class="bi bi-layers me-1"></i>
+              {{ drafts.length }} biến thể
+            </span>
+            <span class="stat-item" *ngIf="totalEstimatedValue > 0">
+              <i class="bi bi-cash me-1"></i>
+              {{ totalEstimatedValue | currency:'VND':'symbol':'1.0-0' }} tổng giá trị
+            </span>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button 
+            class="btn btn-clear" 
+            (click)="clearAll()" 
+            [disabled]="!drafts.length">
+            <i class="bi bi-trash me-2"></i>
+            Xóa tất cả
+          </button>
+          <button 
+            class="btn btn-save-all" 
+            [disabled]="!drafts.length || uploading || saving" 
+            (click)="saveAll()">
+            <div class="spinner-border spinner-border-sm me-2" *ngIf="saving"></div>
+            <i class="bi bi-cloud-upload me-2" *ngIf="!saving"></i>
+            {{ saving ? 'Đang lưu...' : 'Lưu tất cả' }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!drafts.length">
+        <div class="empty-icon">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h4>Chưa có biến thể nào</h4>
+        <p>Thêm biến thể đầu tiên bằng form bên trên</p>
+      </div>
+      
+      <!-- Variants Table -->
+      <div class="table-responsive" *ngIf="drafts.length">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:40px">#</th>
+              <th>Thể loại</th>
+              <th>NXB</th>
+              <th>ISBN</th>
+              <th>Mã SPCT</th>
+              <th style="width:120px">Số lượng</th>
+              <th style="width:160px">Giá</th>
+              <th style="width:200px">Ảnh</th>
+              <th style="width:60px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of drafts; index as i">
+              <td>{{ i + 1 }}</td>
+              <td>
+                <select class="form-control" [(ngModel)]="d.theLoai">
+                  <option *ngFor="let t of theLoais" [ngValue]="t.id">{{ t.tenTheLoai }}</option>
+                </select>
+              </td>
+              <td>
+                <select class="form-control" [(ngModel)]="d.nhaXuatBan">
+                  <option *ngFor="let n of nhaXuatBans" [ngValue]="n.id">{{ n.tenNhaXuatBan }}</option>
+                </select>
+              </td>
+              <td><input class="form-control" [(ngModel)]="d.isbn" placeholder="978..."></td>
+              <td><input class="form-control" [(ngModel)]="d.maSanPhamChiTiet" placeholder="SPCT..."></td>
+              <td><input type="number" class="form-control" [(ngModel)]="d.soLuong"></td>
+              <td><input type="number" class="form-control" [(ngModel)]="d.donGia"></td>
+              <td>
+                <div class="image-upload" [class.uploading]="uploadingIndex === i">
+                  <input type="file" class="d-none" (change)="onFileChange($event, i)" [disabled]="uploading" accept="image/*" #fi>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" (click)="fi.click()">Chọn ảnh</button>
+                    <span *ngIf="d.hinhAnh">{{ d.hinhAnh }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-danger" (click)="removeDraft(i)"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

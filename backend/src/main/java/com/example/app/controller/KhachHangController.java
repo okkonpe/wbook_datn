@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,25 @@ public class KhachHangController {
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> customers = khachHangService.getAllCustomers(pageable);
         return ResponseEntity.ok(customers);
+    }
+
+    // ===== CRUD cho màn khách hàng (sử dụng KhachHangInfoDTO) =====
+    @PostMapping
+    public ResponseEntity<KhachHangInfoDTO> create(@RequestBody KhachHangInfoDTO dto) {
+        KhachHangInfoDTO saved = khachHangService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<KhachHangInfoDTO> update(@PathVariable Integer id, @RequestBody KhachHangInfoDTO dto) {
+        KhachHangInfoDTO updated = khachHangService.update(dto, id);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        khachHangService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     // Endpoint tạo khách hàng mới nhanh (không cần tài khoản)

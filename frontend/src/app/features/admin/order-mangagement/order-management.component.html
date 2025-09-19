@@ -76,7 +76,7 @@
           <td>
   <button class="btn btn-sm btn-info me-2 mb-1" (click)="xemChiTietDonHang(hoaDon.id,hoaDon)">Chi tiết</button>
 <div class="btn-group dropdown">
-              <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+              <button *ngIf="hoaDon?.trangThaiID != 16" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                 Chuyển trạng thái
               </button>
              <ul class="dropdown-menu">

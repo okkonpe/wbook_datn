@@ -44,9 +44,6 @@ public class Book {
     @Column(name = "so_trang")
     private Integer soTrang;
 
-    @Column(name = "so_lan_tai_ban")
-    private Integer soLanTaiBan;
-
     @Column(name = "ma_san_pham_chi_tiet", nullable = false, length = 15)
     private String maSanPhamChiTiet;
 

@@ -171,7 +171,7 @@ hd.setTongTienSauGiam(request.getTongTienSauGiam());
 public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVien){
     HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
         TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(3).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
-    if (hd.getNhanVien().getId()!=idNhanVien){
+    if (hd.getNhanVien().getId()!=null&hd.getNhanVien().getId()!=idNhanVien){
         throw new IllegalArgumentException("Đã có nhân viên xác nhận đơn này!");
     }
     if (hd.getTrangThai().getId()==4){

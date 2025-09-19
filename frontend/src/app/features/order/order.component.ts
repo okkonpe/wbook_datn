@@ -100,7 +100,7 @@ return;
 
     // Tính số tiền giảm
     if (this.selectedVoucher.loaiGiam === 'PERCENT') {
-      this.giamGia = this.tongTien * this.selectedVoucher.giaTri / 100;
+      this.giamGia = (this.tongTien+this.phiShip) * this.selectedVoucher.giaTri / 100;
       if (this.selectedVoucher.giamToiDa && this.giamGia > this.selectedVoucher.giamToiDa) {
         this.giamGia = this.selectedVoucher.giamToiDa;
       }
@@ -130,7 +130,7 @@ return;
           console.log(localStorage.getItem('token'));}
 
     this.hoaDon = {
-      maVoucher:this.selectedVoucher.maVoucher,
+      maVoucher:this.selectedVoucher?.maVoucher,
       tongTien:this.tongTien,
       tongTienSauGiam:this.getTongTienSauGiam(),
       khachHangID: this.khID, // hoặc token decode nếu dùng JWT

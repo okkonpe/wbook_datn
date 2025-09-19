@@ -119,7 +119,7 @@ public class BookService {
             if (dto.getLoaiGiayId() != null)
                 b.setLoaiGiay(loaiGiayRepository.findById(dto.getLoaiGiayId()).orElse(null));
             b.setSoTrang(dto.getSoTrang());
-            b.setSoLanTaiBan(dto.getSoLanTaiBan());
+
             b.setKhoiLuongTinh(dto.getKhoiLuongTinh());
             b.setSoLuong(dto.getSoLuong());
             b.setNgayXuatBan(dto.getNgayXuatBan());
@@ -149,7 +149,6 @@ public class BookService {
         if (dto.getIsbn() != null) existingBook.setIsbn(dto.getIsbn());
         if (dto.getMaSanPhamChiTiet() != null) existingBook.setMaSanPhamChiTiet(dto.getMaSanPhamChiTiet());
         if (dto.getSoTrang() != null) existingBook.setSoTrang(dto.getSoTrang());
-        if (dto.getSoLanTaiBan() != null) existingBook.setSoLanTaiBan(dto.getSoLanTaiBan());
         if (dto.getKhoiLuongTinh() != null) existingBook.setKhoiLuongTinh(dto.getKhoiLuongTinh());
         if (dto.getSoLuong() != null) existingBook.setSoLuong(dto.getSoLuong());
         if (dto.getNgayXuatBan() != null) existingBook.setNgayXuatBan(dto.getNgayXuatBan());

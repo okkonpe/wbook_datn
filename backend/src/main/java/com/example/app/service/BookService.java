@@ -157,6 +157,39 @@ public class BookService {
         if (dto.getMoTa() != null) existingBook.setMoTa(dto.getMoTa());
         if (dto.getTrangThai() != null) existingBook.setTrangThai(dto.getTrangThai());
 
+        // Update theLoai if provided
+        if (dto.getTheLoai() != null && !dto.getTheLoai().isBlank()) {
+            TheLoai theLoai = theLoaiRepository.findAll().stream()
+                .filter(tl -> tl.getTenTheLoai().equals(dto.getTheLoai()))
+                .findFirst()
+                .orElse(null);
+            if (theLoai != null) {
+                existingBook.setTheLoai(theLoai);
+            }
+        }
+
+        // Update nhaXuatBan if provided
+        if (dto.getNhaXuatBan() != null && !dto.getNhaXuatBan().isBlank()) {
+            NhaXuatBan nhaXuatBan = nhaXuatBanRepository.findAll().stream()
+                .filter(nxb -> nxb.getTenNhaXuatBan().equals(dto.getNhaXuatBan()))
+                .findFirst()
+                .orElse(null);
+            if (nhaXuatBan != null) {
+                existingBook.setNhaXuatBan(nhaXuatBan);
+            }
+        }
+
+        // Update image if provided
+        if (dto.getHinhAnh() != null && !dto.getHinhAnh().isBlank()) {
+            HinhAnh ha = new HinhAnh();
+            // ma_hinh_anh bắt buộc -> tự sinh mã ngắn gọn
+            String ma = "HA" + Integer.toHexString((int)(Math.random()*100000));
+            ha.setMaHinhAnh(ma);
+            ha.setHinhAnh(sanitizeFilename(dto.getHinhAnh()));
+            ha = hinhAnhRepository.save(ha);
+            existingBook.setHinhAnh(ha);
+        }
+
         // Save and return updated entity
         Book updatedBook = bookRepository.save(existingBook);
         return bookMapper.getBookByIDDTO(updatedBook);

@@ -83,7 +83,6 @@ CREATE TABLE san_pham(
         ma_san_pham NVARCHAR (15) not null,
         ten_san_pham NVARCHAR (30) not null,
         ngay_tao date, 
-		phien_ban int,
 		mo_ta nvarchar(150),
         trang_thai bit 
 		
@@ -97,12 +96,12 @@ CREATE TABLE san_pham_chi_tiet (
     loai_bia Int ,
 	the_loai Int, 
 	so_trang int ,
-	so_lan_tai_ban int,
 	ma_san_pham_chi_tiet nvarchar(15) not null,
 	nha_xuat_ban int,
 	id_kich_thuoc int,
 	khoi_luong_tinh float,
 	so_luong int not null,
+	so_lan_tai_ban int,
 	ngay_xuat_ban  date,
 	hinh_anh  int,
 	don_gia money,
@@ -131,6 +130,18 @@ CREATE TABLE sach_tac_gia(
     ID_san_pham_chi_tiet INT,
     FOREIGN KEY (ID_tac_gia) REFERENCES tac_gia (ID),
 	FOREIGN KEY (ID_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet (ID)
+);
+CREATE TABLE tai_ban(
+    ID INT IDENTITY (1,1) PRIMARY key not null,
+    lan_tai_ban int ,
+    nam_tai_ban int,
+);
+CREATE TABLE sach_tai_ban(
+    ID INT IDENTITY (1,1) PRIMARY key not null,
+    sach int,
+	tai_ban int,
+	 FOREIGN KEY (sach) REFERENCES san_pham_chi_tiet (ID),
+	FOREIGN KEY (tai_ban) REFERENCES tai_ban (ID)
 );
 
 
@@ -163,7 +174,6 @@ CREATE TABLE trang_thai_hoa_don(
         ma_trang_thai NVARCHAR (15),
         trang_thai NVARCHAR (30),
 );
-
 CREATE TABLE khach_hang (
     ID INT IDENTITY (1,1) PRIMARY KEY not null,
     ma_khach_hang nvarchar(15),
@@ -177,48 +187,32 @@ CREATE TABLE khach_hang (
 	gioi_tinh bit,
 	trang_thai NVARCHAR (30),
 );
-CREATE TABLE danh_gia(
-    ID INT IDENTITY (1,1) PRIMARY key not null,
-    ma_danh_gia NVARCHAR (15) ,
-    noi_dung NVARCHAR(200),  
-	rating tinyint,
-	ngay_danh_gia datetime default CURRENT_TIMESTAMP,
-	da_mua_hang bit default 0,
-	mo_ta nvarchar(100),
-	ID_san_pham INT, 
-    ID_khach_hang INT,
-	trang_thai bit,
-    FOREIGN KEY (ID_san_pham) REFERENCES san_pham_chi_tiet (ID),
-	FOREIGN KEY (ID_khach_hang) REFERENCES khach_hang (ID),
-	unique(ID_san_pham,ID_khach_hang)
-	
-);
 
 CREATE TABLE hoa_don (
     ID INT IDENTITY (1,1) PRIMARY KEY not null,
     ma_hoa_don nvarchar(15) not null,
-    tong_tien money,
-    nhan_vien int,
-    khach_hang int,
-    ngay_tao Date,
-    ngay_nhan_hang Date,
-    phi_ship money,
-    tong_tien_sau_giam money,
-    voucher BIGINT,             -- đổi từ int -> BIGINT
-    so_luong_mua int,
-    trang_thai int,
-    hinh_thuc varchar(8),
-    ho_ten_nguoi_nhan nvarchar(100),
-    dia_chi_giao_hang nvarchar(200),
-    sdt_nguoi_nhan varchar(10),
-    ghi_chu nvarchar(200),
-    loai_thanh_toan varchar(50),
-    ly_do_huy nvarchar(50),
-    FOREIGN KEY (nhan_vien) REFERENCES nhan_vien (ID),
-    FOREIGN KEY (khach_hang) REFERENCES khach_hang (ID),
-    FOREIGN KEY (voucher) REFERENCES voucher (ID),
-    FOREIGN KEY (trang_thai) REFERENCES trang_thai_hoa_don (ID)
-);
+    tong_tien money ,
+	nhan_vien int, 
+	khach_hang int ,
+	ngay_tao Date,
+	ngay_nhan_hang Date,
+	phi_ship money,
+	tong_tien_sau_giam money,
+	voucher bigint,
+	so_luong_mua int,
+    trang_thai int	,
+	hinh_thuc varchar(8),
+	ho_ten_nguoi_nhan nvarchar(100),
+	dia_chi_giao_hang nvarchar(200),
+	sdt_nguoi_nhan varchar(10),
+	ghi_chu nvarchar(200),
+	loai_thanh_toan varchar(50),
+	ly_do_huy nvarchar(50),
+	 FOREIGN KEY (nhan_vien) REFERENCES nhan_vien (ID),
+	 FOREIGN KEY (khach_hang) REFERENCES khach_hang (ID),
+	 FOREIGN KEY (voucher) REFERENCES voucher (ID),
+	 FOREIGN KEY (trang_thai) REFERENCES trang_thai_hoa_don (ID)
+);	
 
 CREATE TABLE hoa_don_chi_tiet (
     ID INT IDENTITY (1,1) PRIMARY KEY,
@@ -233,29 +227,3 @@ CREATE TABLE hoa_don_chi_tiet (
 	 FOREIGN KEY (ma_hoa_don) REFERENCES hoa_don (ID),
 	 FOREIGN KEY (ma_san_pham) REFERENCES san_pham_chi_tiet (ID)
 )
-
-ALTER TABLE hinh_anh ALTER COLUMN hinh_anh NVARCHAR(255);
-
-ALTER TABLE hinh_anh ALTER COLUMN ma_hinh_anh NVARCHAR(50);
-
-DECLARE @fk NVARCHAR(128) =
-  (SELECT name FROM sys.foreign_keys
-   WHERE parent_object_id = OBJECT_ID('dbo.hoa_don')
-     AND referenced_object_id = OBJECT_ID('dbo.voucher'));
-IF @fk IS NOT NULL
-  EXEC('ALTER TABLE dbo.hoa_don DROP CONSTRAINT ' + @fk);
-
-ALTER TABLE dbo.hoa_don ALTER COLUMN voucher BIGINT;
-
-ALTER TABLE dbo.hoa_don
-  ADD CONSTRAINT FK_hoa_don_voucher
-  FOREIGN KEY (voucher) REFERENCES dbo.voucher(id);
-
-
-SET IDENTITY_INSERT trang_thai_hoa_don ON;
-
-IF NOT EXISTS (SELECT 1 FROM trang_thai_hoa_don WHERE id = 16)
-  INSERT INTO trang_thai_hoa_don (id, ma_trang_thai, trang_thai)
-  VALUES (16, 'TT16', N'HOÀN THÀNH');
-
-SET IDENTITY_INSERT trang_thai_hoa_don OFF;

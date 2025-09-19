@@ -33,9 +33,10 @@
             Danh sách sách
           </h5>
           <div class="card-actions">
-            <button class="btn btn-outline-primary btn-sm me-2">
+            <button class="btn btn-outline-primary btn-sm me-2" (click)="toggleFilter()" [class.active]="isFilterOpen">
               <i class="bi bi-funnel me-1"></i>
               Lọc
+              <span class="filter-badge" *ngIf="searchTerm || statusFilter !== 'all'">●</span>
             </button>
             <button class="btn btn-add-product" (click)="addProduct()">
               <i class="bi bi-plus-circle me-2"></i>
@@ -44,8 +45,96 @@
           </div>
         </div>
       </div>
+
+      <!-- Filter Panel -->
+      <div class="filter-panel" *ngIf="isFilterOpen">
+        <div class="filter-content">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="bi bi-search me-1"></i>
+                Tìm kiếm
+              </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Tên sách, mã sách, mô tả..." 
+                [(ngModel)]="searchTerm"
+                (input)="onSearchChange()">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">
+                <i class="bi bi-funnel me-1"></i>
+                Trạng thái
+              </label>
+              <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+                <option value="all">Tất cả</option>
+                <option value="active">Hoạt động</option>
+                <option value="inactive">Ngừng hoạt động</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">
+                <i class="bi bi-sort-alpha-down me-1"></i>
+                Sắp xếp theo
+              </label>
+              <select class="form-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+                <option value="tenSanPham">Tên sách</option>
+                <option value="maSanPham">Mã sách</option>
+                <option value="ngayTao">Ngày tạo</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">
+                <i class="bi bi-arrow-up-down me-1"></i>
+                Thứ tự
+              </label>
+              <select class="form-select" [(ngModel)]="sortOrder" (change)="onSortChange()">
+                <option value="asc">Tăng dần</option>
+                <option value="desc">Giảm dần</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-actions mt-3">
+            <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+              <i class="bi bi-x-circle me-1"></i>
+              Xóa bộ lọc
+            </button>
+            <span class="filter-results ms-3">
+              Hiển thị {{ filteredBooks.length }} / {{ productBooks.length }} kết quả
+            </span>
+          </div>
+        </div>
+      </div>
       
-      <div class="table-container">
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!filteredBooks.length && productBooks.length">
+        <div class="empty-icon">
+          <i class="bi bi-search"></i>
+        </div>
+        <h4>Không tìm thấy kết quả</h4>
+        <p>Không có sách nào phù hợp với bộ lọc hiện tại</p>
+        <button class="btn btn-outline-primary" (click)="clearFilters()">
+          <i class="bi bi-x-circle me-2"></i>
+          Xóa bộ lọc
+        </button>
+      </div>
+
+      <!-- No Data State -->
+      <div class="empty-state" *ngIf="!productBooks.length">
+        <div class="empty-icon">
+          <i class="bi bi-book"></i>
+        </div>
+        <h4>Chưa có sách nào</h4>
+        <p>Thêm sách đầu tiên bằng nút "Thêm sản phẩm"</p>
+        <button class="btn btn-primary" (click)="addProduct()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm sách đầu tiên
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container" *ngIf="filteredBooks.length">
         <table class="modern-table">
           <thead>
             <tr>
@@ -79,7 +168,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let pb of productBooks; index as i" class="table-row" [class.even]="i % 2 === 0">
+            <tr *ngFor="let pb of filteredBooks; index as i" class="table-row" [class.even]="i % 2 === 0">
               <td>
                 <span class="id-badge">#{{ pb.id }}</span>
               </td>
@@ -129,8 +218,8 @@
       <!-- Enhanced Pagination -->
       <div class="pagination-container">
         <div class="pagination-info">
-          <span>Hiển thị {{ ((currentPage * pageSize) + 1) }} - {{ Math.min((currentPage + 1) * pageSize, productBooks.length) }} 
-                trong tổng số {{ productBooks.length }} kết quả</span>
+          <span>Hiển thị {{ ((currentPage * pageSize) + 1) }} - {{ Math.min((currentPage + 1) * pageSize, filteredBooks.length) }} 
+                trong tổng số {{ filteredBooks.length }} kết quả</span>
         </div>
         <div class="pagination-controls">
           <button class="btn btn-pagination" (click)="prevPage()" [disabled]="currentPage === 0">

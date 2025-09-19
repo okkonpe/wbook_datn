@@ -16,9 +16,17 @@ import { FormsModule } from '@angular/forms';
 })
 export class BookManagementComponent implements OnInit {
   productBooks: ProductBook[] = [];
+  filteredBooks: ProductBook[] = [];
   totalPages = 0;
   currentPage = 0;
   pageSize = 10;
+
+  // Filter states
+  isFilterOpen = false;
+  searchTerm = '';
+  statusFilter = 'all'; // 'all', 'active', 'inactive'
+  sortBy = 'tenSanPham'; // 'tenSanPham', 'ngayTao', 'maSanPham'
+  sortOrder = 'asc'; // 'asc', 'desc'
 
   // Modal states
   isQrOpen = false;
@@ -44,9 +52,84 @@ export class BookManagementComponent implements OnInit {
   loadPage(page: number) {
     this.service.getAllPaging(page, this.pageSize).subscribe((res: Page<ProductBook>) => {
       this.productBooks = res.content ?? [];
+      this.applyFilters();
       this.totalPages = res.totalPages ?? 0;
       this.currentPage = page;
     });
+  }
+
+  // Filter methods
+  toggleFilter() {
+    this.isFilterOpen = !this.isFilterOpen;
+  }
+
+  applyFilters() {
+    let filtered = [...this.productBooks];
+
+    // Search filter
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(book => 
+        book.tenSanPham?.toLowerCase().includes(term) ||
+        book.maSanPham?.toLowerCase().includes(term) ||
+        book.moTa?.toLowerCase().includes(term)
+      );
+    }
+
+    // Status filter
+    if (this.statusFilter !== 'all') {
+      const isActive = this.statusFilter === 'active';
+      filtered = filtered.filter(book => book.trangThai === isActive);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (this.sortBy) {
+        case 'tenSanPham':
+          aValue = a.tenSanPham || '';
+          bValue = b.tenSanPham || '';
+          break;
+        case 'maSanPham':
+          aValue = a.maSanPham || '';
+          bValue = b.maSanPham || '';
+          break;
+        case 'ngayTao':
+          aValue = new Date(a.ngayTao || '');
+          bValue = new Date(b.ngayTao || '');
+          break;
+        default:
+          aValue = a.tenSanPham || '';
+          bValue = b.tenSanPham || '';
+      }
+
+      if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return this.sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    this.filteredBooks = filtered;
+  }
+
+  onSearchChange() {
+    this.applyFilters();
+  }
+
+  onStatusFilterChange() {
+    this.applyFilters();
+  }
+
+  onSortChange() {
+    this.applyFilters();
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.statusFilter = 'all';
+    this.sortBy = 'tenSanPham';
+    this.sortOrder = 'asc';
+    this.applyFilters();
   }
 
   prevPage() { if (this.currentPage > 0) { this.loadPage(this.currentPage - 1); } }

@@ -91,7 +91,7 @@ public class Book {
     @JoinTable(
             name = "sach_chu_de",
             joinColumns = @JoinColumn(name = "ID_san_pham_chi_tiet"),
-            inverseJoinColumns = @JoinColumn(name = "chu_de_id")
+            inverseJoinColumns = @JoinColumn(name = "ID_chu_de")
     )
     private Set<ChuDe> chuDes;
 

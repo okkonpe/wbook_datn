@@ -37,5 +37,5 @@ public class KhachHang {
     @Column(name = "gioi_tinh")
       private Boolean gioiTinh;
     @Column(name = "trang_thai")
-    private Boolean trangThai;
+    private String trangThai;
 }

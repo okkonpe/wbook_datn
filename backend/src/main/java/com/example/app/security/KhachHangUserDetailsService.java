@@ -30,7 +30,7 @@ public class KhachHangUserDetailsService implements UserDetailsService {
         if (optNV.isPresent()) {
             NhanVien nv = optNV.get();
             System.out.println(nv.getId());
-            String role =  nv.getChucVu().getTenChucVu().toUpperCase(); // đảm bảo đúng format
+            String role = "ROLE_" + nv.getChucVu().getTenChucVu().toUpperCase().replace(" ", "_"); // đảm bảo đúng format
             return new NhanVienUserDetails(
                     nv.getId(),
                     nv.getTaiKhoan(),

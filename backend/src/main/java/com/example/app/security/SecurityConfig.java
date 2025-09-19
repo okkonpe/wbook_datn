@@ -59,7 +59,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/hoa-don/thanh-toan-cod").hasAnyRole("KHACH_HANG","NHAN_VIEN","ADMIN")
                                 .requestMatchers("/api/hoa-don/offline/thanh-toan").hasAnyRole("NHAN_VIEN","ADMIN")
                                 .requestMatchers("/api/gio-hang/**").hasRole("KHACH_HANG")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN","NHAN_VIEN")
                                 .requestMatchers("/api/hoa-don/**").hasAnyRole("ADMIN","NHAN_VIEN","SHIPPER")
                                 .requestMatchers("/api/ship/**").hasAnyRole("ADMIN","SHIPPER")
                                 .requestMatchers("/ws/**").permitAll()

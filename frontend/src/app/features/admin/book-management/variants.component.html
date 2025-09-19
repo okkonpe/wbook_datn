@@ -90,7 +90,7 @@
             </div>
           </div>
           
-          <div class="col-md-4">
+          <div class="col-md-6">
             <div class="input-group-modern">
               <label class="input-label">
                 <i class="bi bi-boxes me-2"></i>
@@ -106,19 +106,17 @@
             </div>
           </div>
           
-          <div class="col-md-4">
+          <div class="col-md-6">
             <div class="input-group-modern">
               <label class="input-label">
-                <i class="bi bi-file-text me-2"></i>
-                Số trang
+                <i class="bi bi-calendar-event me-2"></i>
+                Ngày xuất bản
               </label>
               <input 
-                type="number" 
+                type="date" 
                 class="form-control-modern" 
-                [(ngModel)]="newDraft.soTrang" 
-                placeholder="200"
-                min="1">
-              <div class="input-help">Tổng số trang</div>
+                [(ngModel)]="newDraft.ngayXuatBan">
+              <div class="input-help">Ngày xuất bản sách</div>
             </div>
           </div>
 

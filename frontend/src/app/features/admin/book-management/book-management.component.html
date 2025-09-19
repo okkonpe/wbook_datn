@@ -307,23 +307,149 @@
     </div>
     
     <div class="modal-body">
+      <!-- Thông tin sản phẩm cơ bản -->
       <div class="mb-4">
-        <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" [(ngModel)]="newProduct.tenSanPham" placeholder="Nhập tên sản phẩm">
-        <div class="form-text">Tên sách sẽ hiển thị cho khách hàng</div>
+        <h5 class="text-primary mb-3">
+          <i class="bi bi-book me-2"></i>
+          Thông tin sản phẩm
+        </h5>
+        <div class="mb-3">
+          <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="newProduct.tenSanPham" placeholder="Nhập tên sản phẩm">
+          <div class="form-text">Tên sách sẽ hiển thị cho khách hàng</div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Mô tả sản phẩm</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="newProduct.moTa" placeholder="Nhập mô tả sản phẩm"></textarea>
+          <div class="form-text">Mô tả ngắn gọn về sản phẩm</div>
+        </div>
       </div>
-      
+
+      <!-- Thông tin biến thể F1 -->
       <div class="mb-4">
-        <label class="form-label">Mô tả</label>
-        <textarea class="form-control" rows="3" [(ngModel)]="newProduct.moTa" placeholder="Nhập mô tả sản phẩm"></textarea>
-        <div class="form-text">Mô tả ngắn gọn về sản phẩm</div>
-      </div>
-      
-      <div class="mb-4">
-        <label class="form-label">Trạng thái</label>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="newProduct.trangThai">
-          <label class="form-check-label">{{ newProduct.trangThai ? 'Hoạt động' : 'Ngừng hoạt động' }}</label>
+        <h5 class="text-success mb-3">
+          <i class="bi bi-tag me-2"></i>
+          Thông tin biến thể F1
+        </h5>
+        
+        <div class="row g-3">
+          <!-- Thông tin tự động tạo -->
+          <div class="col-12">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Thông tin tự động tạo:</strong> ISBN và mã sản phẩm chi tiết sẽ được hệ thống tự động tạo khi lưu.
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Đơn giá (VNĐ) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="newProduct.donGia" placeholder="100000" min="0">
+            <div class="form-text">Giá bán lẻ</div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="newProduct.soLuong" placeholder="100" min="0">
+            <div class="form-text">Tồn kho ban đầu</div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Ngày xuất bản</label>
+            <input type="date" class="form-control" [(ngModel)]="newProduct.ngayXuatBan">
+            <div class="form-text">Ngày xuất bản sách</div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Lần tái bản</label>
+            <input type="number" class="form-control" [(ngModel)]="newProduct.lanTaiBan" placeholder="1" min="1">
+            <div class="form-text">Số lần tái bản</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Thể loại <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.theLoaiId">
+                <option [ngValue]="undefined">-- Chọn thể loại --</option>
+                <option *ngFor="let t of theLoais" [ngValue]="t.id">{{ t.tenTheLoai }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddTheLoai()" title="Thêm nhanh thể loại">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.nhaXuatBanId">
+                <option [ngValue]="undefined">-- Chọn NXB --</option>
+                <option *ngFor="let n of nhaXuatBans" [ngValue]="n.id">{{ n.tenNhaXuatBan }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddNxb()" title="Thêm nhanh NXB">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Kích thước</label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.kichThuocId">
+                <option [ngValue]="undefined">-- Chọn kích thước --</option>
+                <option *ngFor="let k of kichThuocs" [ngValue]="k.id">{{ k.chiSoKichThuoc || k.name }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddKichThuoc()" title="Thêm nhanh kích thước">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Loại bìa</label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.loaiBiaId">
+                <option [ngValue]="undefined">-- Chọn loại bìa --</option>
+                <option *ngFor="let b of loaiBiaList" [ngValue]="b.id">{{ b.tenBia || b.name }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddLoaiBia()" title="Thêm nhanh loại bìa">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Loại giấy</label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.loaiGiayId">
+                <option [ngValue]="undefined">-- Chọn loại giấy --</option>
+                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddLoaiGiay()" title="Thêm nhanh loại giấy">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Khối lượng tịnh (g)</label>
+            <input type="number" class="form-control" [(ngModel)]="newProduct.khoiLuongTinh" placeholder="500" min="0" step="0.1">
+            <div class="form-text">Trọng lượng sách</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Trạng thái</label>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="newProduct.trangThai">
+              <label class="form-check-label">{{ newProduct.trangThai ? 'Hoạt động' : 'Ngừng hoạt động' }}</label>
+            </div>
+          </div>
+          
+          <div class="col-12">
+            <label class="form-label">Mô tả biến thể</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="newProduct.moTaBienThe" placeholder="Mô tả chi tiết về biến thể này..."></textarea>
+            <div class="form-text">Thông tin mô tả bổ sung cho biến thể</div>
+          </div>
         </div>
       </div>
     </div>

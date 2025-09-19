@@ -20,7 +20,7 @@ public class TheLoaiController {
     }
 
     @PostMapping()
-    public ResponseEntity<TheLoaiDTO> create(TheLoaiDTO theLoaiDTO) {
+    public ResponseEntity<TheLoaiDTO> create(@RequestBody TheLoaiDTO theLoaiDTO) {
         TheLoaiDTO saved = theLoaiService.save(theLoaiDTO);
         return ResponseEntity.status(201).body(saved);
     }

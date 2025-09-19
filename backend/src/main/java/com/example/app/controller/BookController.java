@@ -150,4 +150,93 @@ public class BookController {
             return ResponseEntity.internalServerError().body("Lỗi không xác định: " + e.getMessage());
         }
     }
+
+    @PostMapping("/create-with-variant")
+    public ResponseEntity<?> createBookWithVariant(@RequestBody CreateBookWithVariantDTO dto) {
+        try {
+            System.out.println("=== DEBUG: Tạo sách với biến thể F1 ===");
+            System.out.println("DTO nhận được: " + dto);
+            
+            BookDetailDTO result = bookService.createBookWithVariant(dto);
+            
+            System.out.println("✅ Đã tạo sách với biến thể F1 thành công");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi tạo sách với biến thể F1: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Lỗi khi tạo sách: " + e.getMessage());
+        }
+    }
+
+    // DTO cho tạo sách với biến thể F1
+    public static class CreateBookWithVariantDTO {
+        // Product info
+        private String tenSanPham;
+        private String moTa;
+        private Boolean trangThai;
+        
+        // Variant F1 info
+        private String isbn;
+        private String maSanPhamChiTiet;
+        private Integer donGia;
+        private Integer soLuong;
+        private String ngayXuatBan;
+        private Integer lanTaiBan;
+        private Integer theLoaiId;
+        private Integer nhaXuatBanId;
+        private Integer kichThuocId;
+        private Integer loaiBiaId;
+        private Integer loaiGiayId;
+        private Float khoiLuongTinh;
+        private String moTaBienThe;
+
+        // Getters and Setters
+        public String getTenSanPham() { return tenSanPham; }
+        public void setTenSanPham(String tenSanPham) { this.tenSanPham = tenSanPham; }
+        
+        public String getMoTa() { return moTa; }
+        public void setMoTa(String moTa) { this.moTa = moTa; }
+        
+        public Boolean getTrangThai() { return trangThai; }
+        public void setTrangThai(Boolean trangThai) { this.trangThai = trangThai; }
+        
+        public String getIsbn() { return isbn; }
+        public void setIsbn(String isbn) { this.isbn = isbn; }
+        
+        public String getMaSanPhamChiTiet() { return maSanPhamChiTiet; }
+        public void setMaSanPhamChiTiet(String maSanPhamChiTiet) { this.maSanPhamChiTiet = maSanPhamChiTiet; }
+        
+        public Integer getDonGia() { return donGia; }
+        public void setDonGia(Integer donGia) { this.donGia = donGia; }
+        
+        public Integer getSoLuong() { return soLuong; }
+        public void setSoLuong(Integer soLuong) { this.soLuong = soLuong; }
+        
+        public String getNgayXuatBan() { return ngayXuatBan; }
+        public void setNgayXuatBan(String ngayXuatBan) { this.ngayXuatBan = ngayXuatBan; }
+        
+        public Integer getLanTaiBan() { return lanTaiBan; }
+        public void setLanTaiBan(Integer lanTaiBan) { this.lanTaiBan = lanTaiBan; }
+        
+        public Integer getTheLoaiId() { return theLoaiId; }
+        public void setTheLoaiId(Integer theLoaiId) { this.theLoaiId = theLoaiId; }
+        
+        public Integer getNhaXuatBanId() { return nhaXuatBanId; }
+        public void setNhaXuatBanId(Integer nhaXuatBanId) { this.nhaXuatBanId = nhaXuatBanId; }
+        
+        public Integer getKichThuocId() { return kichThuocId; }
+        public void setKichThuocId(Integer kichThuocId) { this.kichThuocId = kichThuocId; }
+        
+        public Integer getLoaiBiaId() { return loaiBiaId; }
+        public void setLoaiBiaId(Integer loaiBiaId) { this.loaiBiaId = loaiBiaId; }
+        
+        public Integer getLoaiGiayId() { return loaiGiayId; }
+        public void setLoaiGiayId(Integer loaiGiayId) { this.loaiGiayId = loaiGiayId; }
+        
+        public Float getKhoiLuongTinh() { return khoiLuongTinh; }
+        public void setKhoiLuongTinh(Float khoiLuongTinh) { this.khoiLuongTinh = khoiLuongTinh; }
+        
+        public String getMoTaBienThe() { return moTaBienThe; }
+        public void setMoTaBienThe(String moTaBienThe) { this.moTaBienThe = moTaBienThe; }
+    }
 }

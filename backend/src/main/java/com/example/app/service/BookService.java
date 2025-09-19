@@ -1,5 +1,6 @@
 package com.example.app.service;
 
+import com.example.app.controller.BookController;
 import com.example.app.dto.bookDTO.BookDetailDTO;
 import com.example.app.dto.bookDTO.VariantCreateDTO;
 import com.example.app.dto.bookDTO.ListAllBookDTO;
@@ -9,19 +10,15 @@ import com.example.app.mapper.BookMapper;
 import com.example.app.repository.BookRepository;
 import com.example.app.repository.*;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +29,27 @@ public class BookService {
 
     @Autowired
     private BookMapper bookMapper;
+
+    @Autowired
+    private SanPhamRepository sanPhamRepository;
+
+    @Autowired
+    private TheLoaiRepository theLoaiRepository;
+
+    @Autowired
+    private NhaXuatBanRepository nhaXuatBanRepository;
+
+    @Autowired
+    private KichThuocRepository kichThuocRepository;
+
+    @Autowired
+    private LoaiBiaRepository loaiBiaRepository;
+
+    @Autowired
+    private LoaiGiayRepository loaiGiayRepository;
+
+    @Autowired
+    private HinhAnhRepository hinhAnhRepository;
 
     public List<ListAllBookDTO> getAllBook() {
         List<Book> books = bookRepository.findAll();
@@ -93,13 +111,6 @@ public class BookService {
     }
 
     // ================== BULK CREATE (VARIANTS) ==================
-    @org.springframework.beans.factory.annotation.Autowired private SanPhamRepository sanPhamRepository;
-    @org.springframework.beans.factory.annotation.Autowired private TheLoaiRepository theLoaiRepository;
-    @org.springframework.beans.factory.annotation.Autowired private NhaXuatBanRepository nhaXuatBanRepository;
-    @org.springframework.beans.factory.annotation.Autowired private KichThuocRepository kichThuocRepository;
-    @org.springframework.beans.factory.annotation.Autowired private LoaiBiaRepository loaiBiaRepository;
-    @org.springframework.beans.factory.annotation.Autowired private LoaiGiayRepository loaiGiayRepository;
-    @org.springframework.beans.factory.annotation.Autowired private HinhAnhRepository hinhAnhRepository;
 
     public java.util.List<BookDetailDTO> createBulkVariants(java.util.List<VariantCreateDTO> dtos) {
         java.util.List<Book> toSave = new java.util.ArrayList<>();
@@ -222,5 +233,114 @@ public class BookService {
         }
         
         return filename;
+    }
+
+    private String generateMaSanPham() {
+        String prefix = "SP";
+        String ma;
+        int attempts = 0;
+        do {
+            // Sử dụng timestamp ngắn gọn để tránh vượt quá 15 ký tự
+            long timestamp = System.currentTimeMillis() % 1000000; // Chỉ lấy 6 số cuối
+            int random = (int) (Math.random() * 100);
+            ma = prefix + String.format("%06d%02d", timestamp, random);
+            attempts++;
+            if (attempts > 10) { // Tránh infinite loop
+                throw new RuntimeException("Không thể tạo mã sản phẩm duy nhất");
+            }
+        } while (sanPhamRepository.existsByMaSanPham(ma));
+        return ma;
+    }
+
+    public BookDetailDTO createBookWithVariant(BookController.CreateBookWithVariantDTO dto) {
+        try {
+            System.out.println("=== DEBUG: Bắt đầu tạo sách với biến thể F1 ===");
+            
+            // 1. Tạo sản phẩm mới
+            SanPham sanPham = new SanPham();
+            sanPham.setMaSanPham(generateMaSanPham()); // Tự động tạo mã sản phẩm
+            sanPham.setTenSanPham(dto.getTenSanPham());
+            sanPham.setMoTa(dto.getMoTa());
+            sanPham.setTrangThai(dto.getTrangThai() != null ? dto.getTrangThai() : true);
+            sanPham.setNgayTao(new Date()); // Set ngày tạo
+            
+            SanPham savedSanPham = sanPhamRepository.save(sanPham);
+            System.out.println("✅ Đã tạo sản phẩm: " + savedSanPham.getId());
+            
+            // 2. Tạo biến thể F1
+            Book book = new Book();
+            book.setSanPham(savedSanPham);
+            book.setIsbn(dto.getIsbn());
+            book.setMaSanPhamChiTiet(dto.getMaSanPhamChiTiet());
+            book.setDonGia(BigDecimal.valueOf(dto.getDonGia()));
+            book.setSoLuong(dto.getSoLuong());
+            book.setTrangThai(dto.getTrangThai() != null ? dto.getTrangThai() : true);
+            book.setMoTa(dto.getMoTaBienThe());
+            
+            // Set ngày xuất bản
+            if (dto.getNgayXuatBan() != null && !dto.getNgayXuatBan().isEmpty()) {
+                book.setNgayXuatBan(LocalDate.parse(dto.getNgayXuatBan()));
+            }
+            
+            // Set lần tái bản
+            if (dto.getLanTaiBan() != null) {
+                book.setSoLanTaiBan(dto.getLanTaiBan());
+            }
+            
+            // Set khối lượng tịnh
+            if (dto.getKhoiLuongTinh() != null) {
+                book.setKhoiLuongTinh(dto.getKhoiLuongTinh());
+            }
+            
+            // Set các entity liên quan
+            if (dto.getTheLoaiId() != null) {
+                TheLoai theLoai = theLoaiRepository.findById(dto.getTheLoaiId()).orElse(null);
+                if (theLoai != null) {
+                    book.setTheLoai(theLoai);
+                }
+            }
+            
+            if (dto.getNhaXuatBanId() != null) {
+                NhaXuatBan nhaXuatBan = nhaXuatBanRepository.findById(dto.getNhaXuatBanId()).orElse(null);
+                if (nhaXuatBan != null) {
+                    book.setNhaXuatBan(nhaXuatBan);
+                }
+            }
+            
+            if (dto.getKichThuocId() != null) {
+                KichThuoc kichThuoc = kichThuocRepository.findById(dto.getKichThuocId()).orElse(null);
+                if (kichThuoc != null) {
+                    book.setKichThuoc(kichThuoc);
+                }
+            }
+            
+            if (dto.getLoaiBiaId() != null) {
+                LoaiBia loaiBia = loaiBiaRepository.findById(dto.getLoaiBiaId()).orElse(null);
+                if (loaiBia != null) {
+                    book.setLoaiBia(loaiBia);
+                }
+            }
+            
+            if (dto.getLoaiGiayId() != null) {
+                LoaiGiay loaiGiay = loaiGiayRepository.findById(dto.getLoaiGiayId()).orElse(null);
+                if (loaiGiay != null) {
+                    book.setLoaiGiay(loaiGiay);
+                }
+            }
+            
+            Book savedBook = bookRepository.save(book);
+            System.out.println("✅ Đã tạo biến thể F1: " + savedBook.getId());
+            
+            // 3. Trả về DTO
+            BookDetailDTO result = bookMapper.getBookByIDDTO(savedBook);
+            System.out.println("✅ Hoàn thành tạo sách với biến thể F1");
+            
+            return result;
+            
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi tạo sách với biến thể F1: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tạo sách với biến thể F1: " + e.getMessage(), e);
+        }
     }
 }

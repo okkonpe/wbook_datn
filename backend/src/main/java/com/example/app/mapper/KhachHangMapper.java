@@ -7,7 +7,12 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface KhachHangMapper {
+
+    // Register mapping (giữ nguyên)
     KhachHangRegisterDTO khRegistertoDTO(KhachHang khachHang);
     KhachHang khRegistertoEntity(KhachHangRegisterDTO dto);
+
+    // Info mapping - MapStruct tự động map tất cả trường có tên giống nhau
     KhachHangInfoDTO khInfoToDTO(KhachHang khachHang);
+    KhachHang khInfoToEntity(KhachHangInfoDTO dto);  // 👈 THÊM METHOD NÀY
 }

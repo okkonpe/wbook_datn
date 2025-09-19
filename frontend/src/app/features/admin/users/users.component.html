@@ -1,1 +1,117 @@
-<p>users works!</p>
+<div class="container mt-4">
+  <h3 class="mb-3 text-primary">👥 Quản lý khách hàng</h3>
+
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-success" (click)="openModal()">➕ Thêm mới</button>
+  </div>
+
+  <!-- BẢNG DỮ LIỆU -->
+  <table class="table table-bordered table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Tên khách hàng</th>
+        <th>Số điện thoại</th>
+        <th>Ngày sinh</th>
+        <th>Địa chỉ</th>
+        <th>Email</th>
+        <th>Giới tính</th>
+        <th>Trạng thái</th>
+        <th class="text-center">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of users">
+        <td>{{ u.id }}</td>
+        <td>{{ u.tenKhachHang }}</td>
+        <td>{{ u.sdt }}</td>
+        <td>{{ u.ngaySinh | date:'dd/MM/yyyy' }}</td>
+        <td>{{ u.diaChi }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.gioiTinh ? 'Nam' : 'Nữ' }}</td>
+        <td>{{ u.trangThai }}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-primary me-1" (click)="editUser(u)">Sửa</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteUser(u.id!)" [disabled]="!u.id">Xóa</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PHÂN TRANG -->
+  <div class="d-flex justify-content-between align-items-center">
+    <button class="btn btn-outline-primary" (click)="prevPage()" [disabled]="currentPage === 0">« Trước</button>
+    <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+    <button class="btn btn-outline-primary" (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages">Sau »</button>
+  </div>
+
+  <!-- FORM MODAL -->
+  <div class="modal fade show d-block" *ngIf="isModalOpen" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form (ngSubmit)="saveUser()">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ isEditMode ? 'Cập nhật khách hàng' : 'Thêm mới khách hàng' }}</h5>
+            <button type="button" class="btn-close" (click)="closeModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Tên khách hàng</label>
+              <input type="text" class="form-control" [(ngModel)]="user.tenKhachHang" name="tenKhachHang" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Số điện thoại</label>
+              <input type="text" class="form-control" [(ngModel)]="user.sdt" name="sdt">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ngày sinh</label>
+              <input type="date" class="form-control" [(ngModel)]="user.ngaySinh" name="ngaySinh">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Địa chỉ</label>
+              <input type="text" class="form-control" [(ngModel)]="user.diaChi" name="diaChi">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" [(ngModel)]="user.email" name="email">
+            </div>
+            
+            <!-- Giới tính - Radio buttons -->
+            <div class="mb-3">
+              <label class="form-label">Giới tính</label><br>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" [value]="true" [(ngModel)]="user.gioiTinh" name="gioiTinh" id="nam">
+                <label class="form-check-label" for="nam">Nam</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" [value]="false" [(ngModel)]="user.gioiTinh" name="gioiTinh" id="nu">
+                <label class="form-check-label" for="nu">Nữ</label>
+              </div>
+              <small class="text-muted">Giá trị: {{ user.gioiTinh }} ({{ user.gioiTinh ? 'Nam' : 'Nữ' }})</small>
+            </div>
+
+            <!-- Trạng thái - Radio buttons -->
+            <div class="mb-3">
+              <label class="form-label">Trạng thái</label><br>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" value="Hoạt động" [(ngModel)]="user.trangThai" name="trangThai" id="hoatdong">
+                <label class="form-check-label" for="hoatdong">Hoạt động</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" value="Ngừng hoạt động" [(ngModel)]="user.trangThai" name="trangThai" id="ngung">
+                <label class="form-check-label" for="ngung">Ngừng hoạt động</label>
+              </div>
+              <small class="text-muted">Giá trị: {{ user.trangThai }}</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">
+              {{ isEditMode ? 'Cập nhật' : 'Thêm mới' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Hủy</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

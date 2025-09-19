@@ -45,6 +45,10 @@ export class VariantsComponent {
   loaiBiaList: any[] = [];
   loaiGiayList: any[] = [];
 
+  // F1 base
+  private baseVariant: any | null = null;
+  inheritMode = false; // bật khi đã kế thừa từ F1
+
   // Multi-select selections
   selectedTheLoaiIds: number[] = [];
   selectedNxbIds: number[] = [];
@@ -62,6 +66,15 @@ export class VariantsComponent {
       const quantity = draft.soLuong || 0;
       return sum + (price * quantity);
     }, 0);
+  }
+
+  // Khóa/mở các trường khi kế thừa từ F1
+  isDisabled(field: string): boolean {
+    if (!this.inheritMode) return false;
+    const editable = new Set([
+      'loaiGiay', 'loaiBia', 'nxb', 'kichThuoc', 'ngayXuatBan', 'hinhAnh', 'donGia', 'soLanTaiBan', 'soLuong', 'theLoai'
+    ]);
+    return !editable.has(field);
   }
 
   addDraft() {
@@ -131,9 +144,36 @@ export class VariantsComponent {
   }
 
   resetForm() {
+    // Khởi tạo theo F1 nếu có
+    const base = this.baseVariant;
     this.newDraft = { trangThai: true };
     this.newDraft.isbn = this.generateIsbn();
     this.newDraft.maSanPhamChiTiet = this.generateSpct();
+
+    if (base) {
+      // Copy các thuộc tính kế thừa từ F1
+      this.newDraft.donGia = base.donGia ?? this.newDraft.donGia;
+      this.newDraft.soLuong = base.soLuong ?? 1;
+      this.newDraft.ngayXuatBan = base.ngayXuatBan ?? this.newDraft.ngayXuatBan;
+      this.newDraft.khoiLuongTinh = base.khoiLuongTinh ?? this.newDraft.khoiLuongTinh;
+      this.newDraft.soLanTaiBan = base.soLanTaiBan ?? this.newDraft.soLanTaiBan;
+      this.newDraft.moTa = '';
+
+      // Map tên -> id cho các dropdown nếu có
+      const tl = this.theLoais.find(t => t.tenTheLoai === base.theLoai);
+      const nxb = this.nhaXuatBans.find(n => n.tenNhaXuatBan === base.nhaXuatBan);
+      const kt = this.kichThuocs.find(k => (k.chiSoKichThuoc || k.name) === base.kichThuoc);
+      const lb = this.loaiBiaList.find(b => (b.tenBia || b.name) === base.loaiBia);
+      const lg = this.loaiGiayList.find(g => (g.tenGiay || g.name) === base.loaiGiay);
+
+      this.chosenTheLoaiId = tl?.id;
+      this.chosenNxbId = nxb?.id;
+      this.newDraft.kichThuoc = kt?.id;
+      this.newDraft.loaiBia = lb?.id;
+      this.newDraft.loaiGiay = lg?.id;
+
+      this.inheritMode = true;
+    }
   }
 
   removeDraft(i: number) { 
@@ -285,22 +325,43 @@ export class VariantsComponent {
   ngOnInit(): void {
     // Nạp danh mục thuộc tính
     this.fetchAttributes();
-    // Gợi ý mã lần đầu
-    this.newDraft.isbn = this.generateIsbn();
-    this.newDraft.maSanPhamChiTiet = this.generateSpct();
+    // Tải F1 và áp thuộc tính kế thừa
+    this.fetchBaseVariant();
+  }
+
+  private fetchBaseVariant() {
+    if (!this.productId) return;
+    this.http.get<any[]>(`http://localhost:8080/api/books/by-product/${this.productId}`)
+      .subscribe({
+        next: (list) => {
+          if (Array.isArray(list) && list.length) {
+            this.baseVariant = list[0]; // F1 là phần tử đầu tiên
+            // Nếu đã có danh mục, áp ngay; nếu chưa, sẽ áp khi danh mục nạp xong
+            this.applyBaseIfReady();
+          }
+        },
+        error: (err) => console.error('Không lấy được F1:', err)
+      });
+  }
+
+  private applyBaseIfReady() {
+    if (!this.baseVariant) return;
+    // Chỉ áp khi đã có danh mục để map tên -> id
+    if (!this.theLoais.length || !this.nhaXuatBans.length) return;
+    this.resetForm();
   }
 
   private fetchAttributes() {
     this.http.get<any>('http://localhost:8080/api/the-loai')
-      .subscribe(res => this.theLoais = this.toArray(res));
+      .subscribe(res => { this.theLoais = this.toArray(res); this.applyBaseIfReady(); });
     this.http.get<any>('http://localhost:8080/api/nha-xuat-ban')
-      .subscribe(res => this.nhaXuatBans = this.toArray(res));
+      .subscribe(res => { this.nhaXuatBans = this.toArray(res); this.applyBaseIfReady(); });
     this.http.get<any>('http://localhost:8080/api/kich-thuoc')
-      .subscribe(res => this.kichThuocs = this.toArray(res));
+      .subscribe(res => { this.kichThuocs = this.toArray(res); this.applyBaseIfReady(); });
     this.http.get<any>('http://localhost:8080/api/loai-bia')
-      .subscribe(res => this.loaiBiaList = this.toArray(res));
+      .subscribe(res => { this.loaiBiaList = this.toArray(res); this.applyBaseIfReady(); });
     this.http.get<any>('http://localhost:8080/api/loai-giay')
-      .subscribe(res => this.loaiGiayList = this.toArray(res));
+      .subscribe(res => { this.loaiGiayList = this.toArray(res); this.applyBaseIfReady(); });
   }
 
   private generateSpct(): string {

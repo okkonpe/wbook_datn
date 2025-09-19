@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-variant-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <!-- Header Section -->
     <div class="variants-hero">
@@ -82,14 +83,78 @@ import { HttpClient } from '@angular/common/http';
                 Danh sách biến thể
               </h5>
               <div class="card-actions">
-                <button class="btn btn-outline-primary btn-sm me-2">
+                <button class="btn btn-outline-primary btn-sm me-2" (click)="toggleFilter()" [class.active]="isFilterOpen">
                   <i class="bi bi-funnel me-1"></i>
                   Lọc
+                  <span class="filter-badge" *ngIf="searchTerm || statusFilter !== 'all'">●</span>
                 </button>
                 <button class="btn btn-add-variant" (click)="addNewVariant()">
                   <i class="bi bi-plus-circle me-2"></i>
                   Thêm biến thể
                 </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Panel -->
+          <div class="filter-panel" *ngIf="isFilterOpen">
+            <div class="filter-content">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">
+                    <i class="bi bi-search me-1"></i>
+                    Tìm kiếm
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Mã SPCT, ISBN, thể loại, NXB..." 
+                    [(ngModel)]="searchTerm"
+                    (input)="onSearchChange()">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">
+                    <i class="bi bi-funnel me-1"></i>
+                    Trạng thái
+                  </label>
+                  <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+                    <option value="all">Tất cả</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Ngừng hoạt động</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">
+                    <i class="bi bi-sort-alpha-down me-1"></i>
+                    Sắp xếp theo
+                  </label>
+                  <select class="form-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+                    <option value="maSanPhamChiTiet">Mã SPCT</option>
+                    <option value="isbn">ISBN</option>
+                    <option value="theLoai">Thể loại</option>
+                    <option value="nhaXuatBan">NXB</option>
+                    <option value="donGia">Đơn giá</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">
+                    <i class="bi bi-arrow-up-down me-1"></i>
+                    Thứ tự
+                  </label>
+                  <select class="form-select" [(ngModel)]="sortOrder" (change)="onSortChange()">
+                    <option value="asc">Tăng dần</option>
+                    <option value="desc">Giảm dần</option>
+                  </select>
+                </div>
+              </div>
+              <div class="filter-actions mt-3">
+                <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+                  <i class="bi bi-x-circle me-1"></i>
+                  Xóa bộ lọc
+                </button>
+                <span class="filter-results ms-3">
+                  Hiển thị {{ filteredVariants.length }} / {{ variants.length }} kết quả
+                </span>
               </div>
             </div>
           </div>
@@ -102,9 +167,22 @@ import { HttpClient } from '@angular/common/http';
             <h4>Chưa có biến thể nào</h4>
             <p>Thêm biến thể đầu tiên bằng nút "Thêm biến thể mới"</p>
           </div>
+
+          <!-- No Results State -->
+          <div class="empty-state" *ngIf="!filteredVariants.length && variants.length">
+            <div class="empty-icon">
+              <i class="bi bi-search"></i>
+            </div>
+            <h4>Không tìm thấy kết quả</h4>
+            <p>Không có biến thể nào phù hợp với bộ lọc hiện tại</p>
+            <button class="btn btn-outline-primary" (click)="clearFilters()">
+              <i class="bi bi-x-circle me-2"></i>
+              Xóa bộ lọc
+            </button>
+          </div>
           
           <!-- Variants Table -->
-          <div class="table-container" *ngIf="variants.length">
+          <div class="table-container" *ngIf="filteredVariants.length">
             <table class="modern-table">
               <thead>
                 <tr>
@@ -120,7 +198,7 @@ import { HttpClient } from '@angular/common/http';
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let variant of variants; index as i" class="table-row" [class.even]="i % 2 === 0">
+                <tr *ngFor="let variant of filteredVariants; index as i" class="table-row" [class.even]="i % 2 === 0">
                   <td>{{ variant.maSanPhamChiTiet }}</td>
                   <td>{{ variant.isbn }}</td>
                   <td>{{ variant.theLoai }}</td>
@@ -211,6 +289,185 @@ import { HttpClient } from '@angular/common/http';
           <button class="btn btn-secondary" (click)="closeQr()">
             <i class="bi bi-x-circle me-2"></i>
             Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Variant Modal -->
+    <div class="modal-overlay" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+      <div class="edit-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>
+            <i class="bi bi-pencil-square me-2"></i>
+            Sửa thông tin biến thể
+          </h3>
+          <button class="btn-close-modal" (click)="closeEditModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        
+        <div class="modal-content">
+          <form (ngSubmit)="saveVariant()" #editForm="ngForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-tag me-1"></i>
+                  Mã sản phẩm chi tiết
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.maSanPhamChiTiet" 
+                  name="maSanPhamChiTiet"
+                  required>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-book me-1"></i>
+                  ISBN
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.isbn" 
+                  name="isbn"
+                  required>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-collection me-1"></i>
+                  Thể loại
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.theLoaiId" 
+                  name="theLoaiId"
+                  required>
+                  <option value="">-- Chọn thể loại --</option>
+                  <option *ngFor="let tl of theLoais" [value]="tl.id">{{ tl.tenTheLoai }}</option>
+                </select>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-building me-1"></i>
+                  Nhà xuất bản
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.nhaXuatBanId" 
+                  name="nhaXuatBanId"
+                  required>
+                  <option value="">-- Chọn nhà xuất bản --</option>
+                  <option *ngFor="let nxb of nhaXuatBans" [value]="nxb.id">{{ nxb.tenNhaXuatBan }}</option>
+                </select>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-currency-dollar me-1"></i>
+                  Đơn giá (VNĐ)
+                </label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.donGia" 
+                  name="donGia"
+                  min="0"
+                  required>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-box me-1"></i>
+                  Số lượng
+                </label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.soLuong" 
+                  name="soLuong"
+                  min="0"
+                  required>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-calendar-event me-1"></i>
+                  Ngày xuất bản
+                </label>
+                <input 
+                  type="date" 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.ngayXuatBan" 
+                  name="ngayXuatBan">
+              </div>
+              
+              <div class="col-md-12">
+                <label class="form-label">
+                  <i class="bi bi-image me-1"></i>
+                  Hình ảnh
+                </label>
+                <div class="image-upload-container">
+                  <div class="current-image" *ngIf="editingVariant.hinhAnh && editingVariant.hinhAnh !== ''">
+                    <img [src]="editingVariant.hinhAnh" alt="Hình ảnh hiện tại" class="preview-image">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-image" (click)="removeImage()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                  <div class="upload-area" [class.has-image]="editingVariant.hinhAnh && editingVariant.hinhAnh !== ''">
+                    <input 
+                      type="file" 
+                      class="form-control file-input" 
+                      accept="image/*"
+                      (change)="onImageSelected($event)"
+                      #fileInput>
+                    <div class="upload-placeholder" *ngIf="!editingVariant.hinhAnh || editingVariant.hinhAnh === ''">
+                      <i class="bi bi-cloud-upload"></i>
+                      <p>Chọn hình ảnh hoặc kéo thả vào đây</p>
+                      <small>Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)</small>
+                    </div>
+                    <div class="upload-info" *ngIf="editingVariant.hinhAnh && editingVariant.hinhAnh !== ''">
+                      <i class="bi bi-check-circle text-success"></i>
+                      <p>Hình ảnh đã chọn</p>
+                      <button type="button" class="btn btn-sm btn-outline-primary" (click)="fileInput.click()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Thay đổi
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-12">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    [(ngModel)]="editingVariant.trangThai" 
+                    name="trangThai"
+                    id="trangThai">
+                  <label class="form-check-label" for="trangThai">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Trạng thái hoạt động
+                  </label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeEditModal()">
+            <i class="bi bi-x-circle me-2"></i>
+            Hủy
+          </button>
+          <button class="btn btn-primary" (click)="saveVariant()" [disabled]="!editForm.form.valid">
+            <i class="bi bi-check-circle me-2"></i>
+            Lưu thay đổi
           </button>
         </div>
       </div>
@@ -548,6 +805,73 @@ import { HttpClient } from '@angular/common/http';
       color: #718096;
     }
 
+    // Filter Panel
+    .filter-panel {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      padding: 1.5rem;
+      animation: slideDown 0.3s ease;
+    }
+
+    .filter-content {
+      .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+
+        &:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+      }
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .filter-results {
+      color: #718096;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .filter-badge {
+      color: #f56565;
+      font-size: 0.8rem;
+      margin-left: 0.25rem;
+    }
+
+    .btn-outline-primary.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     /* QR Modal */
     .modal-overlay {
       position: fixed;
@@ -744,6 +1068,171 @@ import { HttpClient } from '@angular/common/http';
         grid-template-columns: 1fr;
       }
     }
+
+    /* Edit Modal */
+    .edit-modal {
+      background: white;
+      border-radius: 20px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.3s ease;
+    }
+
+    .edit-modal .modal-content {
+      padding: 2rem;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .edit-modal .form-label {
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .edit-modal .form-control {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .edit-modal .form-control:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .edit-modal .form-check {
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .edit-modal .form-check-input {
+      margin-right: 0.75rem;
+    }
+
+    .edit-modal .form-check-label {
+      font-weight: 500;
+      color: #4a5568;
+    }
+
+    .edit-modal .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      border-radius: 10px;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .edit-modal .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .edit-modal .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Image Upload Styles */
+    .image-upload-container {
+      border: 2px dashed #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      background: #f8fafc;
+      transition: all 0.3s ease;
+    }
+
+    .image-upload-container:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .current-image {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .preview-image {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .remove-image {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .upload-area {
+      position: relative;
+      text-align: center;
+    }
+
+    .file-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-placeholder {
+      padding: 2rem;
+      color: #718096;
+    }
+
+    .upload-placeholder i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #a0aec0;
+    }
+
+    .upload-placeholder p {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .upload-placeholder small {
+      color: #a0aec0;
+    }
+
+    .upload-info {
+      padding: 1rem;
+      color: #2f855a;
+    }
+
+    .upload-info i {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-info p {
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
   `]
 })
 export class VariantListComponent implements OnInit {
@@ -753,11 +1242,27 @@ export class VariantListComponent implements OnInit {
   productDescription: string = '';
   productStatus: boolean = true;
   variants: any[] = [];
+  filteredVariants: any[] = [];
+
+  // Filter states
+  isFilterOpen = false;
+  searchTerm = '';
+  statusFilter = 'all'; // 'all', 'active', 'inactive'
+  sortBy = 'maSanPhamChiTiet'; // 'maSanPhamChiTiet', 'isbn', 'theLoai', 'nhaXuatBan', 'donGia'
+  sortOrder = 'asc'; // 'asc', 'desc'
 
   // QR Modal
   isQrOpen: boolean = false;
   qrSrc: string | null = null;
   selectedVariant: any = null;
+
+  // Edit Modal
+  isEditModalOpen: boolean = false;
+  editingVariant: any = {};
+
+  // Data for dropdowns
+  theLoais: any[] = [];
+  nhaXuatBans: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -769,6 +1274,7 @@ export class VariantListComponent implements OnInit {
     this.productId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadProductDetails();
     this.loadVariants();
+    this.loadDropdownData();
   }
 
   loadProductDetails() {
@@ -791,11 +1297,121 @@ export class VariantListComponent implements OnInit {
     this.http.get<any[]>(`http://localhost:8080/api/books/by-product/${this.productId}`).subscribe(
       (data) => {
         this.variants = data;
+        this.applyFilters();
       },
       (error) => {
         console.error('Error loading variants:', error);
       }
     );
+  }
+
+  loadDropdownData() {
+    // Load thể loại
+    this.http.get<any>('http://localhost:8080/api/the-loai?size=1000').subscribe({
+      next: (response) => {
+        this.theLoais = response.content || [];
+        console.log('Loaded thể loại:', this.theLoais);
+      },
+      error: (error) => {
+        console.error('Error loading thể loại:', error);
+        this.theLoais = [];
+      }
+    });
+
+    // Load nhà xuất bản
+    this.http.get<any>('http://localhost:8080/api/nha-xuat-ban?size=1000').subscribe({
+      next: (response) => {
+        this.nhaXuatBans = response.content || [];
+        console.log('Loaded nhà xuất bản:', this.nhaXuatBans);
+      },
+      error: (error) => {
+        console.error('Error loading nhà xuất bản:', error);
+        this.nhaXuatBans = [];
+      }
+    });
+  }
+
+  // Filter methods
+  toggleFilter() {
+    this.isFilterOpen = !this.isFilterOpen;
+  }
+
+  applyFilters() {
+    let filtered = [...this.variants];
+
+    // Search filter
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(variant => 
+        variant.maSanPhamChiTiet?.toLowerCase().includes(term) ||
+        variant.isbn?.toLowerCase().includes(term) ||
+        variant.theLoai?.toLowerCase().includes(term) ||
+        variant.nhaXuatBan?.toLowerCase().includes(term)
+      );
+    }
+
+    // Status filter
+    if (this.statusFilter !== 'all') {
+      const isActive = this.statusFilter === 'active';
+      filtered = filtered.filter(variant => variant.trangThai === isActive);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (this.sortBy) {
+        case 'maSanPhamChiTiet':
+          aValue = a.maSanPhamChiTiet || '';
+          bValue = b.maSanPhamChiTiet || '';
+          break;
+        case 'isbn':
+          aValue = a.isbn || '';
+          bValue = b.isbn || '';
+          break;
+        case 'theLoai':
+          aValue = a.theLoai || '';
+          bValue = b.theLoai || '';
+          break;
+        case 'nhaXuatBan':
+          aValue = a.nhaXuatBan || '';
+          bValue = b.nhaXuatBan || '';
+          break;
+        case 'donGia':
+          aValue = parseFloat(a.donGia) || 0;
+          bValue = parseFloat(b.donGia) || 0;
+          break;
+        default:
+          aValue = a.maSanPhamChiTiet || '';
+          bValue = b.maSanPhamChiTiet || '';
+      }
+
+      if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return this.sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    this.filteredVariants = filtered;
+  }
+
+  onSearchChange() {
+    this.applyFilters();
+  }
+
+  onStatusFilterChange() {
+    this.applyFilters();
+  }
+
+  onSortChange() {
+    this.applyFilters();
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.statusFilter = 'all';
+    this.sortBy = 'maSanPhamChiTiet';
+    this.sortOrder = 'asc';
+    this.applyFilters();
   }
   
   editProduct() {
@@ -831,7 +1447,167 @@ export class VariantListComponent implements OnInit {
   }
 
   editVariant(variant: any) {
-    this.router.navigate(['/admin/products/book', this.productId, 'variants', 'edit', variant.id]);
+    // Copy variant data to editing object
+    this.editingVariant = { ...variant };
+    
+    // Đảm bảo dữ liệu dropdown đã được load
+    if (this.theLoais.length === 0 || this.nhaXuatBans.length === 0) {
+      this.loadDropdownData();
+      // Đợi một chút để dữ liệu được load
+      setTimeout(() => {
+        this.mapVariantToDropdowns(variant);
+        this.isEditModalOpen = true;
+      }, 100);
+    } else {
+      this.mapVariantToDropdowns(variant);
+      this.isEditModalOpen = true;
+    }
+  }
+
+  private mapVariantToDropdowns(variant: any) {
+    // Map từ tên sang ID cho dropdowns
+    if (variant.theLoai && Array.isArray(this.theLoais)) {
+      const theLoai = this.theLoais.find(tl => tl.tenTheLoai === variant.theLoai);
+      this.editingVariant.theLoaiId = theLoai ? theLoai.id : '';
+    } else {
+      this.editingVariant.theLoaiId = '';
+    }
+    
+    if (variant.nhaXuatBan && Array.isArray(this.nhaXuatBans)) {
+      const nxb = this.nhaXuatBans.find(n => n.tenNhaXuatBan === variant.nhaXuatBan);
+      this.editingVariant.nhaXuatBanId = nxb ? nxb.id : '';
+    } else {
+      this.editingVariant.nhaXuatBanId = '';
+    }
+    
+    console.log('Editing variant:', this.editingVariant);
+    console.log('Variant theLoai name:', variant.theLoai);
+    console.log('Variant nhaXuatBan name:', variant.nhaXuatBan);
+    console.log('Available theLoais:', this.theLoais);
+    console.log('Available nhaXuatBans:', this.nhaXuatBans);
+  }
+
+  closeEditModal() {
+    this.isEditModalOpen = false;
+    this.editingVariant = {};
+  }
+
+  onImageSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chọn file hình ảnh!');
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Kích thước file không được vượt quá 5MB!');
+        return;
+      }
+
+      // Upload file to server
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.http.post('http://localhost:8080/api/books/upload-image', formData, {
+        responseType: 'text' // Đảm bảo nhận response dạng text
+      }).subscribe(
+        (response: any) => {
+          console.log('Image uploaded successfully:', response);
+          // Set the filename as the image URL
+          this.editingVariant.hinhAnh = `http://localhost:8080/uploads/${response}`;
+        },
+        (error) => {
+          console.error('Error uploading image:', error);
+          console.error('Error response:', error.error);
+          alert('Có lỗi xảy ra khi upload ảnh: ' + (error.error || error.message));
+        }
+      );
+    } else {
+      // Nếu không chọn file mới, giữ nguyên ảnh cũ
+      console.log('No file selected, keeping current image');
+    }
+  }
+
+  removeImage() {
+    this.editingVariant.hinhAnh = '';
+  }
+
+  saveVariant() {
+    if (!this.editingVariant.id) return;
+
+    console.log('Saving variant:', this.editingVariant);
+
+    // Map ID sang tên cho API
+    let theLoaiName = '';
+    let nhaXuatBanName = '';
+    
+    if (this.editingVariant.theLoaiId && Array.isArray(this.theLoais)) {
+      const theLoai = this.theLoais.find(tl => tl.id == this.editingVariant.theLoaiId);
+      theLoaiName = theLoai ? theLoai.tenTheLoai : '';
+    }
+    
+    if (this.editingVariant.nhaXuatBanId && Array.isArray(this.nhaXuatBans)) {
+      const nxb = this.nhaXuatBans.find(n => n.id == this.editingVariant.nhaXuatBanId);
+      nhaXuatBanName = nxb ? nxb.tenNhaXuatBan : '';
+    }
+
+    // Prepare data for API - gửi đúng cấu trúc BookDetailDTO
+    const updateData: any = {
+      id: this.editingVariant.id,
+      isbn: this.editingVariant.isbn,
+      maSanPhamChiTiet: this.editingVariant.maSanPhamChiTiet,
+      theLoai: theLoaiName,
+      nhaXuatBan: nhaXuatBanName,
+      soTrang: this.editingVariant.soTrang,
+      soLanTaiBan: this.editingVariant.soLanTaiBan,
+      khoiLuongTinh: this.editingVariant.khoiLuongTinh,
+      soLuong: this.editingVariant.soLuong,
+      ngayXuatBan: this.editingVariant.ngayXuatBan,
+      donGia: this.editingVariant.donGia,
+      moTa: this.editingVariant.moTa,
+      trangThai: this.editingVariant.trangThai
+    };
+
+    // Xử lý ảnh - gửi tên file nếu có thay đổi
+    if (this.editingVariant.hinhAnh && this.editingVariant.hinhAnh !== '') {
+      // Chỉ gửi tên file, không gửi full URL
+      const imageUrl = this.editingVariant.hinhAnh;
+      if (imageUrl.includes('/uploads/')) {
+        const filename = imageUrl.split('/uploads/')[1];
+        updateData.hinhAnh = filename;
+      } else {
+        updateData.hinhAnh = imageUrl;
+      }
+    }
+
+    console.log('Update data to send:', updateData);
+
+    // Gửi request với headers đúng
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    this.http.put(`http://localhost:8080/api/books/${this.editingVariant.id}`, updateData, { headers }).subscribe(
+      (response: any) => {
+        console.log('Update response:', response);
+        
+        // Reload variants from server to get updated data
+        this.loadVariants();
+        
+        this.closeEditModal();
+        alert('Cập nhật biến thể thành công!');
+      },
+      (error) => {
+        console.error('Error updating variant:', error);
+        console.error('Error details:', error.error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        alert('Có lỗi xảy ra khi cập nhật biến thể: ' + (error.error?.message || error.message));
+      }
+    );
   }
 
   toggleStatus(variant: any) {

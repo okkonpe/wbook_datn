@@ -53,10 +53,10 @@ public class NhanVien {
     @Column(name = "cccd", length = 13, nullable = false)
     private String cccd;
 
-    @Column(name = "mat_khau", length = 20)
+    @Column(name = "mat_khau", length = 100)
     private String matKhau;
 
-    @Column(name = "tai_khoan", length = 20)
+    @Column(name = "tai_khoan", length = 50)
     private String taiKhoan;
 
     @Column(name = "ngay_bat_dau")

@@ -83,10 +83,20 @@ export class OfflineComponent implements OnInit, AfterViewInit {
   // Modal states
   isCustomerModalOpen: boolean = false;
   customerSearchQuery: string = '';
+  availableCustomers: Customer[] = [];
   isProductModalOpen: boolean = false;
   productSearchQuery: string = '';
   availableProducts: VariantRow[] = [];
   isQrScannerOpen: boolean = false;
+  
+  // Quick customer creation
+  isQuickCustomerModalOpen: boolean = false;
+  newCustomer: any = {
+    tenKhachHang: '',
+    sdt: '',
+    diaChi: '',
+    email: ''
+  };
   
   // Voucher states
   showVoucherModal: boolean = false;
@@ -463,12 +473,55 @@ export class OfflineComponent implements OnInit, AfterViewInit {
   }
 
   selectCustomer(): void {
+    this.loadAvailableCustomers();
     this.isCustomerModalOpen = true;
   }
 
   closeCustomerModal(): void {
     this.isCustomerModalOpen = false;
     this.customerSearchQuery = '';
+  }
+
+  loadAvailableCustomers(): void {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.getAuthToken()}`,
+      'Content-Type': 'application/json'
+    });
+
+    this.http.get<any>('http://localhost:8080/api/khach-hang?page=0&size=100', { headers }).subscribe({
+      next: (response) => {
+        const customers = Array.isArray(response) ? response : (response?.content ?? []);
+        this.availableCustomers = customers.map((customer: any) => ({
+          id: customer.id,
+          tenKhachHang: customer.tenKhachHang || customer.hoTen || customer.ten_khach_hang || '',
+          soDienThoai: customer.sdt || customer.soDienThoai || customer.so_dien_thoai || '',
+          diaChi: customer.diaChi || customer.dia_chi || '',
+          loai: customer.taiKhoan ? 'KHACH_HANG' : 'KHACH_LE' // Có tài khoản = khách hàng, không có = khách lẻ
+        }));
+        console.log('👥 Customers loaded:', this.availableCustomers);
+      },
+      error: (error) => {
+        console.error('❌ Error loading customers:', error);
+        this.availableCustomers = [];
+      }
+    });
+  }
+
+  filterCustomers(query: string): Customer[] {
+    if (!query) return this.availableCustomers;
+    const q = query.toLowerCase();
+    return this.availableCustomers.filter(customer =>
+      (customer.tenKhachHang || '').toLowerCase().includes(q) ||
+      (customer.soDienThoai || '').toLowerCase().includes(q)
+    );
+  }
+
+  selectCustomerFromList(customer: Customer): void {
+    if (this.selectedInvoice) {
+      this.selectedInvoice.customer = customer;
+    }
+    this.closeCustomerModal();
+    this.saveToCookie();
   }
 
   selectGuestCustomer(): void {
@@ -480,6 +533,58 @@ export class OfflineComponent implements OnInit, AfterViewInit {
     }
     this.closeCustomerModal();
     this.saveToCookie();
+  }
+
+  // Quick customer creation methods
+  openQuickCustomerModal(): void {
+    this.newCustomer = {
+      tenKhachHang: '',
+      sdt: '',
+      diaChi: '',
+      email: ''
+    };
+    this.isQuickCustomerModalOpen = true;
+  }
+
+  closeQuickCustomerModal(): void {
+    this.isQuickCustomerModalOpen = false;
+  }
+
+  createQuickCustomer(): void {
+    if (!this.newCustomer.tenKhachHang.trim()) {
+      alert('Vui lòng nhập tên khách hàng');
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.getAuthToken()}`,
+      'Content-Type': 'application/json'
+    });
+
+    this.http.post<any>('http://localhost:8080/api/khach-hang/quick-create', this.newCustomer, { headers }).subscribe({
+      next: (customer) => {
+        // Thêm khách hàng mới vào danh sách
+        const newCustomerData: Customer = {
+          id: customer.id,
+          tenKhachHang: customer.tenKhachHang,
+          soDienThoai: customer.sdt,
+          diaChi: customer.diaChi,
+          loai: 'KHACH_HANG'
+        };
+        
+        this.availableCustomers.unshift(newCustomerData);
+        
+        // Chọn khách hàng mới tạo
+        this.selectCustomerFromList(newCustomerData);
+        
+        this.closeQuickCustomerModal();
+        console.log('✅ Quick customer created:', customer);
+      },
+      error: (error) => {
+        console.error('❌ Error creating quick customer:', error);
+        alert('Lỗi khi tạo khách hàng: ' + (error?.error?.message || 'Lỗi không xác định'));
+      }
+    });
   }
 
   calculateChange(): void {

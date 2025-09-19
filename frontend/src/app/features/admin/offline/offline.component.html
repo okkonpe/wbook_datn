@@ -2,17 +2,26 @@
 <div class="pos-header">
   <div class="container-fluid">
     <div class="row align-items-center">
-      <div class="col-md-6">
-        <h1 class="pos-title">
-          <i class="bi bi-shop me-3"></i>
-          Bán hàng tại quầy
-        </h1>
+      <div class="col-md-8">
+        <div class="header-content">
+          <h1 class="pos-title">
+            <i class="bi bi-shop me-3"></i>
+            Bán hàng tại quầy
+          </h1>
+          <p class="pos-subtitle">Hệ thống bán hàng trực tiếp tại cửa hàng</p>
+        </div>
       </div>
-      <div class="col-md-6 text-end">
-        <button class="btn btn-create-invoice" (click)="createNewInvoice()" [disabled]="pendingInvoices.length >= 5">
-          <i class="bi bi-plus-circle me-2"></i>
-          Tạo hóa đơn ({{ pendingInvoices.length }}/5)
-        </button>
+      <div class="col-md-4 text-end">
+        <div class="header-actions">
+          <div class="invoice-counter">
+            <span class="counter-label">Hóa đơn đang mở:</span>
+            <span class="counter-value">{{ pendingInvoices.length }}/5</span>
+          </div>
+          <button class="btn btn-create-invoice" (click)="createNewInvoice()" [disabled]="pendingInvoices.length >= 5">
+            <i class="bi bi-plus-circle me-2"></i>
+            Tạo hóa đơn mới
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -25,14 +34,37 @@
     <!-- No Invoices State -->
     <div class="no-invoices-state" *ngIf="pendingInvoices.length === 0">
       <div class="empty-illustration">
-        <i class="bi bi-receipt"></i>
+        <div class="illustration-icon">
+          <i class="bi bi-receipt"></i>
+        </div>
+        <div class="illustration-decoration">
+          <div class="decoration-circle circle-1"></div>
+          <div class="decoration-circle circle-2"></div>
+          <div class="decoration-circle circle-3"></div>
+        </div>
       </div>
-      <h3>Chưa có hóa đơn chờ nào</h3>
-      <p>Bấm "Tạo hóa đơn" để bắt đầu bán hàng</p>
-      <button class="btn btn-create-first" (click)="createNewInvoice()">
-        <i class="bi bi-plus-circle me-2"></i>
-        Tạo hóa đơn đầu tiên
-      </button>
+      <div class="empty-content">
+        <h3>Chưa có hóa đơn nào</h3>
+        <p>Bắt đầu bán hàng bằng cách tạo hóa đơn mới</p>
+        <div class="empty-features">
+          <div class="feature-item">
+            <i class="bi bi-qr-code-scan"></i>
+            <span>Quét mã QR sản phẩm</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-cash-coin"></i>
+            <span>Thanh toán tiền mặt</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-ticket-perforated"></i>
+            <span>Áp dụng voucher</span>
+          </div>
+        </div>
+        <button class="btn btn-create-first" (click)="createNewInvoice()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Tạo hóa đơn đầu tiên
+        </button>
+      </div>
     </div>
 
     <!-- Invoice Tabs -->
@@ -51,39 +83,55 @@
 
       <!-- Selected Invoice Content -->
       <div class="invoice-content" *ngIf="selectedInvoice">
-        <div class="row">
+        <div class="row g-4">
           <!-- Left Panel: Products -->
-          <div class="col-md-8">
+          <div class="col-lg-8">
             <div class="products-panel">
               <div class="panel-header">
-                <h5>
-                  <i class="bi bi-basket me-2"></i>
-                  Sản phẩm
-                </h5>
-                <div class="search-tools">
-                  <div class="search-actions mb-3">
-                    <button class="btn btn-qr-scan me-2" (click)="openQrScanner()">
-                      <i class="bi bi-qr-code-scan me-2"></i>
-                      Quét QR sản phẩm
+                <div class="header-left">
+                  <h5>
+                    <i class="bi bi-basket me-2"></i>
+                    Danh sách sản phẩm
+                  </h5>
+                  <span class="item-count">{{ selectedInvoice.items.length }} sản phẩm</span>
+                </div>
+                <div class="header-right">
+                  <div class="quick-actions">
+                    <button class="btn btn-qr-scan" (click)="openQrScanner()" title="Quét mã QR">
+                      <i class="bi bi-qr-code-scan"></i>
                     </button>
-                    <button class="btn btn-add-product" (click)="openProductSearch()">
-                      <i class="bi bi-plus-circle me-2"></i>
-                      Thêm sản phẩm
+                    <button class="btn btn-add-product" (click)="openProductSearch()" title="Thêm sản phẩm">
+                      <i class="bi bi-plus-circle"></i>
                     </button>
                   </div>
-                  <div class="input-group">
+                </div>
+              </div>
+              
+              <div class="search-section">
+                <div class="search-tools">
+                  <div class="input-group search-input">
                     <span class="input-group-text">
                       <i class="bi bi-search"></i>
                     </span>
                     <input type="text" 
                            id="qrInput"
                            class="form-control" 
-                           placeholder="Nhập mã sản phẩm hoặc ISBN..." 
+                           placeholder="Nhập mã sản phẩm, ISBN hoặc tên sách..." 
                            [(ngModel)]="searchQuery"
                            (keyup.enter)="searchProduct()"
                            #qrInput>
                     <button class="btn btn-search" (click)="searchProduct()">
                       <i class="bi bi-arrow-right"></i>
+                    </button>
+                  </div>
+                  <div class="search-shortcuts">
+                    <button class="btn btn-shortcut" (click)="openQrScanner()">
+                      <i class="bi bi-qr-code-scan me-1"></i>
+                      Quét QR
+                    </button>
+                    <button class="btn btn-shortcut" (click)="openProductSearch()">
+                      <i class="bi bi-search me-1"></i>
+                      Tìm kiếm
                     </button>
                   </div>
                 </div>
@@ -131,29 +179,40 @@
           </div>
 
           <!-- Right Panel: Customer & Payment -->
-          <div class="col-md-4">
+          <div class="col-lg-4">
             <div class="payment-panel">
               <!-- Customer Section -->
               <div class="customer-section">
                 <div class="section-header">
                   <h6>
                     <i class="bi bi-person me-2"></i>
-                    Khách hàng
+                    Thông tin khách hàng
                   </h6>
                   <button class="btn btn-sm btn-outline-primary" (click)="selectCustomer()">
-                    <i class="bi bi-person-plus"></i>
-                    Chọn khách hàng
+                    <i class="bi bi-person-plus me-1"></i>
+                    Chọn
                   </button>
                 </div>
                 <div class="customer-info">
-                  <div class="customer-name">{{ selectedInvoice.customer.tenKhachHang }}</div>
-                  <div class="customer-phone" *ngIf="selectedInvoice.customer.soDienThoai">
-                    {{ selectedInvoice.customer.soDienThoai }}
+                  <div class="customer-avatar">
+                    <i class="bi" [class.bi-person]="selectedInvoice.customer.loai === 'KHACH_LE'" [class.bi-person-circle]="selectedInvoice.customer.loai !== 'KHACH_LE'"></i>
                   </div>
-                  <div class="customer-type">
-                    <span class="badge" [class.badge-guest]="selectedInvoice.customer.loai === 'KHACH_LE'">
-                      {{ selectedInvoice.customer.loai === 'KHACH_LE' ? 'Khách lẻ' : 'Khách hàng' }}
-                    </span>
+                  <div class="customer-details">
+                    <div class="customer-name">{{ selectedInvoice.customer.tenKhachHang }}</div>
+                    <div class="customer-phone" *ngIf="selectedInvoice.customer.soDienThoai">
+                      <i class="bi bi-telephone me-1"></i>
+                      {{ selectedInvoice.customer.soDienThoai }}
+                    </div>
+                    <div class="customer-address" *ngIf="selectedInvoice.customer.diaChi">
+                      <i class="bi bi-geo-alt me-1"></i>
+                      {{ selectedInvoice.customer.diaChi }}
+                    </div>
+                    <div class="customer-type">
+                      <span class="badge" [class.badge-guest]="selectedInvoice.customer.loai === 'KHACH_LE'">
+                        <i class="bi" [class.bi-person]="selectedInvoice.customer.loai === 'KHACH_LE'" [class.bi-person-check]="selectedInvoice.customer.loai !== 'KHACH_LE'"></i>
+                        {{ selectedInvoice.customer.loai === 'KHACH_LE' ? 'Khách lẻ' : 'Khách hàng' }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -190,7 +249,7 @@
                   </div>
                   <!-- Debug info -->
                   <div class="voucher-debug" *ngIf="selectedVoucher" style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-                    Debug: Voucher ID {{ selectedVoucher.id }} - Discount: {{ discount | currency:'VND':'symbol':'1.0-0' }}
+                    Voucher ID {{ selectedVoucher.id }} - Discount: {{ discount | currency:'VND':'symbol':'1.0-0' }}
                   </div>
                 </div>
                 
@@ -344,33 +403,154 @@
 <div class="modal-overlay" *ngIf="isCustomerModalOpen" (click)="closeCustomerModal()">
   <div class="modal-content customer-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h4>Chọn khách hàng</h4>
+      <h4>
+        <i class="bi bi-people me-2"></i>
+        Chọn khách hàng
+      </h4>
       <button class="btn-close" (click)="closeCustomerModal()">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
     <div class="modal-body">
       <div class="search-customer">
-        <input type="text" 
-               class="form-control" 
-               placeholder="Tìm kiếm theo tên hoặc số điện thoại..."
-               [(ngModel)]="customerSearchQuery">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" 
+                 class="form-control" 
+                 placeholder="Tìm kiếm theo tên hoặc số điện thoại..."
+                 [(ngModel)]="customerSearchQuery">
+        </div>
+        <button class="btn btn-quick-create" (click)="openQuickCustomerModal()">
+          <i class="bi bi-person-plus me-1"></i>
+          Tạo khách hàng mới
+        </button>
       </div>
+      
       <div class="customer-list">
-        <div class="customer-item default" (click)="selectGuestCustomer()">
-          <div class="customer-avatar">
+        <!-- Guest Customer Option -->
+        <div class="customer-item guest-customer" (click)="selectGuestCustomer()">
+          <div class="customer-avatar guest">
             <i class="bi bi-person"></i>
           </div>
           <div class="customer-details">
             <div class="customer-name">Khách lẻ</div>
             <div class="customer-type">Khách hàng mặc định</div>
           </div>
+          <div class="customer-action">
+            <i class="bi bi-arrow-right"></i>
+          </div>
         </div>
-        <!-- Add more customer items here -->
+
+        <!-- Customer List -->
+        <div class="customer-item" 
+             *ngFor="let customer of filterCustomers(customerSearchQuery)" 
+             (click)="selectCustomerFromList(customer)">
+          <div class="customer-avatar">
+            <i class="bi bi-person-circle"></i>
+          </div>
+          <div class="customer-details">
+            <div class="customer-name">{{ customer.tenKhachHang }}</div>
+            <div class="customer-phone" *ngIf="customer.soDienThoai">
+              <i class="bi bi-telephone me-1"></i>
+              {{ customer.soDienThoai }}
+            </div>
+            <div class="customer-address" *ngIf="customer.diaChi">
+              <i class="bi bi-geo-alt me-1"></i>
+              {{ customer.diaChi }}
+            </div>
+          </div>
+          <div class="customer-action">
+            <i class="bi bi-arrow-right"></i>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div class="no-customers" *ngIf="filterCustomers(customerSearchQuery).length === 0 && customerSearchQuery">
+          <i class="bi bi-person-x"></i>
+          <p>Không tìm thấy khách hàng nào</p>
+          <small>Thử tìm kiếm với từ khóa khác</small>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-customers" *ngIf="availableCustomers.length === 0 && !customerSearchQuery">
+          <i class="bi bi-hourglass-split"></i>
+          <p>Đang tải danh sách khách hàng...</p>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Quick Customer Creation Modal -->
+<div class="modal-overlay" *ngIf="isQuickCustomerModalOpen" (click)="closeQuickCustomerModal()">
+  <div class="modal-content quick-customer-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>
+        <i class="bi bi-person-plus me-2"></i>
+        Tạo khách hàng mới
+      </h4>
+      <button class="btn-close" (click)="closeQuickCustomerModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="createQuickCustomer()">
+        <div class="form-group mb-3">
+          <label class="form-label">Tên khách hàng *</label>
+          <input type="text" 
+                 class="form-control" 
+                 placeholder="Nhập tên khách hàng"
+                 [(ngModel)]="newCustomer.tenKhachHang"
+                 name="tenKhachHang"
+                 required>
+        </div>
+        
+        <div class="form-group mb-3">
+          <label class="form-label">Số điện thoại</label>
+          <input type="tel" 
+                 class="form-control" 
+                 placeholder="Nhập số điện thoại"
+                 [(ngModel)]="newCustomer.sdt"
+                 name="sdt">
+        </div>
+        
+        <div class="form-group mb-3">
+          <label class="form-label">Địa chỉ</label>
+          <textarea class="form-control" 
+                    rows="2"
+                    placeholder="Nhập địa chỉ"
+                    [(ngModel)]="newCustomer.diaChi"
+                    name="diaChi"></textarea>
+        </div>
+        
+        <div class="form-group mb-4">
+          <label class="form-label">Email</label>
+          <input type="email" 
+                 class="form-control" 
+                 placeholder="Nhập email"
+                 [(ngModel)]="newCustomer.email"
+                 name="email">
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" 
+                  class="btn btn-secondary" 
+                  (click)="closeQuickCustomerModal()">
+            Hủy
+          </button>
+          <button type="submit" 
+                  class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>
+            Tạo khách hàng
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Voucher Selection Modal -->
 <div class="modal-overlay" *ngIf="showVoucherModal" (click)="closeVoucherModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">

@@ -9,6 +9,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface HoaDonMapper {
     HoaDonRequestDTO hoaDonReqtoDTO(HoaDon hoaDon);
+    
+    @Mapping(target = "chiTietHoaDons", ignore = true)
     HoaDon hoaDonReqtoEntity(HoaDonRequestDTO dto);
     
     @Mapping(source = "khachHang.tenKhachHang", target = "khachHang")

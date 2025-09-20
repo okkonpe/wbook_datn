@@ -1,5 +1,6 @@
 package com.example.app.dto.bookDTO;
 
+import com.example.app.dto.TaiBanDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,7 +22,6 @@ public class BookDetailDTO {
     private String maSanPhamChiTiet;
     private String theLoai;
     private Integer soTrang;
-    private Integer soLanTaiBan;
     private String nhaXuatBan;
     private String kichThuoc;
     private String loaiBia;
@@ -33,4 +34,8 @@ public class BookDetailDTO {
     private String moTa;
     private Boolean trangThai;
     private List<String> tacGia;
+    private List<Integer> tacGiaIds;
+    private List<String> chuDe;
+    private List<Integer> chuDeIds;
+    private Set<TaiBanDTO> taiBans;
 }

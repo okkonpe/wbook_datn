@@ -11,6 +11,8 @@ import javax.swing.table.TableColumn;
 @Mapper(componentModel = "spring")
 public interface TacGiaMapper {
  TacGiaDTO toDTO(TacGia tacGia);
+ 
+ @Mapping(target = "books", ignore = true)
  TacGia toEntity(TacGiaDTO tacGiaDTO);
 
 }

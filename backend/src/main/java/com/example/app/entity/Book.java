@@ -82,6 +82,7 @@ public class Book {
             joinColumns = @JoinColumn(name = "ID_san_pham_chi_tiet"),
             inverseJoinColumns = @JoinColumn(name = "ID_tac_gia")
     )
+    @Builder.Default
     private Set<TacGia> tacGia = new HashSet<>();
     @ManyToMany
     @JoinTable(
@@ -102,6 +103,13 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private List<HoaDonChiTiet> chiTietHoaDons;
 
-
+    @ManyToMany
+    @JoinTable(
+            name = "sach_tai_ban",
+            joinColumns = @JoinColumn(name = "sach"),
+            inverseJoinColumns = @JoinColumn(name = "tai_ban")
+    )
+    @Builder.Default
+    private Set<TaiBan> taiBans = new HashSet<>();
 
 }

@@ -185,6 +185,24 @@ INSERT INTO hoa_don_chi_tiet (ma_hoa_don, ma_san_pham, tong_tien, so_luong_mua, 
 (2, 3, 120000, 1, 'HDCT003', N'Rừng Na Uy - Bản in lần 1', 1),
 (3, 4, 150000, 1, 'HDCT004', N'Harry Potter - Bản in lần 3', 1);
 
+IF NOT EXISTS (SELECT 1 FROM tai_ban)
+BEGIN
+    INSERT INTO tai_ban (lan_tai_ban, nam_tai_ban) VALUES 
+    (1, 2024),
+    (2, 2024),
+    (1, 2023),
+    (3, 2024),
+    (2, 2023),
+    (1, 2025);
+    
+    PRINT 'Đã thêm dữ liệu mẫu vào bảng tai_ban';
+END
+ELSE
+BEGIN
+    PRINT 'Bảng tai_ban đã có dữ liệu';
+END
+
+
 PRINT N'✅ Đã thêm thành công dữ liệu mẫu cho tất cả các bảng!'
 
 select * from nhan_vien

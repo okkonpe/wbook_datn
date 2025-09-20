@@ -338,7 +338,7 @@
           <div class="col-12">
             <div class="alert alert-info">
               <i class="bi bi-info-circle me-2"></i>
-              <strong>Thông tin tự động tạo:</strong> ISBN và mã sản phẩm chi tiết sẽ được hệ thống tự động tạo khi lưu.
+              <strong>Thông tin tự động tạo:</strong> Mã sản phẩm chi tiết sẽ được hệ thống tự động tạo khi lưu.
             </div>
           </div>
           
@@ -361,9 +361,31 @@
           </div>
           
           <div class="col-md-4">
-            <label class="form-label">Lần tái bản</label>
-            <input type="number" class="form-control" [(ngModel)]="newProduct.lanTaiBan" placeholder="1" min="1">
-            <div class="form-text">Số lần tái bản</div>
+            <label class="form-label">Số trang <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="newProduct.soTrang" placeholder="300" min="1">
+            <div class="form-text">Tổng số trang sách</div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">ISBN <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="newProduct.isbn" placeholder="9781234567890" maxlength="13">
+            <div class="form-text">Mã ISBN</div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label">Tái bản</label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.taiBanIds">
+                <option [ngValue]="undefined">-- Chọn tái bản --</option>
+                <option *ngFor="let tb of taiBans" [ngValue]="tb.id">
+                  Lần {{ tb.lanTaiBan }} - {{ tb.namTaiBan }}
+                </option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddTaiBan()" title="Thêm nhanh tái bản">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+            <div class="form-text">Chọn tái bản</div>
           </div>
           
           <div class="col-md-6">
@@ -423,7 +445,7 @@
             <div class="input-group">
               <select class="form-control" [(ngModel)]="newProduct.loaiGiayId">
                 <option [ngValue]="undefined">-- Chọn loại giấy --</option>
-                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }}</option>
+                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }} - {{ g.mauSac || 'N/A' }}</option>
               </select>
               <button class="btn btn-outline-success" type="button" (click)="quickAddLoaiGiay()" title="Thêm nhanh loại giấy">
                 <i class="bi bi-plus"></i>
@@ -443,6 +465,71 @@
               <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="newProduct.trangThai">
               <label class="form-check-label">{{ newProduct.trangThai ? 'Hoạt động' : 'Ngừng hoạt động' }}</label>
             </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Tác giả <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.tacGiaIds">
+                <option [ngValue]="undefined">-- Chọn tác giả --</option>
+                <option *ngFor="let tg of tacGias" [ngValue]="tg.id">{{ tg.tenTacGia }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddTacGia()" title="Thêm nhanh tác giả">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+            <div class="form-text">Chọn tác giả</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Chủ đề</label>
+            <div class="input-group">
+              <select class="form-control" [(ngModel)]="newProduct.chuDeIds">
+                <option [ngValue]="undefined">-- Chọn chủ đề --</option>
+                <option *ngFor="let cd of chuDes" [ngValue]="cd.id">{{ cd.tenChuDe }}</option>
+              </select>
+              <button class="btn btn-outline-success" type="button" (click)="quickAddChuDe()" title="Thêm nhanh chủ đề">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+            <div class="form-text">Chọn chủ đề</div>
+          </div>
+          
+          <div class="col-12">
+            <label class="form-label">Hình ảnh sách <span class="text-danger">*</span></label>
+            <div class="image-upload-container">
+              <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/*" #fileInput [disabled]="uploadingImage">
+              
+              <!-- Upload progress -->
+              <div class="upload-progress" *ngIf="uploadingImage">
+                <div class="progress-bar">
+                  <div class="progress-fill"></div>
+                </div>
+                <span class="upload-text">Đang upload hình ảnh...</span>
+              </div>
+              
+              <!-- Image preview -->
+              <div class="image-preview" *ngIf="newProduct.hinhAnh && !uploadingImage">
+                <img [src]="newProduct.hinhAnh" alt="Preview" class="preview-image">
+                <div class="image-overlay">
+                  <button type="button" class="btn btn-sm btn-danger remove-image" (click)="removeImage()">
+                    <i class="bi bi-x"></i>
+                  </button>
+                  <div class="upload-success" *ngIf="newProduct.hinhAnhFilename">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <span>Upload thành công</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Upload area when no image -->
+              <div class="upload-area" *ngIf="!newProduct.hinhAnh && !uploadingImage" (click)="fileInput.click()">
+                <i class="bi bi-cloud-upload"></i>
+                <p>Nhấp để chọn hình ảnh</p>
+                <small>JPG, PNG, GIF (tối đa 5MB)</small>
+              </div>
+            </div>
+            <div class="form-text">Chọn hình ảnh bìa sách từ máy tính của bạn</div>
           </div>
           
           <div class="col-12">

@@ -1,62 +1,161 @@
 <div class="container mt-4">
   <h3 class="mb-4 text-primary">🛒 Giỏ hàng của bạn</h3>
 
-  <table class="table table-bordered table-hover" *ngIf="cartItems.length > 0; else emptyCart">
-    <thead class="table-light">
-      <tr>
-        <th>Ảnh</th>
-        <th>Tên sách</th>
-        <th>Đơn giá</th>
-        <th>Số lượng</th>
-        <th>Thành tiền</th>
-        <th>Hành động</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of cartItems">
-        <td><img [src]="item.hinhAnh" alt="..." width="60" height="80" style="object-fit: cover;"></td>
-        <td>{{ item.tenSanPham }}</td>
-        <td>{{ item.donGia | number }} đ</td>
-        <td>
-          <div class="d-flex align-items-center gap-2">
-            <button
-              class="btn btn-outline-secondary btn-sm"
-              (click)="decrease(item)"
-              [disabled]="item.soLuongMua <= 1"
-            >–</button>
-
-            <span>{{ item.soLuongMua }}</span>
-
-            <button
-              class="btn btn-outline-secondary btn-sm"
-              (click)="increase(item)"
-            >+</button>
-          </div>
-        </td>
-        <td>{{ item.tongTien | number }} đ</td>
-        <td>
-          <button class="btn btn-sm btn-danger" (click)="removeItem(item)">
-            🗑 Xóa
-          </button>
-        </td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
-        <td colspan="2" class="fw-bold text-danger">
-          {{ getTotal() | number }} đ
-         
-<button class="btn btn-success" style="margin-left: 150px;" routerLink="/order">
-  <!-- (click)="fillInfoOrder()" -->
-  Đặt hàng
-</button>
-
+  <div class="cart-items" *ngIf="cartItems.length > 0; else emptyCart">
+    <div class="cart-item" *ngFor="let item of cartItems">
+      <div class="item-main">
+        <div class="item-image">
+          <img [src]="item.hinhAnh" alt="..." width="80" height="100" style="object-fit: cover; border-radius: 8px;">
+        </div>
+        
+        <div class="item-details">
+          <h5 class="item-title">{{ item.tenSanPham }}</h5>
           
-        </td>
-      </tr>
-    </tfoot>
-  </table>
+          <!-- Thông tin cơ bản -->
+          <div class="item-basic-info">
+            <div class="info-row">
+              <span class="info-label">ISBN:</span>
+              <span class="info-value">{{ item.isbn || 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Mã SPCT:</span>
+              <span class="info-value">{{ item.maSanPhamChiTiet || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <!-- Thông tin chi tiết -->
+          <div class="item-detailed-info">
+            <div class="info-grid">
+              <div class="info-item">
+                <i class="bi bi-tags"></i>
+                <span class="info-label">Thể loại:</span>
+                <span class="info-value">{{ item.theLoai || 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-building"></i>
+                <span class="info-label">NXB:</span>
+                <span class="info-value">{{ item.nhaXuatBan || 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-rulers"></i>
+                <span class="info-label">Kích thước:</span>
+                <span class="info-value">{{ item.kichThuoc || 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-book"></i>
+                <span class="info-label">Loại bìa:</span>
+                <span class="info-value">{{ item.loaiBia || 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-file-text"></i>
+                <span class="info-label">Loại giấy:</span>
+                <span class="info-value">{{ item.loaiGiay || 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="info-label">Số trang:</span>
+                <span class="info-value">{{ item.soTrang || 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-speedometer"></i>
+                <span class="info-label">Khối lượng:</span>
+                <span class="info-value">{{ item.khoiLuongTinh ? item.khoiLuongTinh + 'g' : 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-calendar"></i>
+                <span class="info-label">Ngày XB:</span>
+                <span class="info-value">{{ item.ngayXuatBan || 'N/A' }}</span>
+              </div>
+            </div>
+
+            <!-- Tác giả -->
+            <div class="info-section" *ngIf="item.tacGia && item.tacGia.length > 0">
+              <i class="bi bi-person"></i>
+              <span class="info-label">Tác giả:</span>
+              <span class="info-value">{{ item.tacGia.join(', ') }}</span>
+            </div>
+
+            <!-- Chủ đề -->
+            <div class="info-section" *ngIf="item.chuDe && item.chuDe.length > 0">
+              <i class="bi bi-bookmark"></i>
+              <span class="info-label">Chủ đề:</span>
+              <span class="info-value">{{ item.chuDe.join(', ') }}</span>
+            </div>
+
+            <!-- Tái bản -->
+            <div class="info-section" *ngIf="item.taiBans && item.taiBans.length > 0">
+              <i class="bi bi-arrow-repeat"></i>
+              <span class="info-label">Tái bản:</span>
+              <span class="info-value">{{ item.taiBans.join(', ') }}</span>
+            </div>
+
+            <!-- Mô tả -->
+            <div class="info-section" *ngIf="item.moTa">
+              <i class="bi bi-info-circle"></i>
+              <span class="info-label">Mô tả:</span>
+              <span class="info-value">{{ item.moTa }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="item-actions">
+          <div class="price-section">
+            <div class="price-info">
+              <span class="price-label">Đơn giá:</span>
+              <span class="price-value">{{ item.donGia | number }} đ</span>
+            </div>
+            
+            <div class="quantity-controls">
+              <span class="quantity-label">Số lượng:</span>
+              <div class="quantity-buttons">
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="decrease(item)"
+                  [disabled]="item.soLuongMua <= 1"
+                >–</button>
+                <span class="quantity-value">{{ item.soLuongMua }}</span>
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="increase(item)"
+                >+</button>
+              </div>
+            </div>
+
+            <div class="total-info">
+              <span class="total-label">Thành tiền:</span>
+              <span class="total-value">{{ item.tongTien | number }} đ</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-sm btn-danger" (click)="removeItem(item)">
+              <i class="bi bi-trash"></i> Xóa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Summary -->
+  <div class="cart-summary" *ngIf="cartItems.length > 0">
+    <div class="summary-card">
+      <div class="summary-content">
+        <div class="total-section">
+          <h4 class="total-title">
+            <i class="bi bi-calculator me-2"></i>
+            Tổng cộng: {{ getTotal() | number }} đ
+          </h4>
+        </div>
+        <div class="checkout-section">
+          <button class="btn btn-success btn-lg" routerLink="/order">
+            <i class="bi bi-cart-check me-2"></i>
+            Đặt hàng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <ng-template #emptyCart>
     <div class="alert alert-info">🛒 Giỏ hàng trống. Quay lại mua sách nhé!</div>

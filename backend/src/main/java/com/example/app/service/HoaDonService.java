@@ -264,10 +264,26 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
         hoaDonRepository.save(hd);
         return hoaDonMapper.donHangtoDTO(hd);
     }
+@Transactional
 public ThemGioHangDTO themGioHang(ThemGioHangDTO gioHangDTO){
+    System.out.println("🛒 === THÊM VÀO GIỎ HÀNG (VERSION 2.0) ===");
+    System.out.println("📦 Sản phẩm ID: " + gioHangDTO.getId());
+    System.out.println("👤 Khách hàng ID: " + gioHangDTO.getKhachHangId());
+    System.out.println("📊 Số lượng thêm: " + gioHangDTO.getSoLuong());
 
 KhachHang kh =khachHangRepo.findById(gioHangDTO.getKhachHangId()).orElseThrow(()-> new RuntimeException("Không tìm khách hàng"));
     Book book =  bookRepository.findById(gioHangDTO.getId()).orElseThrow(() -> new RuntimeException("Không tìm thấy sách"));
+    
+    // Kiểm tra số lượng tồn kho trước khi thêm vào giỏ hàng
+    int currentStock = book.getSoLuong() == null ? 0 : book.getSoLuong();
+    System.out.println("📦 Tồn kho hiện tại: " + currentStock + " (Mã: " + book.getMaSanPhamChiTiet() + ")");
+    
+    // Chỉ kiểm tra tồn kho khi thêm sản phẩm (soLuong > 0)
+    if (gioHangDTO.getSoLuong() > 0 && currentStock < gioHangDTO.getSoLuong()) {
+        throw new RuntimeException("Số lượng tồn không đủ cho mã: " + book.getMaSanPhamChiTiet() + 
+                                 ". Tồn kho hiện tại: " + currentStock + ", yêu cầu: " + gioHangDTO.getSoLuong());
+    }
+    
     TrangThaiHoaDon trangThaiGio = trangThaiHoaDonRepo.findByTrangThai("GIO_HANG")
             .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái GIỎ_HÀNG"));
     HoaDon hoaDon = hoaDonRepository.findByKhachHangAndTrangThai(kh, trangThaiGio)
@@ -276,26 +292,52 @@ KhachHang kh =khachHangRepo.findById(gioHangDTO.getKhachHangId()).orElseThrow(()
             });
     Optional<HoaDonChiTiet> existingCT = gioHangRepo.findByHoaDonAndAndBook(hoaDon, book);
 
+    int soLuongThucTeThem = gioHangDTO.getSoLuong(); // Số lượng thực tế được thêm vào
+
     if (existingCT.isPresent()) {
         HoaDonChiTiet ct = existingCT.get();
+        int oldSoLuong = ct.getSoLuongMua();
         int newSoLuong = ct.getSoLuongMua() + gioHangDTO.getSoLuong();
+        System.out.println("🔄 Sản phẩm đã có trong giỏ: " + oldSoLuong + " + " + gioHangDTO.getSoLuong() + " = " + newSoLuong);
+        
         if (newSoLuong <= 0) {
             gioHangRepo.delete(ct);
+            soLuongThucTeThem = -ct.getSoLuongMua(); // Nếu xóa hoàn toàn, số lượng thực tế là âm của số cũ
+            System.out.println("🗑️ Xóa sản phẩm khỏi giỏ hàng, hoàn trả tồn kho: " + (-soLuongThucTeThem));
         } else {
+            // Kiểm tra tổng số lượng trong giỏ hàng không vượt quá tồn kho (chỉ khi thêm)
+            if (gioHangDTO.getSoLuong() > 0 && newSoLuong > currentStock) {
+                throw new RuntimeException("Số lượng trong giỏ hàng vượt quá tồn kho cho mã: " + book.getMaSanPhamChiTiet() + 
+                                         ". Tồn kho: " + currentStock + ", trong giỏ: " + newSoLuong);
+            }
             ct.setSoLuongMua(newSoLuong);
             ct.setTongTien(book.getDonGia().multiply(BigDecimal.valueOf(newSoLuong)));
             gioHangRepo.save(ct);
+            System.out.println("✅ Cập nhật số lượng trong giỏ hàng: " + newSoLuong);
         }
     } else {
-        HoaDonChiTiet newCT = new HoaDonChiTiet();
-        newCT.setHoaDon(hoaDon);
-        newCT.setBook(book);
-        newCT.setSoLuongMua(gioHangDTO.getSoLuong());
-        newCT.setTongTien(book.getDonGia().multiply(BigDecimal.valueOf(gioHangDTO.getSoLuong())));
-        newCT.setTrangThai(true);
-        gioHangRepo.save(newCT);
+        // Chỉ thêm sản phẩm mới khi soLuong > 0
+        if (gioHangDTO.getSoLuong() > 0) {
+            HoaDonChiTiet newCT = new HoaDonChiTiet();
+            newCT.setHoaDon(hoaDon);
+            newCT.setBook(book);
+            newCT.setSoLuongMua(gioHangDTO.getSoLuong());
+            newCT.setTongTien(book.getDonGia().multiply(BigDecimal.valueOf(gioHangDTO.getSoLuong())));
+            newCT.setTrangThai(true);
+            gioHangRepo.save(newCT);
+            System.out.println("➕ Thêm sản phẩm mới vào giỏ hàng: " + gioHangDTO.getSoLuong());
+        } else {
+            System.out.println("⚠️ Không thể thêm sản phẩm với số lượng <= 0");
+            soLuongThucTeThem = 0; // Không thay đổi tồn kho
+        }
     }
 
+    // Cập nhật số lượng tồn kho với số lượng thực tế được thêm/xóa
+    int newStock = currentStock - soLuongThucTeThem;
+    System.out.println("🔄 Cập nhật tồn kho: " + currentStock + " - " + soLuongThucTeThem + " = " + newStock);
+    book.setSoLuong(newStock);
+    bookRepository.save(book);
+    System.out.println("✅ Đã lưu tồn kho mới: " + newStock);
 
     List<HoaDonChiTiet> chiTietList = gioHangRepo.findByHoaDon(hoaDon);
 
@@ -303,13 +345,10 @@ KhachHang kh =khachHangRepo.findById(gioHangDTO.getKhachHangId()).orElseThrow(()
             .map(HoaDonChiTiet::getTongTien)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    int tongSoLuong = chiTietList.stream()
-            .mapToInt(HoaDonChiTiet::getSoLuongMua)
-            .sum();
-
     hoaDon.setTongTien(tongTien);
 
     hoaDonRepository.save(hoaDon);
+    System.out.println("🎉 === HOÀN THÀNH THÊM VÀO GIỎ HÀNG ===");
 return gioHangDTO;
 }
 //public List<ListHoaDonDTO> getHoaDonByKhachHangID(){
@@ -495,6 +534,17 @@ return gioHangDTO;
 
         Book book = bookRepository.findById(idSanPham)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+        // Lấy số lượng sản phẩm trong giỏ hàng trước khi xóa để hoàn trả tồn kho
+        Optional<HoaDonChiTiet> existingCT = gioHangRepo.findByHoaDonAndAndBook(hoaDon, book);
+        if (existingCT.isPresent()) {
+            int soLuongTrongGio = existingCT.get().getSoLuongMua();
+            
+            // Hoàn trả số lượng tồn kho
+            int currentStock = book.getSoLuong() == null ? 0 : book.getSoLuong();
+            book.setSoLuong(currentStock + soLuongTrongGio);
+            bookRepository.save(book);
+        }
 
         gioHangRepo.deleteByHoaDonAndBook(hoaDon, book);
     }

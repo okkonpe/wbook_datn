@@ -137,6 +137,31 @@
                 </div>
               </div>
 
+              <!-- Cart Summary -->
+              <div class="cart-summary" *ngIf="selectedInvoice.items.length > 0">
+                <div class="summary-header">
+                  <h6>
+                    <i class="bi bi-cart-check me-2"></i>
+                    Tóm tắt giỏ hàng
+                  </h6>
+                  <span class="item-count">{{ selectedInvoice.items.length }} sản phẩm</span>
+                </div>
+                <div class="summary-stats">
+                  <div class="stat-item">
+                    <span class="stat-label">Tổng tiền hàng:</span>
+                    <span class="stat-value">{{ selectedInvoice.totalAmount | currency:'VND':'symbol':'1.0-0' }}</span>
+                  </div>
+                  <div class="stat-item" *ngIf="discount > 0">
+                    <span class="stat-label">Giảm giá:</span>
+                    <span class="stat-value text-success">-{{ discount | currency:'VND':'symbol':'1.0-0' }}</span>
+                  </div>
+                  <div class="stat-item total">
+                    <span class="stat-label">Thành tiền:</span>
+                    <span class="stat-value">{{ (selectedInvoice.totalAmount - discount) | currency:'VND':'symbol':'1.0-0' }}</span>
+                  </div>
+                </div>
+              </div>
+
               <!-- Product List -->
               <div class="product-list" *ngIf="selectedInvoice.items.length === 0">
                 <div class="empty-cart">
@@ -146,18 +171,37 @@
                 </div>
               </div>
 
-              <div class="product-list" *ngIf="selectedInvoice.items.length > 0">
-                <div class="product-item" *ngFor="let item of selectedInvoice.items; index as i">
-                  <div class="product-info">
-                    <div class="product-details">
-                      <h6>{{ item.tenSanPham }}</h6>
-                      <p class="product-code">{{ item.maSanPhamChiTiet }}</p>
-                      <p class="product-isbn">ISBN: {{ item.isbn }}</p>
+              <div class="product-list-horizontal" *ngIf="selectedInvoice.items.length > 0">
+                <div class="product-row" *ngFor="let item of selectedInvoice.items; index as i">
+                  <div class="product-checkbox">
+                    <input type="checkbox" [checked]="true" disabled>
+                  </div>
+                  
+                  <div class="product-image">
+                    <img *ngIf="item.hinhAnh" [src]="item.hinhAnh" [alt]="item.tenSanPham" class="product-thumb">
+                    <div *ngIf="!item.hinhAnh" class="no-image">
+                      <i class="bi bi-image"></i>
+                    </div>
+                    <div class="discount-badge" *ngIf="false">
+                      <span>20%</span>
                     </div>
                   </div>
-                  <div class="product-actions">
+                  
+                  <div class="product-info" (click)="viewProductDetail(item)">
+                    <h6 class="product-name">{{ item.tenSanPham }}</h6>
+                    <div class="product-details">
+                      <span class="product-code">{{ item.maSanPhamChiTiet }}</span>
+                      <span class="product-isbn">ISBN: {{ item.isbn }}</span>
+                    </div>
+                    <div class="price-info">
+                      <span class="original-price" *ngIf="false">{{ item.donGia | currency:'VND':'symbol':'1.0-0' }}</span>
+                      <span class="current-price">{{ item.donGia | currency:'VND':'symbol':'1.0-0' }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="quantity-section">
                     <div class="quantity-controls">
-                      <button class="btn btn-quantity" (click)="decreaseQuantity(i)">
+                      <button class="btn btn-quantity" (click)="decreaseQuantity(i)" [disabled]="item.soLuong <= 1">
                         <i class="bi bi-dash"></i>
                       </button>
                       <span class="quantity">{{ item.soLuong }}</span>
@@ -165,11 +209,14 @@
                         <i class="bi bi-plus"></i>
                       </button>
                     </div>
-                    <div class="price-info">
-                      <div class="unit-price">{{ item.donGia | currency:'VND':'symbol':'1.0-0' }}</div>
-                      <div class="total-price">{{ item.thanhTien | currency:'VND':'symbol':'1.0-0' }}</div>
-                    </div>
-                    <button class="btn btn-remove" (click)="removeItem(i)">
+                  </div>
+                  
+                  <div class="total-section">
+                    <span class="total-price">{{ item.thanhTien | currency:'VND':'symbol':'1.0-0' }}</span>
+                  </div>
+                  
+                  <div class="action-section">
+                    <button class="btn btn-remove" (click)="removeItem(i)" title="Xóa sản phẩm">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -597,6 +644,74 @@
       <button class="btn btn-primary" (click)="applyVoucher()" [disabled]="!selectedVoucher">
         Áp dụng voucher
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="modal-overlay" *ngIf="isProductDetailModalOpen" (click)="closeProductDetailModal()">
+  <div class="modal-content product-detail-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>
+        <i class="bi bi-info-circle me-2"></i>
+        Chi tiết sản phẩm
+      </h4>
+      <button class="btn-close" (click)="closeProductDetailModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedProductDetail">
+      <div class="product-detail-content">
+        <div class="product-image-section">
+          <img *ngIf="selectedProductDetail.hinhAnh" 
+               [src]="selectedProductDetail.hinhAnh" 
+               [alt]="selectedProductDetail.tenSanPham" 
+               class="detail-image">
+          <div *ngIf="!selectedProductDetail.hinhAnh" class="no-detail-image">
+            <i class="bi bi-image"></i>
+            <p>Không có hình ảnh</p>
+          </div>
+        </div>
+        
+        <div class="product-info-section">
+          <h5 class="product-title">{{ selectedProductDetail.tenSanPham }}</h5>
+          
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Mã sản phẩm:</label>
+              <span>{{ selectedProductDetail.maSanPhamChiTiet }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <label>ISBN:</label>
+              <span>{{ selectedProductDetail.isbn || 'N/A' }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <label>Đơn giá:</label>
+              <span class="price">{{ selectedProductDetail.donGia | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <label>Số lượng trong giỏ:</label>
+              <span class="quantity">{{ selectedProductDetail.soLuong }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <label>Thành tiền:</label>
+              <span class="total">{{ selectedProductDetail.thanhTien | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+          </div>
+          
+          <div class="product-description" *ngIf="selectedProductDetail?.moTa">
+            <label>Mô tả:</label>
+            <p>{{ selectedProductDetail?.moTa }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeProductDetailModal()">Đóng</button>
     </div>
   </div>
 </div>

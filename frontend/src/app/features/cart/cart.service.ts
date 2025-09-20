@@ -23,6 +23,21 @@ export interface ListGioHangDTO {
   soLuongMua: number;
   tongTien: number;
   hinhAnh: string;
+  // Thêm các thuộc tính chi tiết của biến thể
+  isbn?: string;
+  maSanPhamChiTiet?: string;
+  theLoai?: string;
+  nhaXuatBan?: string;
+  kichThuoc?: string;
+  loaiBia?: string;
+  loaiGiay?: string;
+  soTrang?: number;
+  khoiLuongTinh?: number;
+  ngayXuatBan?: string;
+  tacGia?: string[];
+  chuDe?: string[];
+  taiBans?: string[];
+  moTa?: string;
 }
 
 @Injectable({

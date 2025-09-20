@@ -19,8 +19,10 @@
       </div>
       <div class="col-md-4 text-end">
         <div class="draft-counter">
-          <div class="counter-circle">{{ drafts.length }}</div>
-          <span>Biến thể chờ lưu</span>
+          <div class="counter-circle">
+            <i class="bi bi-plus-circle-fill"></i>
+          </div>
+          <span>Thêm biến thể mới</span>
         </div>
       </div>
     </div>
@@ -38,8 +40,9 @@
           <i class="bi bi-plus-circle me-2"></i>
           Thêm biến thể mới
         </h3>
-        <p>Nhập thông tin biến thể và thêm vào danh sách staging</p>
+        <p>Nhập thông tin biến thể và lưu trực tiếp vào hệ thống</p>
       </div>
+      
       
       <div class="form-content">
         <div class="row g-4">
@@ -55,9 +58,12 @@
                 [(ngModel)]="newDraft.isbn" 
                 placeholder="978-0-123456-78-9"
                 maxlength="13"
-                readonly
-                disabled>
-              <div class="input-help">Tự động tạo (không thể chỉnh sửa)</div>
+                [disabled]="isDisabled('isbn')"
+                readonly>
+              <div class="input-help" *ngIf="isDisabled('isbn')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
             </div>
           </div>
           
@@ -118,81 +124,233 @@
                 <i class="bi bi-calendar-event me-2"></i>
                 Ngày xuất bản
               </label>
-              <input 
-                type="date" 
-                class="form-control-modern" 
-                [(ngModel)]="newDraft.ngayXuatBan"
-                [disabled]="isDisabled('ngayXuatBan')">
+              <div class="input-group">
+                <input 
+                  type="date" 
+                  class="form-control-modern" 
+                  [(ngModel)]="newDraft.ngayXuatBan"
+                  [disabled]="isDisabled('ngayXuatBan')">
+                <button class="btn btn-outline-success" type="button" (click)="setCurrentDate()" title="Đặt ngày hiện tại">
+                  <i class="bi bi-calendar-check"></i>
+                </button>
+              </div>
               <div class="input-help">Ngày xuất bản sách</div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-book me-2"></i>
+                Số trang
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern locked-field" 
+                [(ngModel)]="newDraft.soTrang" 
+                placeholder="300"
+                min="1"
+                [disabled]="isDisabled('soTrang')"
+                [readonly]="isDisabled('soTrang')">
+              <div class="input-help" *ngIf="isDisabled('soTrang')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-arrow-repeat me-2"></i>
+                Tái bản
+              </label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.taiBanIds" [disabled]="isDisabled('taiBanIds')">
+                <option [ngValue]="undefined">-- Chọn tái bản --</option>
+                <option *ngFor="let tb of taiBans" [ngValue]="tb.id">
+                  Lần {{ tb.lanTaiBan }} - {{ tb.namTaiBan }}
+                </option>
+              </select>
+              <div class="input-help" *ngIf="isDisabled('taiBanIds')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-speedometer me-2"></i>
+                Khối lượng tịnh (g)
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern locked-field" 
+                [(ngModel)]="newDraft.khoiLuongTinh" 
+                placeholder="500"
+                min="0"
+                step="0.1"
+                [disabled]="isDisabled('khoiLuongTinh')"
+                [readonly]="isDisabled('khoiLuongTinh')">
+              <div class="input-help" *ngIf="isDisabled('khoiLuongTinh')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
             </div>
           </div>
 
           <!-- Thuộc tính bắt buộc -->
-          <!-- Picker pills giống màu sắc & kích cỡ -->
           <div class="col-md-6">
             <div class="input-group-modern">
               <label class="input-label"><i class="bi bi-tags me-2"></i>Thể loại</label>
-              <div class="d-flex gap-2 mb-2">
-                <select class="form-control-modern" [(ngModel)]="chosenTheLoaiId" [disabled]="isDisabled('theLoai')">
+              <div class="input-group">
+                <select class="form-control-modern" [(ngModel)]="newDraft.theLoai" [disabled]="isDisabled('theLoai')">
                   <option [ngValue]="undefined">-- Chọn thể loại --</option>
                   <option *ngFor="let t of theLoais" [ngValue]="t.id">{{ t.tenTheLoai }}</option>
                 </select>
-                <button class="btn btn-success" type="button" (click)="addTheLoai()" [disabled]="isDisabled('theLoai')"><i class="bi bi-plus"></i></button>
-              </div>
-              <div class="d-flex flex-wrap gap-2">
-                <span class="badge rounded-pill bg-primary d-flex align-items-center gap-2" *ngFor="let id of selectedTheLoaiIds">
-                  {{ getTheLoaiName(id) }}
-                  <i class="bi bi-x" role="button" (click)="removeTheLoai(id)" [class.disabled]="isDisabled('theLoai')"></i>
-                </span>
+                <button class="btn btn-outline-success" type="button" (click)="quickAddTheLoai()" title="Thêm nhanh thể loại">
+                  <i class="bi bi-plus"></i>
+                </button>
               </div>
             </div>
           </div>
           <div class="col-md-6">
             <div class="input-group-modern">
               <label class="input-label"><i class="bi bi-building me-2"></i>Nhà xuất bản</label>
-              <div class="d-flex gap-2 mb-2">
-                <select class="form-control-modern" [(ngModel)]="chosenNxbId" [disabled]="isDisabled('nxb')">
+              <div class="input-group">
+                <select class="form-control-modern" [(ngModel)]="newDraft.nhaXuatBan" [disabled]="isDisabled('nxb')">
                   <option [ngValue]="undefined">-- Chọn NXB --</option>
                   <option *ngFor="let n of nhaXuatBans" [ngValue]="n.id">{{ n.tenNhaXuatBan }}</option>
                 </select>
-                <button class="btn btn-success" type="button" (click)="addNxb()" [disabled]="isDisabled('nxb')"><i class="bi bi-plus"></i></button>
-              </div>
-              <div class="d-flex flex-wrap gap-2">
-                <span class="badge rounded-pill bg-info text-dark d-flex align-items-center gap-2" *ngFor="let id of selectedNxbIds">
-                  {{ getNxbName(id) }}
-                  <i class="bi bi-x" role="button" (click)="removeNxb(id)" [class.disabled]="isDisabled('nxb')"></i>
-                </span>
+                <button class="btn btn-outline-success" type="button" (click)="quickAddNxb()" title="Thêm nhanh nhà xuất bản">
+                  <i class="bi bi-plus"></i>
+                </button>
               </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="input-group-modern">
               <label class="input-label"><i class="bi bi-aspect-ratio me-2"></i>Kích thước</label>
-              <select class="form-control-modern" [(ngModel)]="newDraft.kichThuoc" [disabled]="isDisabled('kichThuoc')">
-                <option [ngValue]="undefined">-- Chọn kích thước --</option>
-                <option *ngFor="let k of kichThuocs" [ngValue]="k.id">{{ k.chiSoKichThuoc || k.name }}</option>
-              </select>
+              <div class="input-group">
+                <select class="form-control-modern" [(ngModel)]="newDraft.kichThuoc" [disabled]="isDisabled('kichThuoc')">
+                  <option [ngValue]="undefined">-- Chọn kích thước --</option>
+                  <option *ngFor="let k of kichThuocs" [ngValue]="k.id">{{ k.chiSoKichThuoc || k.name }}</option>
+                </select>
+                <button class="btn btn-outline-success" type="button" (click)="quickAddKichThuoc()" title="Thêm nhanh kích thước">
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="input-group-modern">
               <label class="input-label"><i class="bi bi-journal me-2"></i>Loại bìa</label>
-              <select class="form-control-modern" [(ngModel)]="newDraft.loaiBia" [disabled]="isDisabled('loaiBia')">
-                <option [ngValue]="undefined">-- Chọn loại bìa --</option>
-                <option *ngFor="let b of loaiBiaList" [ngValue]="b.id">{{ b.tenBia || b.name }}</option>
-              </select>
+              <div class="input-group">
+                <select class="form-control-modern" [(ngModel)]="newDraft.loaiBia" [disabled]="isDisabled('loaiBia')">
+                  <option [ngValue]="undefined">-- Chọn loại bìa --</option>
+                  <option *ngFor="let b of loaiBiaList" [ngValue]="b.id">{{ b.tenBia || b.name }}</option>
+                </select>
+                <button class="btn btn-outline-success" type="button" (click)="quickAddLoaiBia()" title="Thêm nhanh loại bìa">
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="input-group-modern">
               <label class="input-label"><i class="bi bi-file-earmark-richtext me-2"></i>Loại giấy</label>
-              <select class="form-control-modern" [(ngModel)]="newDraft.loaiGiay" [disabled]="isDisabled('loaiGiay')">
-                <option [ngValue]="undefined">-- Chọn loại giấy --</option>
-                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }}</option>
-              </select>
+              <div class="input-group">
+                <select class="form-control-modern" [(ngModel)]="newDraft.loaiGiay" [disabled]="isDisabled('loaiGiay')">
+                  <option [ngValue]="undefined">-- Chọn loại giấy --</option>
+                  <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }} - {{ g.mauSac || 'N/A' }}</option>
+                </select>
+                <button class="btn btn-outline-success" type="button" (click)="quickAddLoaiGiay()" title="Thêm nhanh loại giấy">
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
             </div>
           </div>
           
+          
+          <!-- Tác giả -->
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-person me-2"></i>
+                Tác giả
+              </label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.tacGiaIds" [disabled]="isDisabled('tacGiaIds')">
+                <option [ngValue]="undefined">-- Chọn tác giả --</option>
+                <option *ngFor="let tg of tacGias" [ngValue]="tg.id">{{ tg.tenTacGia }}</option>
+              </select>
+              <div class="input-help" *ngIf="isDisabled('tacGiaIds')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+
+          <!-- Chủ đề -->
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-tags me-2"></i>
+                Chủ đề
+              </label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.chuDeIds" [disabled]="isDisabled('chuDeIds')">
+                <option [ngValue]="undefined">-- Chọn chủ đề --</option>
+                <option *ngFor="let cd of chuDes" [ngValue]="cd.id">{{ cd.tenChuDe }}</option>
+              </select>
+              <div class="input-help" *ngIf="isDisabled('chuDeIds')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+
+          <!-- Hình ảnh -->
+          <div class="col-md-12">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-image me-2"></i>
+                Hình ảnh sách
+              </label>
+              <div class="image-upload-container">
+                <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/*" #fileInput [disabled]="isDisabled('hinhAnh')">
+                
+                <!-- Upload progress -->
+                <div class="upload-progress" *ngIf="uploadingImage">
+                  <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <span class="upload-text">Đang upload hình ảnh...</span>
+                </div>
+                
+                <!-- Image preview -->
+                <div class="image-preview" *ngIf="newDraft.hinhAnh && !uploadingImage">
+                  <img [src]="getImageUrl(newDraft.hinhAnh)" alt="Preview" class="preview-image">
+                  <div class="image-overlay">
+                    <button type="button" class="btn btn-sm btn-danger remove-image" (click)="removeImage()" [disabled]="isDisabled('hinhAnh')">
+                      <i class="bi bi-x"></i>
+                    </button>
+                    <div class="upload-success" *ngIf="newDraft.hinhAnh">
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                      <span>Đã tải lên</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Upload area when no image -->
+                <div class="upload-area" *ngIf="!newDraft.hinhAnh && !uploadingImage" (click)="fileInput.click()" [class.disabled]="isDisabled('hinhAnh')">
+                  <i class="bi bi-cloud-upload"></i>
+                  <p>Nhấp để chọn hình ảnh</p>
+                  <small>JPG, PNG, GIF (tối đa 5MB)</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="col-md-12">
             <div class="input-group-modern">
               <label class="input-label">
@@ -211,9 +369,10 @@
           
           <div class="col-md-12">
             <div class="form-actions">
-              <button class="btn btn-add-variant" (click)="addDraft()">
-                <i class="bi bi-plus-lg me-2"></i>
-                Thêm vào danh sách
+              <button class="btn btn-add-variant" (click)="saveVariant()" [disabled]="saving">
+                <div class="spinner-border spinner-border-sm me-2" *ngIf="saving"></div>
+                <i class="bi bi-check-circle me-2" *ngIf="!saving"></i>
+                {{ saving ? 'Đang lưu...' : 'Lưu biến thể' }}
               </button>
               <button class="btn btn-reset" (click)="resetForm()">
                 <i class="bi bi-arrow-clockwise me-2"></i>
@@ -225,104 +384,6 @@
       </div>
     </div>
 
-    <!-- Staging List -->
-    <div class="staging-card">
-      <div class="staging-header">
-        <div class="header-left">
-          <h3>
-            <i class="bi bi-list-ul me-2"></i>
-            Danh sách staging
-          </h3>
-          <div class="staging-stats">
-            <span class="stat-item">
-              <i class="bi bi-layers me-1"></i>
-              {{ drafts.length }} biến thể
-            </span>
-            <span class="stat-item" *ngIf="totalEstimatedValue > 0">
-              <i class="bi bi-cash me-1"></i>
-              {{ totalEstimatedValue | currency:'VND':'symbol':'1.0-0' }} tổng giá trị
-            </span>
-          </div>
-        </div>
-        
-        <div class="header-actions">
-          <button 
-            class="btn btn-clear" 
-            (click)="clearAll()" 
-            [disabled]="!drafts.length">
-            <i class="bi bi-trash me-2"></i>
-            Xóa tất cả
-          </button>
-          <button 
-            class="btn btn-save-all" 
-            [disabled]="!drafts.length || uploading || saving" 
-            (click)="saveAll()">
-            <div class="spinner-border spinner-border-sm me-2" *ngIf="saving"></div>
-            <i class="bi bi-cloud-upload me-2" *ngIf="!saving"></i>
-            {{ saving ? 'Đang lưu...' : 'Lưu tất cả' }}
-          </button>
-        </div>
-      </div>
-      
-      <!-- Empty State -->
-      <div class="empty-state" *ngIf="!drafts.length">
-        <div class="empty-icon">
-          <i class="bi bi-inbox"></i>
-        </div>
-        <h4>Chưa có biến thể nào</h4>
-        <p>Thêm biến thể đầu tiên bằng form bên trên</p>
-      </div>
-      
-      <!-- Variants Table -->
-      <div class="table-responsive" *ngIf="drafts.length">
-        <table class="table table-bordered align-middle">
-          <thead class="table-light">
-            <tr>
-              <th style="width:40px">#</th>
-              <th>Thể loại</th>
-              <th>NXB</th>
-              <th>ISBN</th>
-              <th>Mã SPCT</th>
-              <th style="width:120px">Số lượng</th>
-              <th style="width:160px">Giá</th>
-              <th style="width:200px">Ảnh</th>
-              <th style="width:60px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let d of drafts; index as i">
-              <td>{{ i + 1 }}</td>
-              <td>
-                <select class="form-control" [(ngModel)]="d.theLoai" [disabled]="isDisabled('theLoai')">
-                  <option *ngFor="let t of theLoais" [ngValue]="t.id">{{ t.tenTheLoai }}</option>
-                </select>
-              </td>
-              <td>
-                <select class="form-control" [(ngModel)]="d.nhaXuatBan" [disabled]="isDisabled('nxb')">
-                  <option *ngFor="let n of nhaXuatBans" [ngValue]="n.id">{{ n.tenNhaXuatBan }}</option>
-                </select>
-              </td>
-              <td><input class="form-control" [(ngModel)]="d.isbn" placeholder="978..." readonly disabled></td>
-              <td><input class="form-control" [(ngModel)]="d.maSanPhamChiTiet" placeholder="SPCT..." readonly disabled></td>
-              <td><input type="number" class="form-control" [(ngModel)]="d.soLuong" [disabled]="isDisabled('soLuong')"></td>
-              <td><input type="number" class="form-control" [(ngModel)]="d.donGia" [disabled]="isDisabled('donGia')"></td>
-              <td>
-                <div class="image-upload" [class.uploading]="uploadingIndex === i">
-                  <input type="file" class="d-none" (change)="onFileChange($event, i)" [disabled]="uploading || isDisabled('hinhAnh')" accept="image/*" #fi>
-                  <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-secondary btn-sm" (click)="fi.click()" [disabled]="isDisabled('hinhAnh')">Chọn ảnh</button>
-                    <span *ngIf="d.hinhAnh">{{ d.hinhAnh }}</span>
-                  </div>
-                </div>
-              </td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-danger" (click)="removeDraft(i)"><i class="bi bi-trash"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </div>
 

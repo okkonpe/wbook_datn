@@ -134,20 +134,38 @@ public class BookController {
     }
 
     @PostMapping("/upload-image")
-    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file) {
+        System.out.println("📤 Nhận request upload image: " + file.getOriginalFilename());
         try {
             if (file.isEmpty()) {
+                System.err.println("❌ File rỗng");
                 return ResponseEntity.badRequest().body("File rỗng");
             }
+            
+            // Validate file type
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                System.err.println("❌ File không phải là hình ảnh: " + contentType);
+                return ResponseEntity.badRequest().body("File không phải là hình ảnh");
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.getSize() > 5 * 1024 * 1024) {
+                System.err.println("❌ File quá lớn: " + file.getSize() + " bytes");
+                return ResponseEntity.badRequest().body("File quá lớn (tối đa 5MB)");
+            }
+            
             String filename = uploadService.saveFile(file);
             System.out.println("✅ Upload thành công: " + filename);
             return ResponseEntity.ok(filename);
         } catch (IOException e) {
+            System.err.println("❌ Lỗi IO: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("Upload thất bại: " + e.getMessage());
         } catch (Exception e) {
+            System.err.println("❌ Lỗi không xác định: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Lỗi không xác định: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Upload thất bại: " + e.getMessage());
         }
     }
 
@@ -181,7 +199,7 @@ public class BookController {
         private Integer donGia;
         private Integer soLuong;
         private String ngayXuatBan;
-        private Integer lanTaiBan;
+        private List<Integer> taiBanIds;
         private Integer theLoaiId;
         private Integer nhaXuatBanId;
         private Integer kichThuocId;
@@ -189,6 +207,10 @@ public class BookController {
         private Integer loaiGiayId;
         private Float khoiLuongTinh;
         private String moTaBienThe;
+        private List<Integer> tacGiaIds;
+        private List<Integer> chuDeIds;
+        private Integer soTrang;
+        private String hinhAnh;
 
         // Getters and Setters
         public String getTenSanPham() { return tenSanPham; }
@@ -215,8 +237,8 @@ public class BookController {
         public String getNgayXuatBan() { return ngayXuatBan; }
         public void setNgayXuatBan(String ngayXuatBan) { this.ngayXuatBan = ngayXuatBan; }
         
-        public Integer getLanTaiBan() { return lanTaiBan; }
-        public void setLanTaiBan(Integer lanTaiBan) { this.lanTaiBan = lanTaiBan; }
+        public List<Integer> getTaiBanIds() { return taiBanIds; }
+        public void setTaiBanIds(List<Integer> taiBanIds) { this.taiBanIds = taiBanIds; }
         
         public Integer getTheLoaiId() { return theLoaiId; }
         public void setTheLoaiId(Integer theLoaiId) { this.theLoaiId = theLoaiId; }
@@ -238,5 +260,17 @@ public class BookController {
         
         public String getMoTaBienThe() { return moTaBienThe; }
         public void setMoTaBienThe(String moTaBienThe) { this.moTaBienThe = moTaBienThe; }
+        
+        public List<Integer> getTacGiaIds() { return tacGiaIds; }
+        public void setTacGiaIds(List<Integer> tacGiaIds) { this.tacGiaIds = tacGiaIds; }
+        
+        public List<Integer> getChuDeIds() { return chuDeIds; }
+        public void setChuDeIds(List<Integer> chuDeIds) { this.chuDeIds = chuDeIds; }
+        
+        public Integer getSoTrang() { return soTrang; }
+        public void setSoTrang(Integer soTrang) { this.soTrang = soTrang; }
+        
+        public String getHinhAnh() { return hinhAnh; }
+        public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
     }
 }

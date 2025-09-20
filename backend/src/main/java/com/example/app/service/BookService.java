@@ -1,6 +1,7 @@
 package com.example.app.service;
 
 import com.example.app.controller.BookController;
+import com.example.app.dto.TaiBanDTO;
 import com.example.app.dto.bookDTO.BookDetailDTO;
 import com.example.app.dto.bookDTO.VariantCreateDTO;
 import com.example.app.dto.bookDTO.ListAllBookDTO;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +54,15 @@ public class BookService {
     @Autowired
     private HinhAnhRepository hinhAnhRepository;
 
+    @Autowired
+    private TaiBanRepository taiBanRepository;
+
+    @Autowired
+    private TacGiaRepository tacGiaRepository;
+
+    @Autowired
+    private ChuDeRepository chuDeRepository;
+
     public List<ListAllBookDTO> getAllBook() {
         List<Book> books = bookRepository.findAll();
         return books.stream().map(bookMapper::listAllBookToDTO).collect(Collectors.toList());
@@ -78,7 +90,12 @@ public class BookService {
     public BookDetailDTO getByID(Integer id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + id));
-        return bookMapper.getBookByIDDTO(book);
+        System.out.println("📖 === LẤY THÔNG TIN SẢN PHẨM ===");
+        System.out.println("📦 Sản phẩm ID: " + id);
+        System.out.println("📊 Số lượng tồn kho: " + book.getSoLuong() + " (Mã: " + book.getMaSanPhamChiTiet() + ")");
+        BookDetailDTO dto = bookMapper.getBookByIDDTO(book);
+        System.out.println("✅ Trả về DTO với số lượng: " + dto.getSoLuong());
+        return dto;
     }
 
     public List<BookDetailDTO> getByProductId(Integer productId) {
@@ -130,8 +147,19 @@ public class BookService {
             if (dto.getLoaiGiayId() != null)
                 b.setLoaiGiay(loaiGiayRepository.findById(dto.getLoaiGiayId()).orElse(null));
             b.setSoTrang(dto.getSoTrang());
-            b.setSoLanTaiBan(dto.getSoLanTaiBan());
             b.setKhoiLuongTinh(dto.getKhoiLuongTinh());
+            
+            // Set tái bản
+            if (dto.getTaiBanIds() != null && !dto.getTaiBanIds().isEmpty()) {
+                Set<TaiBan> taiBans = new HashSet<>();
+                for (Integer taiBanId : dto.getTaiBanIds()) {
+                    TaiBan taiBan = taiBanRepository.findById(taiBanId).orElse(null);
+                    if (taiBan != null) {
+                        taiBans.add(taiBan);
+                    }
+                }
+                b.setTaiBans(taiBans);
+            }
             b.setSoLuong(dto.getSoLuong());
             b.setNgayXuatBan(dto.getNgayXuatBan());
             if (dto.getHinhAnh() != null && !dto.getHinhAnh().isBlank()) {
@@ -139,13 +167,43 @@ public class BookService {
                 // ma_hinh_anh bắt buộc -> tự sinh mã ngắn gọn
                 String ma = "HA" + Integer.toHexString((int)(Math.random()*100000));
                 ha.setMaHinhAnh(ma);
-                ha.setHinhAnh(sanitizeFilename(dto.getHinhAnh()));
+                // Chỉ lưu tên file, không lưu URL đầy đủ
+                String filename = dto.getHinhAnh();
+                if (filename.contains("/")) {
+                    filename = filename.substring(filename.lastIndexOf("/") + 1);
+                }
+                ha.setHinhAnh(sanitizeFilename(filename));
                 ha = hinhAnhRepository.save(ha);
                 b.setHinhAnh(ha);
             }
             b.setDonGia(dto.getDonGia());
             b.setMoTa(dto.getMoTa());
             b.setTrangThai(Boolean.TRUE.equals(dto.getTrangThai()));
+            
+            // Set tác giả
+            if (dto.getTacGiaIds() != null && !dto.getTacGiaIds().isEmpty()) {
+                Set<TacGia> tacGias = new HashSet<>();
+                for (Integer tacGiaId : dto.getTacGiaIds()) {
+                    TacGia tacGia = tacGiaRepository.findById(tacGiaId).orElse(null);
+                    if (tacGia != null) {
+                        tacGias.add(tacGia);
+                    }
+                }
+                b.setTacGia(tacGias);
+            }
+            
+            // Set chủ đề
+            if (dto.getChuDeIds() != null && !dto.getChuDeIds().isEmpty()) {
+                Set<ChuDe> chuDes = new HashSet<>();
+                for (Integer chuDeId : dto.getChuDeIds()) {
+                    ChuDe chuDe = chuDeRepository.findById(chuDeId).orElse(null);
+                    if (chuDe != null) {
+                        chuDes.add(chuDe);
+                    }
+                }
+                b.setChuDes(chuDes);
+            }
+            
             toSave.add(b);
         }
         java.util.List<Book> saved = bookRepository.saveAll(toSave);
@@ -160,8 +218,18 @@ public class BookService {
         if (dto.getIsbn() != null) existingBook.setIsbn(dto.getIsbn());
         if (dto.getMaSanPhamChiTiet() != null) existingBook.setMaSanPhamChiTiet(dto.getMaSanPhamChiTiet());
         if (dto.getSoTrang() != null) existingBook.setSoTrang(dto.getSoTrang());
-        if (dto.getSoLanTaiBan() != null) existingBook.setSoLanTaiBan(dto.getSoLanTaiBan());
         if (dto.getKhoiLuongTinh() != null) existingBook.setKhoiLuongTinh(dto.getKhoiLuongTinh());
+        
+        // Update tái bản - clear existing and set new ones
+        if (dto.getTaiBans() != null) {
+            existingBook.getTaiBans().clear();
+            for (TaiBanDTO taiBanDTO : dto.getTaiBans()) {
+                TaiBan taiBan = taiBanRepository.findById(taiBanDTO.getId()).orElse(null);
+                if (taiBan != null) {
+                    existingBook.getTaiBans().add(taiBan);
+                }
+            }
+        }
         if (dto.getSoLuong() != null) existingBook.setSoLuong(dto.getSoLuong());
         if (dto.getNgayXuatBan() != null) existingBook.setNgayXuatBan(dto.getNgayXuatBan());
         if (dto.getDonGia() != null) existingBook.setDonGia(dto.getDonGia());
@@ -282,9 +350,16 @@ public class BookService {
                 book.setNgayXuatBan(LocalDate.parse(dto.getNgayXuatBan()));
             }
             
-            // Set lần tái bản
-            if (dto.getLanTaiBan() != null) {
-                book.setSoLanTaiBan(dto.getLanTaiBan());
+            // Set tái bản
+            if (dto.getTaiBanIds() != null && !dto.getTaiBanIds().isEmpty()) {
+                Set<TaiBan> taiBans = new HashSet<>();
+                for (Integer taiBanId : dto.getTaiBanIds()) {
+                    TaiBan taiBan = taiBanRepository.findById(taiBanId).orElse(null);
+                    if (taiBan != null) {
+                        taiBans.add(taiBan);
+                    }
+                }
+                book.setTaiBans(taiBans);
             }
             
             // Set khối lượng tịnh
@@ -326,6 +401,50 @@ public class BookService {
                 if (loaiGiay != null) {
                     book.setLoaiGiay(loaiGiay);
                 }
+            }
+            
+            // Set tác giả
+            if (dto.getTacGiaIds() != null && !dto.getTacGiaIds().isEmpty()) {
+                Set<TacGia> tacGias = new HashSet<>();
+                for (Integer tacGiaId : dto.getTacGiaIds()) {
+                    TacGia tacGia = tacGiaRepository.findById(tacGiaId).orElse(null);
+                    if (tacGia != null) {
+                        tacGias.add(tacGia);
+                    }
+                }
+                book.setTacGia(tacGias);
+            }
+            
+            // Set chủ đề
+            if (dto.getChuDeIds() != null && !dto.getChuDeIds().isEmpty()) {
+                Set<ChuDe> chuDes = new HashSet<>();
+                for (Integer chuDeId : dto.getChuDeIds()) {
+                    ChuDe chuDe = chuDeRepository.findById(chuDeId).orElse(null);
+                    if (chuDe != null) {
+                        chuDes.add(chuDe);
+                    }
+                }
+                book.setChuDes(chuDes);
+            }
+            
+            // Set số trang
+            if (dto.getSoTrang() != null) {
+                book.setSoTrang(dto.getSoTrang());
+            }
+            
+            // Set hình ảnh
+            if (dto.getHinhAnh() != null && !dto.getHinhAnh().isEmpty()) {
+                HinhAnh ha = new HinhAnh();
+                String ma = "HA" + Integer.toHexString((int)(Math.random()*100000));
+                ha.setMaHinhAnh(ma);
+                // Chỉ lưu tên file, không lưu URL đầy đủ
+                String filename = dto.getHinhAnh();
+                if (filename.contains("/")) {
+                    filename = filename.substring(filename.lastIndexOf("/") + 1);
+                }
+                ha.setHinhAnh(sanitizeFilename(filename));
+                ha = hinhAnhRepository.save(ha);
+                book.setHinhAnh(ha);
             }
             
             Book savedBook = bookRepository.save(book);

@@ -22,7 +22,8 @@ interface InvoiceItem {
   soLuong: number;
   thanhTien: number;
   hinhAnh?: string;
-  tonKho?: number; 
+  tonKho?: number;
+  moTa?: string;
 }
 
 interface Customer {
@@ -97,6 +98,10 @@ export class OfflineComponent implements OnInit, AfterViewInit {
     diaChi: '',
     email: ''
   };
+  
+  // Product detail modal
+  isProductDetailModalOpen: boolean = false;
+  selectedProductDetail: InvoiceItem | null = null;
   
   // Voucher states
   showVoucherModal: boolean = false;
@@ -548,6 +553,17 @@ export class OfflineComponent implements OnInit, AfterViewInit {
 
   closeQuickCustomerModal(): void {
     this.isQuickCustomerModalOpen = false;
+  }
+
+  // Product detail modal methods
+  viewProductDetail(item: InvoiceItem): void {
+    this.selectedProductDetail = item;
+    this.isProductDetailModalOpen = true;
+  }
+
+  closeProductDetailModal(): void {
+    this.isProductDetailModalOpen = false;
+    this.selectedProductDetail = null;
   }
 
   createQuickCustomer(): void {

@@ -41,6 +41,17 @@
         <p>Nhập thông tin biến thể và thêm vào danh sách staging</p>
       </div>
       
+      <!-- F1 Status Alert -->
+      <div class="alert alert-info" *ngIf="!hasF1Data" style="margin: 20px; border-left: 4px solid #17a2b8;">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Chưa có dữ liệu F1:</strong> Các trường tái bản, khối lượng tịnh, tác giả, chủ đề sẽ có thể chỉnh sửa tự do.
+      </div>
+      
+      <div class="alert alert-success" *ngIf="hasF1Data" style="margin: 20px; border-left: 4px solid #28a745;">
+        <i class="bi bi-check-circle me-2"></i>
+        <strong>Đã tải dữ liệu F1:</strong> Các trường tái bản, khối lượng tịnh, tác giả, chủ đề sẽ được kế thừa từ F1 và không thể chỉnh sửa.
+      </div>
+      
       <div class="form-content">
         <div class="row g-4">
           <div class="col-md-6">
@@ -55,9 +66,12 @@
                 [(ngModel)]="newDraft.isbn" 
                 placeholder="978-0-123456-78-9"
                 maxlength="13"
-                readonly
-                disabled>
-              <div class="input-help">Tự động tạo (không thể chỉnh sửa)</div>
+                [disabled]="isDisabled('isbn')"
+                readonly>
+              <div class="input-help" *ngIf="isDisabled('isbn')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
             </div>
           </div>
           
@@ -126,6 +140,68 @@
               <div class="input-help">Ngày xuất bản sách</div>
             </div>
           </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-book me-2"></i>
+                Số trang
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern locked-field" 
+                [(ngModel)]="newDraft.soTrang" 
+                placeholder="300"
+                min="1"
+                [disabled]="isDisabled('soTrang')"
+                [readonly]="isDisabled('soTrang')">
+              <div class="input-help" *ngIf="isDisabled('soTrang')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-arrow-repeat me-2"></i>
+                Tái bản
+              </label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.taiBanIds" [disabled]="isDisabled('taiBanIds')">
+                <option [ngValue]="undefined">-- Chọn tái bản --</option>
+                <option *ngFor="let tb of taiBans" [ngValue]="tb.id">
+                  Lần {{ tb.lanTaiBan }} - {{ tb.namTaiBan }}
+                </option>
+              </select>
+              <div class="input-help" *ngIf="isDisabled('taiBanIds')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-speedometer me-2"></i>
+                Khối lượng tịnh (g)
+              </label>
+              <input 
+                type="number" 
+                class="form-control-modern locked-field" 
+                [(ngModel)]="newDraft.khoiLuongTinh" 
+                placeholder="500"
+                min="0"
+                step="0.1"
+                [disabled]="isDisabled('khoiLuongTinh')"
+                [readonly]="isDisabled('khoiLuongTinh')">
+              <div class="input-help" *ngIf="isDisabled('khoiLuongTinh')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
 
           <!-- Thuộc tính bắt buộc -->
           <!-- Picker pills giống màu sắc & kích cỡ -->
@@ -188,11 +264,90 @@
               <label class="input-label"><i class="bi bi-file-earmark-richtext me-2"></i>Loại giấy</label>
               <select class="form-control-modern" [(ngModel)]="newDraft.loaiGiay" [disabled]="isDisabled('loaiGiay')">
                 <option [ngValue]="undefined">-- Chọn loại giấy --</option>
-                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }}</option>
+                <option *ngFor="let g of loaiGiayList" [ngValue]="g.id">{{ g.tenGiay || g.name }} - {{ g.mauSac || 'N/A' }}</option>
               </select>
             </div>
           </div>
           
+          
+          <!-- Tác giả -->
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-person me-2"></i>
+                Tác giả
+              </label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.tacGiaIds" [disabled]="isDisabled('tacGiaIds')">
+                <option [ngValue]="undefined">-- Chọn tác giả --</option>
+                <option *ngFor="let tg of tacGias" [ngValue]="tg.id">{{ tg.tenTacGia }}</option>
+              </select>
+              <div class="input-help" *ngIf="isDisabled('tacGiaIds')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+
+          <!-- Chủ đề -->
+          <div class="col-md-6">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-tags me-2"></i>
+                Chủ đề
+              </label>
+              <select class="form-control-modern" [(ngModel)]="newDraft.chuDeIds" [disabled]="isDisabled('chuDeIds')">
+                <option [ngValue]="undefined">-- Chọn chủ đề --</option>
+                <option *ngFor="let cd of chuDes" [ngValue]="cd.id">{{ cd.tenChuDe }}</option>
+              </select>
+              <div class="input-help" *ngIf="isDisabled('chuDeIds')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+            </div>
+          </div>
+
+          <!-- Hình ảnh -->
+          <div class="col-md-12">
+            <div class="input-group-modern">
+              <label class="input-label">
+                <i class="bi bi-image me-2"></i>
+                Hình ảnh sách
+              </label>
+              <div class="image-upload-container">
+                <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/*" #fileInput [disabled]="isDisabled('hinhAnh')">
+                
+                <!-- Upload progress -->
+                <div class="upload-progress" *ngIf="uploadingImage">
+                  <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <span class="upload-text">Đang upload hình ảnh...</span>
+                </div>
+                
+                <!-- Image preview -->
+                <div class="image-preview" *ngIf="newDraft.hinhAnh && !uploadingImage">
+                  <img [src]="getImageUrl(newDraft.hinhAnh)" alt="Preview" class="preview-image">
+                  <div class="image-overlay">
+                    <button type="button" class="btn btn-sm btn-danger remove-image" (click)="removeImage()" [disabled]="isDisabled('hinhAnh')">
+                      <i class="bi bi-x"></i>
+                    </button>
+                    <div class="upload-success" *ngIf="newDraft.hinhAnh">
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                      <span>Đã tải lên</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Upload area when no image -->
+                <div class="upload-area" *ngIf="!newDraft.hinhAnh && !uploadingImage" (click)="fileInput.click()" [class.disabled]="isDisabled('hinhAnh')">
+                  <i class="bi bi-cloud-upload"></i>
+                  <p>Nhấp để chọn hình ảnh</p>
+                  <small>JPG, PNG, GIF (tối đa 5MB)</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="col-md-12">
             <div class="input-group-modern">
               <label class="input-label">

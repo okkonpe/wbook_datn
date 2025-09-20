@@ -5,13 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { ProductBookService } from '../product-book/product-book.service';
 import { Page } from '../product-book/product-book.page';
 import { ProductBook } from '../product-book/product-book.model';
-import { FilterPipe } from '../../../shared/pipes/filter.pipe';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-book-management',
   standalone:true,
-  imports: [CommonModule, FilterPipe, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './book-management.component.html',
   styleUrl: './book-management.component.scss'
 })
@@ -33,6 +32,8 @@ export class BookManagementComponent implements OnInit {
   isQrOpen = false;
   qrSrc: string | null = null;
   isAddModalOpen = false;
+  uploadingImage = false;
+  selectedTaiBanId: number | undefined;
   
   // New product form with variant F1 data
   newProduct: any = {
@@ -44,17 +45,22 @@ export class BookManagementComponent implements OnInit {
     // Variant F1 info - sẽ được tạo trong resetForm()
     isbn: '',
     maSanPhamChiTiet: '',
+    soTrang: null,
     donGia: null,
     soLuong: null,
     ngayXuatBan: '',
-    lanTaiBan: 1, // Mặc định lần tái bản đầu tiên
+    taiBanIds: undefined, // Mặc định không có tái bản
     theLoaiId: undefined,
     nhaXuatBanId: undefined,
     kichThuocId: undefined,
     loaiBiaId: undefined,
     loaiGiayId: undefined,
     khoiLuongTinh: null,
-    moTaBienThe: ''
+    moTaBienThe: '',
+    tacGiaIds: undefined,
+    chuDeIds: undefined,
+    hinhAnh: null,
+    hinhAnhFilename: null
   };
 
   // Dropdown data
@@ -63,6 +69,9 @@ export class BookManagementComponent implements OnInit {
   kichThuocs: any[] = [];
   loaiBiaList: any[] = [];
   loaiGiayList: any[] = [];
+  tacGias: any[] = [];
+  chuDes: any[] = [];
+  taiBans: any[] = [];
 
   // Math helper for template
   Math = Math;
@@ -230,6 +239,33 @@ export class BookManagementComponent implements OnInit {
     this.http.get('http://localhost:8080/api/loai-giay?size=1000').subscribe((response: any) => {
       this.loaiGiayList = response.content || [];
     });
+
+    // Load tác giả
+    this.http.get('http://localhost:8080/api/tac-gia?size=1000').subscribe((response: any) => {
+      this.tacGias = response.content || [];
+    });
+
+    // Load chủ đề
+    this.http.get('http://localhost:8080/api/chu-de?size=1000').subscribe((response: any) => {
+      this.chuDes = response.content || [];
+    });
+
+    // Load tái bản
+    this.loadTaiBans();
+  }
+
+  // Load tái bản từ server
+  loadTaiBans(): void {
+    this.http.get('http://localhost:8080/api/tai-ban').subscribe({
+      next: (response: any) => {
+        console.log('Loaded tái bản:', response);
+        this.taiBans = Array.isArray(response) ? response : [];
+      },
+      error: (error) => {
+        console.error('Error loading tái bản:', error);
+        this.taiBans = [];
+      }
+    });
   }
 
   // Quick add helpers
@@ -265,21 +301,36 @@ export class BookManagementComponent implements OnInit {
   }
 
   quickAddNxb() {
-    const name = prompt('Nhập tên nhà xuất bản mới');
-    if (!name || !name.trim()) return;
-    const body: any = { tenNhaXuatBan: name.trim(), maNhaXuatBan: this.genCode('NXB'), trangThai: true };
+    const tenNhaXuatBan = prompt('Nhập tên nhà xuất bản:');
+    if (!tenNhaXuatBan || !tenNhaXuatBan.trim()) return;
+    
+    const truSoChinh = prompt('Nhập trụ sở chính (tùy chọn):');
+    const moTa = prompt('Nhập mô tả (tùy chọn):');
+    
+    const body: any = { 
+      tenNhaXuatBan: tenNhaXuatBan.trim(), 
+      maNhaXuatBan: this.genCode('NXB'), 
+      truSoChinh: truSoChinh?.trim() || null,
+      moTa: moTa?.trim() || null,
+      trangThai: true 
+    };
+    
     this.http.post('http://localhost:8080/api/nha-xuat-ban', body).subscribe({
       next: (res: any) => {
         const newId = res?.id;
         this.http.get('http://localhost:8080/api/nha-xuat-ban?size=1000').subscribe((r: any) => {
           this.nhaXuatBans = r.content || [];
           if (newId) this.newProduct.nhaXuatBanId = newId; else {
-            const found = this.nhaXuatBans.find((x: any) => x.tenNhaXuatBan?.trim() === name.trim());
+            const found = this.nhaXuatBans.find((x: any) => x.tenNhaXuatBan?.trim() === tenNhaXuatBan.trim());
             if (found) this.newProduct.nhaXuatBanId = found.id;
           }
         });
+        alert('Đã thêm nhà xuất bản mới');
       },
-      error: (err) => { console.error('Thêm NXB thất bại', err); alert('Thêm NXB thất bại'); }
+      error: (err) => { 
+        console.error('Thêm NXB thất bại', err); 
+        alert('Thêm NXB thất bại'); 
+      }
     });
   }
 
@@ -303,40 +354,66 @@ export class BookManagementComponent implements OnInit {
   }
 
   quickAddLoaiBia() {
-    const name = prompt('Nhập tên loại bìa');
-    if (!name || !name.trim()) return;
-    const body: any = { tenBia: name.trim(), maBia: this.genCode('LB'), trangThai: true };
+    const tenBia = prompt('Nhập tên loại bìa:');
+    if (!tenBia || !tenBia.trim()) return;
+    
+    const mauSac = prompt('Nhập màu sắc bìa (tùy chọn):');
+    
+    const body: any = { 
+      tenBia: tenBia.trim(), 
+      maBia: this.genCode('LB'), 
+      mauSac: mauSac?.trim() || null,
+      trangThai: true 
+    };
+    
     this.http.post('http://localhost:8080/api/loai-bia', body).subscribe({
       next: (res: any) => {
         const newId = res?.id;
         this.http.get('http://localhost:8080/api/loai-bia?size=1000').subscribe((r: any) => {
           this.loaiBiaList = r.content || [];
           if (newId) this.newProduct.loaiBiaId = newId; else {
-            const found = this.loaiBiaList.find((x: any) => (x.tenBia || x.name)?.trim() === name.trim());
+            const found = this.loaiBiaList.find((x: any) => (x.tenBia || x.name)?.trim() === tenBia.trim());
             if (found) this.newProduct.loaiBiaId = found.id;
           }
         });
+        alert('Đã thêm loại bìa mới');
       },
-      error: (err) => { console.error('Thêm loại bìa thất bại', err); alert('Thêm loại bìa thất bại'); }
+      error: (err) => { 
+        console.error('Thêm loại bìa thất bại', err); 
+        alert('Thêm loại bìa thất bại'); 
+      }
     });
   }
 
   quickAddLoaiGiay() {
-    const name = prompt('Nhập tên loại giấy');
-    if (!name || !name.trim()) return;
-    const body: any = { tenGiay: name.trim(), maGiay: this.genCode('LG'), trangThai: true };
+    const tenGiay = prompt('Nhập tên loại giấy:');
+    if (!tenGiay || !tenGiay.trim()) return;
+    
+    const mauSac = prompt('Nhập màu sắc giấy (tùy chọn):');
+    
+    const body: any = { 
+      tenGiay: tenGiay.trim(), 
+      maGiay: this.genCode('LG'), 
+      mauSac: mauSac?.trim() || null,
+      trangThai: true 
+    };
+    
     this.http.post('http://localhost:8080/api/loai-giay', body).subscribe({
       next: (res: any) => {
         const newId = res?.id;
         this.http.get('http://localhost:8080/api/loai-giay?size=1000').subscribe((r: any) => {
           this.loaiGiayList = r.content || [];
           if (newId) this.newProduct.loaiGiayId = newId; else {
-            const found = this.loaiGiayList.find((x: any) => (x.tenGiay || x.name)?.trim() === name.trim());
+            const found = this.loaiGiayList.find((x: any) => (x.tenGiay || x.name)?.trim() === tenGiay.trim());
             if (found) this.newProduct.loaiGiayId = found.id;
           }
         });
+        alert('Đã thêm loại giấy mới');
       },
-      error: (err) => { console.error('Thêm loại giấy thất bại', err); alert('Thêm loại giấy thất bại'); }
+      error: (err) => { 
+        console.error('Thêm loại giấy thất bại', err); 
+        alert('Thêm loại giấy thất bại'); 
+      }
     });
   }
   
@@ -352,19 +429,24 @@ export class BookManagementComponent implements OnInit {
       trangThai: true,
       
       // Variant F1 info - tự động tạo
-      isbn: this.generateISBN(),
+      isbn: '', // Người dùng nhập thủ công
       maSanPhamChiTiet: this.generateSPCT(),
+      soTrang: null,
       donGia: null,
       soLuong: null,
       ngayXuatBan: '',
-      lanTaiBan: 1, // Mặc định lần tái bản đầu tiên
+      taiBanIds: [], // Mặc định không có tái bản
       theLoaiId: undefined,
       nhaXuatBanId: undefined,
       kichThuocId: undefined,
       loaiBiaId: undefined,
       loaiGiayId: undefined,
       khoiLuongTinh: null,
-      moTaBienThe: ''
+      moTaBienThe: '',
+      tacGiaIds: undefined,
+      chuDeIds: undefined,
+      hinhAnh: null,
+      hinhAnhFilename: null
     };
   }
 
@@ -439,17 +521,21 @@ export class BookManagementComponent implements OnInit {
       // Variant F1 info
       isbn: this.newProduct.isbn.trim(),
       maSanPhamChiTiet: this.newProduct.maSanPhamChiTiet.trim(),
+      soTrang: this.newProduct.soTrang,
       donGia: this.newProduct.donGia,
       soLuong: this.newProduct.soLuong,
       ngayXuatBan: this.newProduct.ngayXuatBan || null,
-      lanTaiBan: this.newProduct.lanTaiBan || 1,
+      taiBanIds: this.newProduct.taiBanIds ? [this.newProduct.taiBanIds] : [],
       theLoaiId: this.newProduct.theLoaiId,
       nhaXuatBanId: this.newProduct.nhaXuatBanId,
       kichThuocId: this.newProduct.kichThuocId || null,
       loaiBiaId: this.newProduct.loaiBiaId || null,
       loaiGiayId: this.newProduct.loaiGiayId || null,
       khoiLuongTinh: this.newProduct.khoiLuongTinh || null,
-      moTaBienThe: this.newProduct.moTaBienThe?.trim() || ''
+      moTaBienThe: this.newProduct.moTaBienThe?.trim() || '',
+      tacGiaIds: this.newProduct.tacGiaIds ? [this.newProduct.tacGiaIds] : [],
+      chuDeIds: this.newProduct.chuDeIds ? [this.newProduct.chuDeIds] : [],
+      hinhAnh: this.newProduct.hinhAnhFilename
     };
     
     console.log('Sending product data:', productData);
@@ -468,4 +554,132 @@ export class BookManagementComponent implements OnInit {
       }
     });
   }
+
+  // Image handling methods
+  onImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chọn file hình ảnh hợp lệ!');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Kích thước file không được vượt quá 5MB!');
+        return;
+      }
+
+      this.uploadingImage = true;
+
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.newProduct.hinhAnh = e.target.result; // For preview
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const formData = new FormData();
+      formData.append('image', file);
+
+      this.http.post('http://localhost:8080/api/books/upload-image', formData, {
+        responseType: 'text'
+      }).subscribe({
+        next: (filename: string) => {
+          console.log('Image uploaded successfully:', filename);
+          // Store the filename for API call
+          this.newProduct.hinhAnhFilename = filename;
+          this.uploadingImage = false;
+        },
+        error: (error) => {
+          console.error('Error uploading image:', error);
+          alert('Lỗi khi upload hình ảnh: ' + (error.error?.message || error.message));
+          // Reset preview on error
+          this.newProduct.hinhAnh = null;
+          this.newProduct.hinhAnhFilename = null;
+          this.uploadingImage = false;
+        }
+      });
+    }
+  }
+
+  removeImage(): void {
+    this.newProduct.hinhAnh = null;
+    this.newProduct.hinhAnhFilename = null;
+  }
+
+  // Quick add methods for new attributes
+  quickAddTacGia(): void {
+    const tenTacGia = prompt('Nhập tên tác giả:');
+    if (tenTacGia && tenTacGia.trim()) {
+      const newTacGia = {
+        tenTacGia: tenTacGia.trim(),
+        moTa: '',
+        trangThai: true
+      };
+      
+      this.http.post('http://localhost:8080/api/tac-gia', newTacGia).subscribe({
+        next: (result: any) => {
+          this.tacGias.push(result);
+          this.newProduct.tacGiaIds = result.id;
+          alert('Thêm tác giả thành công!');
+        },
+        error: (error) => {
+          console.error('Lỗi khi thêm tác giả:', error);
+          alert('Thêm tác giả thất bại!');
+        }
+      });
+    }
+  }
+
+  quickAddChuDe(): void {
+    const tenChuDe = prompt('Nhập tên chủ đề:');
+    if (tenChuDe && tenChuDe.trim()) {
+      const newChuDe = {
+        tenChuDe: tenChuDe.trim(),
+        moTa: '',
+        trangThai: true
+      };
+      
+      this.http.post('http://localhost:8080/api/chu-de', newChuDe).subscribe({
+        next: (result: any) => {
+          this.chuDes.push(result);
+          this.newProduct.chuDeIds = result.id;
+          alert('Thêm chủ đề thành công!');
+        },
+        error: (error) => {
+          console.error('Lỗi khi thêm chủ đề:', error);
+          alert('Thêm chủ đề thất bại!');
+        }
+      });
+    }
+  }
+
+
+  quickAddTaiBan(): void {
+    const lanTaiBan = prompt('Nhập lần tái bản (số):');
+    const namTaiBan = prompt('Nhập năm tái bản:');
+    
+    if (lanTaiBan && namTaiBan && lanTaiBan.trim() && namTaiBan.trim()) {
+      const newTaiBan = { 
+        lanTaiBan: parseInt(lanTaiBan.trim()), 
+        namTaiBan: parseInt(namTaiBan.trim()) 
+      };
+      this.http.post('http://localhost:8080/api/tai-ban', newTaiBan).subscribe({
+        next: (response: any) => {
+          console.log('Tái bản được tạo:', response);
+          // Reload danh sách tái bản từ server
+          this.loadTaiBans();
+          alert('Thêm tái bản thành công!');
+        },
+        error: (error) => {
+          console.error('Error adding tái bản:', error);
+          alert('Lỗi khi thêm tái bản: ' + (error.error?.message || error.message));
+        }
+      });
+    }
+  }
+
 }

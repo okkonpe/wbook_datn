@@ -35,10 +35,8 @@ interface VariantDraft {
 })
 export class VariantsComponent {
   productId!: number;
-  drafts: VariantDraft[] = [];
   newDraft: VariantDraft = { trangThai: true };
-  uploading = false;
-  uploadingIndex = -1;
+  uploadingImage = false;
   saving = false;
 
   theLoais: any[] = [];
@@ -50,32 +48,18 @@ export class VariantsComponent {
   chuDes: any[] = [];
   taiBans: any[] = [];
   
-  // Selected values for dropdowns
-  uploadingImage = false;
 
   // F1 base
   private baseVariant: any | null = null;
   inheritMode = false; // bật khi đã kế thừa từ F1
   hasF1Data = false; // kiểm tra xem có dữ liệu F1 không
 
-  // Multi-select selections
-  selectedTheLoaiIds: number[] = [];
-  selectedNxbIds: number[] = [];
-  chosenTheLoaiId?: number;
-  chosenNxbId?: number;
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) {
     this.productId = Number(this.route.snapshot.paramMap.get('id'));
     console.log('Product ID:', this.productId);
   }
 
-  get totalEstimatedValue(): number {
-    return this.drafts.reduce((sum, draft) => {
-      const price = draft.donGia || 0;
-      const quantity = draft.soLuong || 0;
-      return sum + (price * quantity);
-    }, 0);
-  }
 
   // Khóa/mở các trường khi kế thừa từ F1
   isDisabled(field: string): boolean {
@@ -117,7 +101,7 @@ export class VariantsComponent {
     return !editable.has(field);
   }
 
-  addDraft() {
+  saveVariant() {
     // Validation
     if (!this.newDraft.isbn?.trim() || !this.newDraft.maSanPhamChiTiet?.trim()) {
       // Tự sinh nếu thiếu
@@ -138,50 +122,50 @@ export class VariantsComponent {
       alert('Vui lòng nhập số lượng hợp lệ!');
       return;
     }
-    
-    // Check duplicate ISBN or SPCT code
-    const duplicate = this.drafts.find(d => 
-      d.isbn === this.newDraft.isbn || 
-      d.maSanPhamChiTiet === this.newDraft.maSanPhamChiTiet
-    );
-    
-    if (duplicate) {
-      alert('ISBN hoặc Mã SPCT đã tồn tại trong danh sách!');
-      return;
-    }
 
-    if (this.selectedTheLoaiIds.length && this.selectedNxbIds.length) {
-      if (this.generateVariants()) {
-        this.resetForm();
-        console.log(`✅ Đã thêm ${this.selectedTheLoaiIds.length * this.selectedNxbIds.length} biến thể theo tổ hợp`);
-        return;
-      }
-    }
-    
-    this.drafts.push({ ...this.newDraft });
-    this.resetForm();
-    
-    console.log('✅ Đã thêm biến thể:', this.newDraft.maSanPhamChiTiet);
-  }
+    this.saving = true;
+    const payload = { 
+      sanPhamId: this.productId,
+      isbn: (this.newDraft.isbn || '').toString(),
+      maSanPhamChiTiet: (this.newDraft.maSanPhamChiTiet || '').toString(),
+      theLoaiId: this.toId(this.newDraft.theLoai, this.theLoais),
+      nhaXuatBanId: this.toId(this.newDraft.nhaXuatBan, this.nhaXuatBans),
+      kichThuocId: this.toId(this.newDraft.kichThuoc, this.kichThuocs),
+      loaiBiaId: this.toId(this.newDraft.loaiBia, this.loaiBiaList),
+      loaiGiayId: this.toId(this.newDraft.loaiGiay, this.loaiGiayList),
+      soTrang: this.newDraft.soTrang ?? 0,
+      taiBanIds: this.newDraft.taiBanIds ? [this.newDraft.taiBanIds] : [],
+      tacGiaIds: this.newDraft.tacGiaIds ? [this.newDraft.tacGiaIds] : [],
+      chuDeIds: this.newDraft.chuDeIds ? [this.newDraft.chuDeIds] : [],
+      khoiLuongTinh: this.newDraft.khoiLuongTinh ?? 0,
+      soLuong: this.newDraft.soLuong ?? 0,
+      ngayXuatBan: this.newDraft.ngayXuatBan as any,
+      hinhAnh: this.newDraft.hinhAnh,
+      donGia: this.newDraft.donGia ?? 0,
+      moTa: this.newDraft.moTa,
+      trangThai: this.newDraft.trangThai
+    };
 
-  private generateVariants() {
-    if (this.selectedTheLoaiIds.length && this.selectedNxbIds.length) {
-      for (const tl of this.selectedTheLoaiIds) {
-        for (const nxb of this.selectedNxbIds) {
-          const draft: VariantDraft = {
-            ...this.newDraft,
-            isbn: this.generateIsbn(),
-            maSanPhamChiTiet: this.generateSpct(),
-            theLoai: tl as any,
-            nhaXuatBan: nxb as any
-          };
-          this.drafts.push(draft);
+    console.log('Payload single variant:', payload);
+    
+    this.http.post('http://localhost:8080/api/books/bulk-create', [payload], {
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .subscribe({
+        next: () => {
+          this.saving = false;
+          alert('Lưu biến thể thành công!');
+          // Chuyển về trang danh sách biến thể
+          this.router.navigate(['/admin/products/book', this.productId, 'variants']);
+        },
+        error: (error) => {
+          console.error('Save failed:', error);
+          alert(`Lưu thất bại! Lỗi: ${error.error?.message || error.message || 'Không xác định'}`);
+          this.saving = false;
         }
-      }
-      return true;
-    }
-    return false;
+      });
   }
+
 
   resetForm() {
     // Khởi tạo theo F1 nếu có
@@ -238,8 +222,8 @@ export class VariantsComponent {
       const lb = this.loaiBiaList.find(b => (b.tenBia || b.name) === base.loaiBia);
       const lg = this.loaiGiayList.find(g => (g.tenGiay || g.name) === base.loaiGiay);
 
-      this.chosenTheLoaiId = tl?.id;
-      this.chosenNxbId = nxb?.id;
+      this.newDraft.theLoai = tl?.id;
+      this.newDraft.nhaXuatBan = nxb?.id;
       this.newDraft.kichThuoc = kt?.id;
       this.newDraft.loaiBia = lb?.id;
       this.newDraft.loaiGiay = lg?.id;
@@ -254,108 +238,8 @@ export class VariantsComponent {
     }
   }
 
-  removeDraft(i: number) { 
-    this.drafts.splice(i, 1); 
-  }
 
-  clearAll() {
-    if (confirm('Bạn có chắc chắn muốn xóa tất cả biến thể?')) {
-      this.drafts = [];
-    }
-  }
 
-  onFileChange(event: any, idx: number) {
-    const file: File = event.target.files?.[0];
-    if (!file) return;
-    
-    if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn file hình ảnh!');
-      return;
-    }
-    
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
-      return;
-    }
-
-    const form = new FormData();
-    form.append('file', file);
-    this.uploading = true;
-    this.uploadingIndex = idx;
-    
-    console.log(`Đang tải lên ảnh: ${file.name} (${file.size} bytes)`);
-    
-    // Đảm bảo gửi form đúng định dạng multipart/form-data
-    this.http.post('http://localhost:8080/api/books/upload-image', form, { 
-      responseType: 'text',
-      headers: { 'Accept': 'text/plain' }
-    })
-      .subscribe({
-        next: (filename) => {
-          console.log('✅ Upload thành công:', filename);
-          this.drafts[idx].hinhAnh = filename;
-          this.uploading = false;
-          this.uploadingIndex = -1;
-        },
-        error: (error) => { 
-          console.error('❌ Upload thất bại:', error);
-          alert(`Tải ảnh thất bại! Lỗi: ${error.error || error.message || 'Không xác định'}`);
-          this.uploading = false;
-          this.uploadingIndex = -1;
-        }
-      });
-  }
-
-  saveAll() {
-    if (!this.drafts.length) return;
-    
-    this.saving = true;
-    const payload = this.drafts.map(d => ({ 
-      sanPhamId: this.productId,
-      isbn: (d.isbn || '').toString(),
-      maSanPhamChiTiet: (d.maSanPhamChiTiet || '').toString(),
-      theLoaiId: this.toId(d.theLoai, this.theLoais),
-      nhaXuatBanId: this.toId(d.nhaXuatBan, this.nhaXuatBans),
-      kichThuocId: this.toId(d.kichThuoc, this.kichThuocs),
-      loaiBiaId: this.toId(d.loaiBia, this.loaiBiaList),
-      loaiGiayId: this.toId(d.loaiGiay, this.loaiGiayList),
-      soTrang: d.soTrang ?? 0,
-      taiBanIds: d.taiBanIds ? [d.taiBanIds] : [],
-      tacGiaIds: d.tacGiaIds ? [d.tacGiaIds] : [],
-      chuDeIds: d.chuDeIds ? [d.chuDeIds] : [],
-      khoiLuongTinh: d.khoiLuongTinh ?? 0,
-      soLuong: d.soLuong ?? 0,
-      ngayXuatBan: d.ngayXuatBan as any,
-      hinhAnh: d.hinhAnh,
-      donGia: d.donGia ?? 0,
-      moTa: d.moTa,
-      trangThai: d.trangThai
-    }));
-
-    const invalid = payload.find(p => !p.isbn || !p.maSanPhamChiTiet || (p.soLuong as number) <= 0 || (p.donGia as number) <= 0);
-    if (invalid) {
-      this.saving = false;
-      alert('Vui lòng nhập đầy đủ:Số lượng > 0, Đơn giá > 0');
-      return;
-    }
-
-    console.log('Payload bulk variants:', payload);
-    
-    this.http.post('http://localhost:8080/api/books/bulk-create', payload, {
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .subscribe({
-        next: () => {
-          this.saving = false;
-          this.router.navigate(['/admin/products/book']);
-        },
-        error: (error) => {
-          console.error('Save failed:', error);
-          alert(`Lưu thất bại! Lỗi: ${error.error?.message || error.message || 'Không xác định'}`);
-          this.saving = false;
-        }
-      });
-  }
 
   private toId(val: any, list: any[]): number | undefined {
     if (val == null) return undefined;
@@ -365,42 +249,6 @@ export class VariantsComponent {
     return item?.id;
   }
 
-  addTheLoai() {
-    if (!this.chosenTheLoaiId) return;
-    if (!this.selectedTheLoaiIds.includes(this.chosenTheLoaiId)) {
-      this.selectedTheLoaiIds.push(this.chosenTheLoaiId);
-    }
-    this.chosenTheLoaiId = undefined;
-  }
-
-  removeTheLoai(id: number) {
-    this.selectedTheLoaiIds = this.selectedTheLoaiIds.filter(x => x !== id);
-  }
-
-  addNxb() {
-    if (!this.chosenNxbId) return;
-    if (!this.selectedNxbIds.includes(this.chosenNxbId)) {
-      this.selectedNxbIds.push(this.chosenNxbId);
-    }
-    this.chosenNxbId = undefined;
-  }
-
-  removeNxb(id: number) {
-    this.selectedNxbIds = this.selectedNxbIds.filter(x => x !== id);
-  }
-
-  // Helpers for template display
-  getTheLoaiName(id: number | undefined): string {
-    if (!id) return '';
-    const item = this.theLoais?.find((t: any) => t.id === id);
-    return item?.tenTheLoai ?? String(id);
-  }
-
-  getNxbName(id: number | undefined): string {
-    if (!id) return '';
-    const item = this.nhaXuatBans?.find((n: any) => n.id === id);
-    return item?.tenNhaXuatBan ?? String(id);
-  }
 
   ngOnInit(): void {
     // Nạp danh mục thuộc tính
@@ -519,6 +367,140 @@ export class VariantsComponent {
         }
       });
     }
+  }
+
+  // Quick add kích thước
+  quickAddKichThuoc(): void {
+    const chiSoKichThuoc = prompt('Nhập chỉ số kích thước (ví dụ: 14x20cm):');
+    if (!chiSoKichThuoc || !chiSoKichThuoc.trim()) return;
+    
+    const newKichThuoc = { 
+      chiSoKichThuoc: chiSoKichThuoc.trim(),
+      trangThai: true 
+    };
+    this.http.post('http://localhost:8080/api/kich-thuoc', newKichThuoc).subscribe({
+      next: (response: any) => {
+        console.log('Kích thước được tạo:', response);
+        this.fetchAttributes();
+        alert('Thêm kích thước thành công!');
+      },
+      error: (error) => {
+        console.error('Error adding kích thước:', error);
+        alert('Lỗi khi thêm kích thước: ' + (error.error?.message || error.message));
+      }
+    });
+  }
+
+  // Quick add loại bìa
+  quickAddLoaiBia(): void {
+    const tenBia = prompt('Nhập tên loại bìa:');
+    if (!tenBia || !tenBia.trim()) return;
+    
+    const newLoaiBia = { 
+      tenBia: tenBia.trim(),
+      trangThai: true 
+    };
+    this.http.post('http://localhost:8080/api/loai-bia', newLoaiBia).subscribe({
+      next: (response: any) => {
+        console.log('Loại bìa được tạo:', response);
+        this.fetchAttributes();
+        alert('Thêm loại bìa thành công!');
+      },
+      error: (error) => {
+        console.error('Error adding loại bìa:', error);
+        alert('Lỗi khi thêm loại bìa: ' + (error.error?.message || error.message));
+      }
+    });
+  }
+
+  // Quick add loại giấy
+  quickAddLoaiGiay(): void {
+    const tenGiay = prompt('Nhập tên loại giấy:');
+    if (!tenGiay || !tenGiay.trim()) return;
+    
+    const mauSac = prompt('Nhập màu sắc (tùy chọn):');
+    
+    const newLoaiGiay = { 
+      tenGiay: tenGiay.trim(),
+      mauSac: mauSac?.trim() || null,
+      trangThai: true 
+    };
+    this.http.post('http://localhost:8080/api/loai-giay', newLoaiGiay).subscribe({
+      next: (response: any) => {
+        console.log('Loại giấy được tạo:', response);
+        this.fetchAttributes();
+        alert('Thêm loại giấy thành công!');
+      },
+      error: (error) => {
+        console.error('Error adding loại giấy:', error);
+        alert('Lỗi khi thêm loại giấy: ' + (error.error?.message || error.message));
+      }
+    });
+  }
+
+  // Set current date
+  setCurrentDate(): void {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    this.newDraft.ngayXuatBan = `${year}-${month}-${day}`;
+  }
+
+  // Quick add thể loại
+  quickAddTheLoai(): void {
+    const tenTheLoai = prompt('Nhập tên thể loại:');
+    if (!tenTheLoai || !tenTheLoai.trim()) return;
+    
+    const newTheLoai = { 
+      tenTheLoai: tenTheLoai.trim(),
+      trangThai: true 
+    };
+    this.http.post('http://localhost:8080/api/the-loai', newTheLoai).subscribe({
+      next: (response: any) => {
+        console.log('Thể loại được tạo:', response);
+        this.fetchAttributes();
+        alert('Thêm thể loại thành công!');
+      },
+      error: (error) => {
+        console.error('Error adding thể loại:', error);
+        alert('Lỗi khi thêm thể loại: ' + (error.error?.message || error.message));
+      }
+    });
+  }
+
+  // Quick add nhà xuất bản
+  quickAddNxb(): void {
+    const tenNhaXuatBan = prompt('Nhập tên nhà xuất bản:');
+    if (!tenNhaXuatBan || !tenNhaXuatBan.trim()) return;
+    
+    const truSoChinh = prompt('Nhập trụ sở chính (tùy chọn):');
+    const moTa = prompt('Nhập mô tả (tùy chọn):');
+    
+    const newNxb = { 
+      tenNhaXuatBan: tenNhaXuatBan.trim(),
+      maNhaXuatBan: this.genCode('NXB'),
+      truSoChinh: truSoChinh?.trim() || null,
+      moTa: moTa?.trim() || null,
+      trangThai: true 
+    };
+    this.http.post('http://localhost:8080/api/nha-xuat-ban', newNxb).subscribe({
+      next: (response: any) => {
+        console.log('Nhà xuất bản được tạo:', response);
+        this.fetchAttributes();
+        alert('Thêm nhà xuất bản thành công!');
+      },
+      error: (error) => {
+        console.error('Error adding nhà xuất bản:', error);
+        alert('Lỗi khi thêm nhà xuất bản: ' + (error.error?.message || error.message));
+      }
+    });
+  }
+
+  // Generate code helper
+  private genCode(prefix: string): string {
+    const timestamp = Date.now().toString().slice(-6);
+    return `${prefix}${timestamp}`;
   }
 
   // Hình ảnh methods

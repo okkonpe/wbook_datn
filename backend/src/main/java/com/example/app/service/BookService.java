@@ -282,9 +282,6 @@ public class BookService {
             }
             
             // Set lần tái bản
-            if (dto.getLanTaiBan() != null) {
-                book.setSoLanTaiBan(dto.getLanTaiBan());
-            }
             
             // Set khối lượng tịnh
             if (dto.getKhoiLuongTinh() != null) {

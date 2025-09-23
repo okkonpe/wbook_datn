@@ -2,21 +2,30 @@ package com.example.app.service;
 
 import com.example.app.controller.KhachHangController.QuickCustomerDTO;
 import com.example.app.dto.banHangDTO.ListDonHangDTO;
+import com.example.app.dto.banHangDTO.ListGioHangDTO;
+import com.example.app.dto.khachHangDTO.DoiMKDTO;
 import com.example.app.dto.khachHangDTO.KhachHangInfoDTO;
 import com.example.app.dto.khachHangDTO.KhachHangRegisterDTO;
+import com.example.app.entity.HoaDon;
 import com.example.app.entity.KhachHang;
 import com.example.app.mapper.KhachHangMapper;
 import com.example.app.mapper.banHangMapper.HoaDonMapper;
 import com.example.app.repository.HoaDonRepository;
 import com.example.app.repository.KhachHangRepo;
 import com.example.app.repository.NhanVienRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +45,9 @@ public class KhachHangService {
 
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Autowired
     private KhachHangMapper mapper;
@@ -102,7 +114,7 @@ public class KhachHangService {
             khachHang.setDiaChi(dto.getDiaChi() != null ? dto.getDiaChi().trim() : null);
             khachHang.setEmail(dto.getEmail() != null ? dto.getEmail().trim() : null);
             khachHang.setGioiTinh(dto.getGioiTinh() != null ? dto.getGioiTinh() : true);
-            khachHang.setTrangThai(dto.getTrangThai() != null ? dto.getTrangThai() : "Hoạt động");
+            khachHang.setTrangThai(true);
 
             System.out.println("Entity trước khi save: " + khachHang);
             KhachHang saved = repo.save(khachHang);
@@ -130,11 +142,71 @@ public class KhachHangService {
         entity.setDiaChi(dto.getDiaChi());
         entity.setEmail(dto.getEmail());
         entity.setGioiTinh(dto.getGioiTinh());
-        entity.setTrangThai(dto.getTrangThai());
+        entity.setTrangThai(true);
 
         KhachHang saved = repo.save(entity);
         return mapper.khInfoToDTO(saved);
     }
+    public KhachHangInfoDTO updateInfo(KhachHangInfoDTO dto, String userName) {
+        KhachHang entity = repo.findByTaiKhoan(userName)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+
+        entity.setTenKhachHang(dto.getTenKhachHang());
+        entity.setSdt(dto.getSdt());
+        entity.setNgaySinh(dto.getNgaySinh());
+        entity.setDiaChi(dto.getDiaChi());
+        entity.setEmail(dto.getEmail());
+
+        KhachHang saved = repo.save(entity);
+        return mapper.khInfoToDTO(saved);
+    }
+
+    public void changePassword(String username, DoiMKDTO request) {
+        KhachHang kh = repo.findByTaiKhoan(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
+
+        if (!encoder.matches(request.getOldPassword(), kh.getMatKhau())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng");
+        }
+
+        kh.setMatKhau(encoder.encode(request.getNewPassword()));
+        repo.save(kh);
+    }
+    public void createPasswordResetToken(String email) {
+        KhachHang kh = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        String token = UUID.randomUUID().toString();
+        kh.setResetToken(token);
+        kh.setResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
+        repo.save(kh);
+
+        String resetUrl = "http://localhost:4200/reset-password?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Đặt lại mật khẩu");
+        message.setText("Click vào link để đổi mật khẩu: " + resetUrl);
+
+        mailSender.send(message);
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        KhachHang kh = repo.findByResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Token không hợp lệ"));
+
+        if (kh.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token đã hết hạn");
+        }
+
+        kh.setMatKhau(encoder.encode(newPassword));
+        kh.setResetToken(null);
+        kh.setResetTokenExpiry(null);
+
+        repo.save(kh);
+    }
+
+
 
     public void delete(Integer id) {
         KhachHang entity = repo.findById(id)
@@ -162,21 +234,25 @@ public class KhachHangService {
     // Giữ nguyên các method cũ
     public void register(KhachHangRegisterDTO dto) {
         String tk = dto.getTaiKhoan();
+        String email =dto.getEmail();
         if (tk != null && (repo.findByTaiKhoan(dto.getTaiKhoan()).isPresent() || nhanVienRepository.existsByTaiKhoan(tk))) {
             throw new IllegalArgumentException("Tài khoản đã tồn tại");
         }
-
+        if (email != null && (repo.findByEmail(dto.getEmail()).isPresent())) {
+            throw new IllegalArgumentException("Email đã tồn tại");
+        }
         KhachHang kh = mapper.khRegistertoEntity(dto);
         kh.setMatKhau(encoder.encode(dto.getMatKhau()));
-        kh.setTrangThai("Hoạt động");  // 👈 Set String mặc định
+        kh.setTrangThai(true);  // 👈 Set String mặc định
+        kh.setMaKhachHang(generateUniqueMaKhachHang());
         repo.save(kh);
     }
 
-    public List<ListDonHangDTO> layDonHangTheoKhachHang(String username) {
+    public List<ListDonHangDTO> layDonHangTheoKhachHang(String username)  {
         KhachHang kh = repo.findByTaiKhoan(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
-
-List<Integer> list = List.of(1,2);
+List<Integer> list = List.of(1);
+        List<HoaDon> listHD = hoaDonRepository.findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(kh,list);
         return hoaDonRepository.findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(kh,list).stream().map(hoaDonMapper::donHangtoDTO).collect(Collectors.toList());
     }
     public KhachHangInfoDTO thongTinKhachHang(String username){
@@ -208,7 +284,7 @@ List<Integer> list = List.of(1,2);
         customer.setSdt(dto.getSdt());
         customer.setDiaChi(dto.getDiaChi());
         customer.setEmail(dto.getEmail());
-        customer.setTrangThai("ACTIVE");
+        customer.setTrangThai(true);
         // Không set tài khoản và mật khẩu cho khách hàng nhanh
 
         return repo.save(customer);

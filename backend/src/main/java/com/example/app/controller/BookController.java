@@ -3,12 +3,15 @@ package com.example.app.controller;
 import com.example.app.dto.bookDTO.BookDetailDTO;
 import com.example.app.dto.bookDTO.VariantCreateDTO;
 import com.example.app.dto.bookDTO.ListAllBookDTO;
+import com.example.app.repository.BookRepository;
 import com.example.app.service.BookService;
 import com.example.app.service.QRCodeService;
 import com.example.app.service.UploadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,8 @@ public class BookController {
     
     @Autowired
     private QRCodeService qrCodeService;
+    @Autowired
+    private BookRepository bookRepository;
 
 //    @GetMapping()
 //    public ResponseEntity<List<ListAllBookDTO>> getAllBooks() {
@@ -43,12 +48,20 @@ public class BookController {
     public ResponseEntity<Page<ListAllBookDTO>> getBooks(
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "12") int size
     ) {
         Page<ListAllBookDTO> result = bookService.getBooks(keyword, page, size);
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/theloai/{id}")
+    public Page<ListAllBookDTO> getByTheLoai(
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return bookService.getBookByTheLoai(page,size,id);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookDetailDTO> getByID(@PathVariable Integer id) {

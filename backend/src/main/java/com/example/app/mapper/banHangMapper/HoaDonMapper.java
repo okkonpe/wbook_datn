@@ -6,7 +6,7 @@ import com.example.app.entity.HoaDon;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",uses = {GioHangMapper.class})
 public interface HoaDonMapper {
     HoaDonRequestDTO hoaDonReqtoDTO(HoaDon hoaDon);
     

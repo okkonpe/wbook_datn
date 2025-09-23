@@ -1,36 +1,54 @@
 <div class="container mt-5 mb-5" style="max-width: 600px;">
   <h3 class="text-center text-success mb-4">📝 Đăng ký</h3>
 
-  <form (ngSubmit)="register()" #registerForm="ngForm">
+  <form (ngSubmit)="register(registerForm)" #registerForm="ngForm">
     <div class="row">
       <div class="mb-3 col-md-6">
         <label class="form-label">Tài khoản</label>
-        <input type="text" class="form-control" required [(ngModel)]="registerData.taiKhoan" name="taiKhoan">
+        <input type="text" class="form-control" required [(ngModel)]="registerData.taiKhoan" name="taiKhoan"  #taiKhoan="ngModel">
+        <div *ngIf="submitted&&taiKhoan.invalid" class="text-danger">
+      Tài khoản không được để trống
+    </div>
       </div>
 
       <div class="mb-3 col-md-6">
         <label class="form-label">Mật khẩu</label>
-        <input type="password" class="form-control" required [(ngModel)]="registerData.matKhau" name="matKhau">
+        <input type="password" class="form-control" required [(ngModel)]="registerData.matKhau" name="matKhau"  #matKhau="ngModel">
+        <div *ngIf="matKhau.invalid &&submitted " class="text-danger">
+      Tài khoản không được để trống
+    </div>
       </div>
 
       <div class="mb-3 col-md-6">
         <label class="form-label">Họ tên</label>
-        <input type="text" class="form-control" required [(ngModel)]="registerData.tenKhachHang" name="tenKhachHang">
+        <input type="text" class="form-control" required [(ngModel)]="registerData.tenKhachHang" name="tenKhachHang"  #tenKhachHang="ngModel">
+        <div *ngIf="tenKhachHang.invalid && submitted" class="text-danger">
+      Họ tên không được để trống
+    </div>
       </div>
 
       <div class="mb-3 col-md-6">
         <label class="form-label">Số điện thoại</label>
-        <input type="text" class="form-control" required [(ngModel)]="registerData.sdt" name="sdt">
+        <input type="text" class="form-control" required [(ngModel)]="registerData.sdt" name="sdt"  #sdt="ngModel">
+        <div *ngIf="sdt.invalid &&submitted" class="text-danger">
+      Số điện thoại không được để trống
+    </div>
       </div>
 
       <div class="mb-3 col-12">
         <label class="form-label">Email</label>
-        <input type="email" class="form-control" required [(ngModel)]="registerData.email" name="email">
+        <input type="email" class="form-control" required [(ngModel)]="registerData.email" name="email"  #email="ngModel">
+        <div *ngIf="email.invalid && submitted" class="text-danger">
+      Email không được để trống
+    </div>
       </div>
-
+<div class="mb-3 col-12">
+        <label class="form-label">Ngày sinh</label>
+        <input type="date" class="form-control"  [(ngModel)]="registerData.ngaySinh" name="ngaySinh">
+      </div>
       <div class="mb-3 col-12">
         <label class="form-label">Địa chỉ</label>
-        <textarea rows="2" class="form-control" required [(ngModel)]="registerData.diaChi" name="diaChi"></textarea>
+        <textarea rows="2" class="form-control"  [(ngModel)]="registerData.diaChi" name="diaChi"></textarea>
       </div>
     </div>
 

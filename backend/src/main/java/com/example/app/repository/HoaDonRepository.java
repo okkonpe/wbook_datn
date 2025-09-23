@@ -21,8 +21,16 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
     Optional<HoaDon> findByKhachHangAndTrangThai(KhachHang kh, TrangThaiHoaDon trangThaiHoaDon);
     Optional<HoaDon> findByKhachHangIdAndTrangThaiId(Integer khachHangId, Integer trangThaiId);
     Page<HoaDon> findByTrangThaiIdNotIn(List<Integer> trangThaiId, Pageable pageable);
-    @EntityGraph(attributePaths = {"chiTietHoaDons", "chiTietHoaDons.book", "chiTietHoaDons.book.sanPham", "chiTietHoaDons.book.hinhAnh"})
-    List<HoaDon> findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(KhachHang khachHang,List<Integer> id);
+    @Query("""
+    SELECT DISTINCT hd FROM HoaDon hd
+    JOIN FETCH hd.chiTietHoaDons cthd
+    JOIN FETCH cthd.book spct
+    JOIN FETCH spct.sanPham sp
+    LEFT JOIN FETCH spct.hinhAnh ha
+    WHERE hd.khachHang = :khachHang
+      AND hd.trangThai.id NOT IN :id
+    ORDER BY hd.ngayTao DESC
+""")       List<HoaDon> findByKhachHangAndTrangThaiIdNotInOrderByNgayTaoDesc(KhachHang khachHang,List<Integer> id);
     @Query("SELECT h FROM HoaDon h " +
             "WHERE (:status IS NULL OR h.trangThai.trangThai = :status) "+
             "and (:loaiTT IS NULL OR h.loaiThanhToan=:loaiTT)"+

@@ -84,13 +84,7 @@ public class Book {
     )
     @Builder.Default
     private Set<TacGia> tacGia = new HashSet<>();
-    @ManyToMany
-    @JoinTable(
-            name = "sach_tai_ban",
-            joinColumns = @JoinColumn(name = "sach"),
-            inverseJoinColumns = @JoinColumn(name = "tai_ban")
-    )
-    private Set<TaiBan> taiBan = new HashSet<>();
+
 
     @ManyToMany
     @JoinTable(

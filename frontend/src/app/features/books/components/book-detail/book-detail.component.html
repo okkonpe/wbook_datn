@@ -12,7 +12,7 @@
       <p><strong>Tác giả:</strong> {{ book.tacGia }}</p>
       <p><strong>Thể loại:</strong> {{ book.theLoai }}</p>
       <p><strong>Giá: </strong> 
-        <span class="text-danger fs-4 fw-bold">{{ book.donGia}}₫</span>
+        <span class="text-danger fs-4 fw-bold">{{ book.donGia | currency: 'VND':'symbol':'1.0-0':'vi'}}</span>
       </p>
 
       <p class="mt-4"><strong>Mô tả:</strong>    {{ book.moTa }}

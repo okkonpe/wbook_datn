@@ -1,13 +1,29 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { TheLoaiService } from './theloai.service';
 @Component({
   selector: 'app-header',
   imports: [RouterModule,CommonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit{
+  theLoais: any[] = [];
+
+    constructor(private theLoaiService: TheLoaiService, private router: Router) {}
+ ngOnInit(): void {
+    this.theLoaiService.getTheLoai().subscribe(data => {
+      this.theLoais = data.content ?? [];
+    });
+  }
+   goToCategory(id: number, tenTheLoai: string) {
+  this.router.navigate(
+    ['/product', id],
+    { queryParams: { name: tenTheLoai } }  // truyền thêm tên thể loại
+  );
+}
+
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }

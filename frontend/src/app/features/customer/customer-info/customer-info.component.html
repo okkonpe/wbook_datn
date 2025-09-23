@@ -1,4 +1,4 @@
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
   <div class="card shadow rounded p-4">
     <h3 class="text-center mb-4">Thông tin khách hàng</h3>
     
@@ -30,25 +30,138 @@
     </div>
 
     <div class="text-center mt-4">
-      <button class="btn btn-primary" (click)="editMode = true">Chỉnh sửa</button>
+      <button class="btn btn-primary me-2" (click)="openModal()" >Chỉnh sửa</button>
+            <button class="btn btn-primary " (click)="openModalDoiMK()">Đổi mật khẩu</button>
+
     </div>
+  </div>
+      <!-- modal sửa info -->
+       <div *ngIf="isModal" class="overlay">
+  <div class="modal-box">
+  <form  #editForm="ngForm">
+        
+        <!-- Header -->
+        <div class="modal-header  text-primary">
+          <h5 class="modal-title ">Chỉnh sửa thông tin khách hàng</h5>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Họ tên -->
+            <div class="col-md-6">
+              <label class="form-label">Họ và tên:</label>
+              <input type="text" class="form-control" 
+                     [(ngModel)]="khachHang.tenKhachHang" 
+                     name="tenKhachHang" 
+                     >
+              <div *ngIf="editForm.submitted && !khachHang.tenKhachHang" class="text-danger small">
+                Họ tên không được để trống
+              </div>
+            </div>
+
+            <!-- SĐT -->
+            <div class="col-md-6">
+              <label class="form-label">Số điện thoại:</label>
+              <input type="text" class="form-control" 
+                     [(ngModel)]="khachHang.sdt" 
+                     name="sdt" 
+                     pattern="^[0-9]{10,11}$"
+                     >
+              <div *ngIf="editForm.submitted && !khachHang.sdt" class="text-danger small">
+                Số điện thoại không được để trống
+              </div>
+              <div *ngIf="editForm.submitted && khachHang.sdt && !khachHang.sdt.match('^[0-9]{10,11}$')" class="text-danger small">
+                Số điện thoại phải gồm 10–11 chữ số
+              </div>
+            </div>
+
+            <!-- Thêm các field khác -->
+            <div class="col-md-6">
+              <label class="form-label">Ngày sinh:</label>
+              <input type="date" class="form-control" 
+                     [(ngModel)]="khachHang.ngaySinh" 
+                     name="ngaySinh" 
+                     >            
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email:</label>
+              <input type="email" class="form-control" 
+                     [(ngModel)]="khachHang.email" 
+                     name="email" 
+                     >
+              <div *ngIf="editForm.submitted && !khachHang.email" class="text-danger small">
+                Email không được để trống
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Địa chỉ:</label>
+              <input type="text" class="form-control" 
+                     [(ngModel)]="khachHang.diaChi" 
+                     name="diaChi">
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer mt-2">
+          <button class="btn btn-success me-2" type="button" (click)="update()">💾 Lưu thay đổi</button>
+          <button class="btn btn-secondary" type="button" (click)="colseModal()">❌ Đóng</button>
+        </div>
+
+      </form>   
   </div>
 </div>
-<form *ngIf="editMode" (ngSubmit)="saveChanges()">
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label class="form-label">Họ và tên:</label>
-      <input type="text" class="form-control" [(ngModel)]="khachHang.tenKhachHang" name="tenKhachHang">
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Số điện thoại:</label>
-      <input type="text" class="form-control" [(ngModel)]="khachHang.sdt" name="sdt">
-    </div>
+
+
+<!-- modal đổi MK  -->
+ <div *ngIf="modalMK" class="overlay">
+  <div class="modal-box">
+   <form  #chanePassWordForm="ngForm">
+        
+        <!-- Header -->
+        <div class="modal-header  text-primary">
+          <h5 class="modal-title">Đổi mật khẩu</h5>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Họ tên -->
+            <div class="col-md-6">
+              <label class="form-label">Mật khẩu cũ:</label>
+              <input type="password" class="form-control" 
+                     [(ngModel)]="passWord.oldPassword" 
+                     name="oldPassword" 
+                     >
+              <div *ngIf="chanePassWordForm.submitted && !passWord.oldPassword" class="text-danger small">
+                Không được để trống!
+              </div>
+            </div>
+
+            <!-- SĐT -->
+            <div class="col-md-6">
+              <label class="form-label">Mật khẩu mới:</label>
+              <input type="password" class="form-control" 
+                     [(ngModel)]="passWord.newPassword" 
+                     name="newPassword"
+                     >
+            </div>       
+          </div>
+        </div>
+        <!-- Footer -->
+        <div class="modal-footer mt-2  mt-2">
+          <button class="btn btn-success me-2" type="button" (click)="doiMK()">💾 Lưu </button>
+          <button class="btn btn-secondary" type="button" (click)="closeModalDoiMK()">❌ Đóng</button>
+        </div>
+
+      </form>   
   </div>
-  <!-- ...các field khác tương tự -->
-  <div class="text-center mt-3">
-    <button class="btn btn-success me-2" type="submit">Lưu thay đổi</button>
-    <button class="btn btn-secondary" type="button" (click)="editMode = false">Huỷ</button>
-  </div>
-</form>
+</div>
+
+
+</div>
+
+
 

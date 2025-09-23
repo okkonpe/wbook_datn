@@ -36,7 +36,7 @@ export interface ListGioHangDTO {
   ngayXuatBan?: string;
   tacGia?: string[];
   chuDe?: string[];
-  taiBans?: string[];
+  taiBan: string[];
   moTa?: string;
 }
 

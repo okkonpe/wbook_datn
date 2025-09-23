@@ -67,8 +67,14 @@ public class BookService {
         List<Book> books = bookRepository.findAll();
         return books.stream().map(bookMapper::listAllBookToDTO).collect(Collectors.toList());
     }
+    public Page<ListAllBookDTO> getBookByTheLoai(int page, int size,Integer theLoaiID) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Book> books = bookRepository.findByTheLoai_Id(theLoaiID, pageable);
+        return books.map(bookMapper::listAllBookToDTO);
+    }
 
-    public Page<ListAllBookDTO> getBooks(String keyword, int page, int size) {
+
+        public Page<ListAllBookDTO> getBooks(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         if (keyword != null && !keyword.isEmpty()) {

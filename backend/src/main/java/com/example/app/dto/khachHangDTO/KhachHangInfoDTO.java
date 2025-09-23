@@ -18,5 +18,5 @@ public class KhachHangInfoDTO {
     private String diaChi;
     private String email;
     private Boolean gioiTinh;     // 👈 THÊM GIỚI TÍNH
-    private String trangThai;     // 👈 THÊM TRẠNG THÁI (String)
+//    private String trangThai;     // 👈 THÊM TRẠNG THÁI (String)
 }

@@ -14,6 +14,8 @@ import { CustomerInfoComponent } from './features/customer/customer-info/custome
 import { CheckoutComponent } from './features/checkout/checkout.component';
 import { OfflineComponent } from './features/admin/offline/offline.component';
 import { VoucherComponent } from './features/admin/voucher/voucher.component';
+import { BookListComponent } from './features/books/components/book-list/book-list.component';
+import { ResetPasswordComponent } from './features/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -38,7 +40,10 @@ export const routes: Routes = [
     component: CustomerPurchaseComponent },
     { path: 'login', component: LoginComponent },
        { path: 'checkout-success', component: CheckoutComponent },
-        { path: 'register', component: RegisterComponent },
+        { path: 'reset-password', component: ResetPasswordComponent },
+                { path: 'register', component: RegisterComponent },
+
+{ path: 'product/:id', component: BookListComponent },
 
 
   {

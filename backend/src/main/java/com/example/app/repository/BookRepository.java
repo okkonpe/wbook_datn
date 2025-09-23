@@ -1,5 +1,6 @@
 package com.example.app.repository;
 
+import com.example.app.dto.bookDTO.ListAllBookDTO;
 import com.example.app.entity.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,8 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
     Book findByMaSanPhamChiTiet(String maSanPhamChiTiet);
     
     Book findByIsbn(String isbn);
+
+    Page<Book> findByTheLoai_Id(Integer theLoaiId, Pageable pageable);
 
     @Query("SELECT b FROM Book b ORDER BY b.soLuong ASC")
     List<Book> findLowStock(org.springframework.data.domain.Pageable pageable);

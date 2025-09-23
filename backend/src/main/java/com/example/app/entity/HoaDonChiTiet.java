@@ -28,10 +28,10 @@ public class HoaDonChiTiet {
     private HoaDon hoaDon;
 
     // FK đến sản phẩm chi tiết
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "ma_san_pham", nullable = false)
-    private Book book;  // hoặc `SanPhamChiTiet` nếu bạn dùng tên khác
+    private Book book;
 
     @Column(name = "tong_tien")
     private BigDecimal tongTien;

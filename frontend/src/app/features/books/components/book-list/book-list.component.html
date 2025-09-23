@@ -1,8 +1,21 @@
 <div class="container mt-4">
-  <h2 class="mb-4 text-center">Sách đề xuất cho bạn</h2>
-  
+          <div class="row g-3 mb-4">
+  <h2 class="mb-4 text-center" style="color:chocolate;">{{categoryName}}</h2>
+
+  <div class=" col-md-4">
+              <label class="form-label">
+                <i class="bi bi-search me-1"></i>
+                Tìm kiếm
+              </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="searchKey"
+                (input)="onSearchChange()">
+            </div>
+             </div>
   <div class="row">
-    <div class="col-3 col-md-3 mb-4" *ngFor="let book of books">
+    <div class="col-3 col-md-3 mb-4" *ngFor="let book of filterBook">
       <div class="card h-100">
         <div class="image-wrapper">
           <img [src]="book.hinhAnh"

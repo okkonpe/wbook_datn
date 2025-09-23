@@ -39,6 +39,9 @@ public class HoaDonService {
     KhachHangRepo khachHangRepo;
     @Autowired
 VoucherRepo voucherRepo;
+     @Autowired
+     HoaDonChiTietRepo hoaDonChiTietRepo;
+
     @Autowired
     private SimpMessagingTemplate   messagingTemplate;
     public HoaDon createHoaDon(KhachHang khachHang){
@@ -219,6 +222,20 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
         hoaDonRepository.save(hd);
         return hoaDonMapper.donHangtoDTO(hd);
     }
+    public ListDonHangDTO chuyenTrangThaiKhachHangHuy(Integer idHD){
+        HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
+        TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(15).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
+
+        if (hd.getTrangThai().getId()==3){
+            throw new IllegalArgumentException("Đơn hàng đang giao!");
+        }
+        if (hd.getTrangThai().getId()==4){
+            throw new IllegalArgumentException("Đơn hàng đã giao!");
+        }
+        hd.setTrangThai(trangThaiHoaDon);
+        hoaDonRepository.save(hd);
+        return hoaDonMapper.donHangtoDTO(hd);
+    }
     public ListDonHangDTO chuyenTrangThaiNhanVienHuy(Integer idHD,Integer idNhanVien){
         HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
         TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(5).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
@@ -366,7 +383,10 @@ return gioHangDTO;
                 .orElseThrow(() -> new RuntimeException("Khách hàng chưa có giỏ hàng"));
 
         List<ListGioHangDTO> chiTietList = gioHangRepo.getGioHangDTOByHoaDon(hoaDon);
-
+        for (ListGioHangDTO dto : chiTietList) {
+            List<String> tacGias = hoaDonChiTietRepo.findTacGiaByBookId(dto.getIdSanPham());
+            dto.setTacGia(tacGias);
+        }
         return chiTietList;
     }
 

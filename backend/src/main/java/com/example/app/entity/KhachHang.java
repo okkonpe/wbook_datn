@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "khach_hang")
@@ -37,5 +38,9 @@ public class KhachHang {
     @Column(name = "gioi_tinh")
       private Boolean gioiTinh;
     @Column(name = "trang_thai")
-    private String trangThai;
+    private Boolean trangThai;
+    @Column(name = "reset_Token")
+    private String resetToken;
+    @Column(name = "reset_Token_Expiry")
+    private LocalDateTime resetTokenExpiry;
 }

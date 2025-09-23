@@ -1,5 +1,7 @@
 package com.example.app.dto.banHangDTO;
 
+import com.example.app.entity.TacGia;
+import com.example.app.entity.TaiBan;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,27 +25,34 @@ public class ListGioHangDTO {
     private Integer soLuongMua;
     
     // Thêm các thuộc tính chi tiết của biến thể
-    private String isbn;
-    private String maSanPhamChiTiet;
     private String theLoai;
     private String nhaXuatBan;
-    private String kichThuoc;
     private String loaiBia;
     private String loaiGiay;
-    private Integer soTrang;
-    private Float khoiLuongTinh;
-    private LocalDate ngayXuatBan;
     private List<String> tacGia;
-    private List<String> chuDe;
-    private Set<String> taiBans;
+    private Set<String> taiBan;
     private String moTa;
 
-    public ListGioHangDTO(Integer idSanPham, String tenSanPham, BigDecimal donGia, Integer soLuongMua, BigDecimal tongTien, String hinhAnh) {
+    public ListGioHangDTO(Integer idSanPham, String tenSanPham, BigDecimal donGia, Integer soLuongMua, BigDecimal tongTien, String hinhAnh,
+                          String theLoai,
+             String nhaXuatBan,
+             String loaiBia,
+             String loaiGiay,
+                          Integer lanTaiBan, // đổi thành Integer
+             String moTa) {
         this.idSanPham = idSanPham;
         this.tenSanPham = tenSanPham;
         this.donGia = donGia;
         this.soLuongMua = soLuongMua;
         this.tongTien = tongTien;
         this.hinhAnh = hinhAnh;
+
+        this.theLoai = theLoai;
+        this.nhaXuatBan = nhaXuatBan;
+        this.loaiBia = loaiBia;
+        this.loaiGiay = loaiGiay;
+        this.taiBan = Set.of(lanTaiBan+""); // wrap thành set nếu cần
+        this.moTa = moTa;
+
     }
 }

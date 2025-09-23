@@ -10,19 +10,6 @@
         
         <div class="item-details">
           <h5 class="item-title">{{ item.tenSanPham }}</h5>
-          
-          <!-- Thông tin cơ bản -->
-          <div class="item-basic-info">
-            <div class="info-row">
-              <span class="info-label">ISBN:</span>
-              <span class="info-value">{{ item.isbn || 'N/A' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Mã SPCT:</span>
-              <span class="info-value">{{ item.maSanPhamChiTiet || 'N/A' }}</span>
-            </div>
-          </div>
-
           <!-- Thông tin chi tiết -->
           <div class="item-detailed-info">
             <div class="info-grid">
@@ -36,11 +23,7 @@
                 <span class="info-label">NXB:</span>
                 <span class="info-value">{{ item.nhaXuatBan || 'N/A' }}</span>
               </div>
-              <div class="info-item">
-                <i class="bi bi-rulers"></i>
-                <span class="info-label">Kích thước:</span>
-                <span class="info-value">{{ item.kichThuoc || 'N/A' }}</span>
-              </div>
+              
               <div class="info-item">
                 <i class="bi bi-book"></i>
                 <span class="info-label">Loại bìa:</span>
@@ -50,21 +33,6 @@
                 <i class="bi bi-file-text"></i>
                 <span class="info-label">Loại giấy:</span>
                 <span class="info-value">{{ item.loaiGiay || 'N/A' }}</span>
-              </div>
-              <div class="info-item">
-                <i class="bi bi-file-earmark-text"></i>
-                <span class="info-label">Số trang:</span>
-                <span class="info-value">{{ item.soTrang || 'N/A' }}</span>
-              </div>
-              <div class="info-item">
-                <i class="bi bi-speedometer"></i>
-                <span class="info-label">Khối lượng:</span>
-                <span class="info-value">{{ item.khoiLuongTinh ? item.khoiLuongTinh + 'g' : 'N/A' }}</span>
-              </div>
-              <div class="info-item">
-                <i class="bi bi-calendar"></i>
-                <span class="info-label">Ngày XB:</span>
-                <span class="info-value">{{ item.ngayXuatBan || 'N/A' }}</span>
               </div>
             </div>
 
@@ -76,17 +44,12 @@
             </div>
 
             <!-- Chủ đề -->
-            <div class="info-section" *ngIf="item.chuDe && item.chuDe.length > 0">
-              <i class="bi bi-bookmark"></i>
-              <span class="info-label">Chủ đề:</span>
-              <span class="info-value">{{ item.chuDe.join(', ') }}</span>
-            </div>
 
             <!-- Tái bản -->
-            <div class="info-section" *ngIf="item.taiBans && item.taiBans.length > 0">
+            <div class="info-section" *ngIf="item.taiBan && item.taiBan.length > 0">
               <i class="bi bi-arrow-repeat"></i>
-              <span class="info-label">Tái bản:</span>
-              <span class="info-value">{{ item.taiBans.join(', ') }}</span>
+              <span class="info-label">Tái bản lần:</span>
+              <span class="info-value">{{ item.taiBan.join(', ') }}</span>
             </div>
 
             <!-- Mô tả -->

@@ -12,12 +12,31 @@
 
     </div>
     <div class="card-body">
-      <div><strong>Trạng thái:</strong> {{ donHang.trangThai }}</div>
-      <div><strong>Tổng tiền:</strong> {{ donHang.tongTien | number }}₫</div>
-<button class="btn btn-sm btn-outline-primary"
+      <div><strong>Trạng thái: </strong> 
+      <span [ngSwitch]="donHang.trangThai">
+    <span  *ngSwitchCase="'DA_XAC_NHAN'" class="badge bg-primary">Đã xác nhận</span>
+    <span *ngSwitchCase="'CHO_XAC_NHAN'" class="badge bg-warning">Chờ xác nhận</span>
+    <span *ngSwitchCase="'DANG_GIAO_HANG'" class="badge bg-primary">Đang giao</span>
+    <span *ngSwitchCase="'GIAO_HANG_THANH_CONG'" class="badge bg-success">Gia hàng thành công</span>
+    <span *ngSwitchCase="'NHAN_VIEN_HUY'" class="badge bg-danger">Nhân viên huỷ</span>
+        <span *ngSwitchCase="'KHACH_HANG_DA_HUY'" class="badge bg-danger">Khách hàng huỷ</span>
+    <span *ngSwitchCase="'GIAO_HANG_THAT_BAI'" class="badge bg-danger">Giao hàng thất bại</span>
+    <span *ngSwitchCase="'HOAN_THANH'" class="badge bg-success">Đơn hàng OFFLINE</span>
+    <span *ngSwitchDefault>{{ donHang.trangThai }}</span>
+  </span>
+      </div>
+      <div><strong>Thanh toán:</strong> {{ donHang.tongTienSauGiam | number }}₫</div>
+<button class="btn btn-sm btn-outline-primary mt-1"
               (click)="moChiTiet(donHang.id)">
         {{ donHang.id === idDonHangDangXem ? 'Ẩn chi tiết' : 'Xem chi tiết' }}
+
       </button>
+      <div class="mt-2">
+        <button class="btn btn-sm btn-outline-danger" *ngIf="donHang.trangThai==='DA_XAC_NHAN'||donHang.trangThai==='CHO_XAC_NHAN'"
+              (click)="huyDon(donHang)">
+Huỷ đơn        
+      </button>
+      </div>
       <hr>
        <div class="card-body" *ngIf="donHang.id === idDonHangDangXem">
       <p><strong>Tổng tiền:</strong> {{ donHang.tongTien | number }}₫</p>

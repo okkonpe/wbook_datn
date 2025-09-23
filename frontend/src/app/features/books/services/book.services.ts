@@ -14,7 +14,9 @@ export class BookService {
 getBooks(page: number): Observable<PageResponse<Book>> {
   return this.http.get<PageResponse<Book>>(`${this.apiUrl}?page=${page}`);
 }
-
+getSachByTheLoai(id: number, page: number, size: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/theloai/${id}?page=${page}&size=${size}`);
+  }
 
 
   getBookById(id: string | number): Observable<any> {

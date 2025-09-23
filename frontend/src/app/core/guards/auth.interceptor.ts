@@ -20,10 +20,13 @@ export class AuthInterceptor implements HttpInterceptor {
         headers: req.headers.set('Authorization', `Bearer ${token}`)
       });
     }
+const publicUrls = ['/login', '/register', '/forgot-password', '/reset-password'];
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || error.status === 403) {
+
+        if (error.status === 401 || error.status === 403&&
+    !publicUrls.some(url => this.router.url.startsWith(url))) {
           // 👇 Xóa token + chuyển hướng
           localStorage.removeItem('token');
           localStorage.removeItem('role');

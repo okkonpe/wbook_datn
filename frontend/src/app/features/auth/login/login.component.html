@@ -15,8 +15,46 @@
     <button class="btn btn-primary w-100" type="submit">Đăng nhập</button>
 
     <div class="text-center mt-3">
-      <span>Chưa có tài khoản?</span>
+      <span class="mb-2">Chưa có tài khoản?</span>
       <a routerLink="/register">Đăng ký</a>
+      <button type="button" (click)="openEmailModal()">Quên mật khẩu</button>
     </div>
   </form>
+  <!-- Modal nhập Email -->
+<div class="modal fade show d-block" *ngIf="isEmailModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      
+      <!-- Header -->
+      <div class="modal-header">
+        <h5 class="modal-title">Nhập Email</h5>
+      </div>
+      
+      <!-- Body -->
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="emailInput" class="form-label">Email</label>
+            <input type="email"
+                   id="emailInput"
+                   class="form-control"
+                   [(ngModel)]="email"
+                   name="email"
+                   placeholder="Nhập email của bạn"
+                   required>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeEmailModal()">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="submitEmail()">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="isEmailModal"></div>
+
+
 </div>

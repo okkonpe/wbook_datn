@@ -4,11 +4,12 @@ import { BookService } from '../../services/book.services';
 import { CartService, ThemGioHangDTO } from '../../../cart/cart.service';
 import { FormsModule } from '@angular/forms';
 import { jwtDecode } from 'jwt-decode';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-book-detail',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule,CommonModule],
   templateUrl: './book-detail.component.html',
   styleUrl: './book-detail.component.scss'
 })

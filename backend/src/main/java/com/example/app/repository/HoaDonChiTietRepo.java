@@ -21,16 +21,31 @@ public interface HoaDonChiTietRepo extends JpaRepository<HoaDonChiTiet,Integer> 
         b.donGia,
         ct.soLuongMua,
         ct.tongTien,
-          CONCAT('http://localhost:8080/uploads/', ha.hinhAnh)
+          CONCAT('http://localhost:8080/uploads/', ha.hinhAnh),
+          ct.book.theLoai.tenTheLoai,
+          ct.book.nhaXuatBan.tenNhaXuatBan,
+                    ct.book.loaiBia.tenBia,
+                              ct.book.loaiGiay.tenGiay,
+                    tb.lanTaiBan,
+                    ct.book.moTa
     )
     FROM HoaDonChiTiet ct
     JOIN ct.book b
     JOIN b.sanPham sp
     JOIN b.hinhAnh ha
+     LEFT JOIN b.taiBans tb
     WHERE ct.hoaDon = :hoaDon
 """)
     List<ListGioHangDTO> getGioHangDTOByHoaDon(@Param("hoaDon") HoaDon hoaDon);
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);
     void deleteByHoaDonAndBook(HoaDon hoaDon, Book book);
 List<HoaDonChiTiet> findByHoaDonId(Integer id);
+    @Query("""
+    SELECT tg.tenTacGia
+    FROM Book b
+    JOIN b.tacGia tg
+    WHERE b.id = :bookId
+""")
+    List<String> findTacGiaByBookId(@Param("bookId") Integer bookId);
+
 }

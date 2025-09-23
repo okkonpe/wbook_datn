@@ -24,26 +24,20 @@ public interface GioHangMapper {
     @Mapping(target = "hoaDon", ignore = true)
     @Mapping(target = "book", ignore = true)
     HoaDonChiTiet toEntityThemGH(ThemGioHangDTO gioHangDTO);
+
     @Mapping(source = "book.id", target = "idSanPham")
     @Mapping(source = "book.sanPham.tenSanPham", target = "tenSanPham")
     @Mapping(source = "book.donGia", target = "donGia")
     @Mapping(source = "book.hinhAnh.hinhAnh", target = "hinhAnh")
     @Mapping(source = "soLuongMua", target = "soLuongMua")
     @Mapping(source = "tongTien", target = "tongTien")
-    @Mapping(source = "book.isbn", target = "isbn")
-    @Mapping(source = "book.maSanPhamChiTiet", target = "maSanPhamChiTiet")
     @Mapping(source = "book.theLoai.tenTheLoai", target = "theLoai")
     @Mapping(source = "book.nhaXuatBan.tenNhaXuatBan", target = "nhaXuatBan")
-    @Mapping(source = "book.kichThuoc.chiSoKichThuoc", target = "kichThuoc")
     @Mapping(source = "book.loaiBia.tenBia", target = "loaiBia")
     @Mapping(source = "book.loaiGiay.tenGiay", target = "loaiGiay")
-    @Mapping(source = "book.soTrang", target = "soTrang")
-    @Mapping(source = "book.khoiLuongTinh", target = "khoiLuongTinh")
-    @Mapping(source = "book.ngayXuatBan", target = "ngayXuatBan")
     @Mapping(source = "book.moTa", target = "moTa")
     @Mapping(source = "book.tacGia", target = "tacGia", qualifiedByName = "mapTacGiaNames")
-    @Mapping(source = "book.chuDes", target = "chuDe", qualifiedByName = "mapChuDeNames")
-    @Mapping(source = "book.taiBans", target = "taiBans", qualifiedByName = "mapTaiBanNames")
+    @Mapping(source = "book.taiBans", target = "taiBan",qualifiedByName = "mapTaiBanNames")
     ListGioHangDTO toDTOListGH(HoaDonChiTiet chiTiet);
     @AfterMapping
     default void buildImgUrlDetail(HoaDonChiTiet book, @MappingTarget ListGioHangDTO detailDTO){
@@ -56,6 +50,7 @@ public interface GioHangMapper {
             detailDTO.setHinhAnh(imageUrl);
         }
     }
+    List<ListGioHangDTO> toDTOs(List<HoaDonChiTiet> chiTiets);
 
     @Named("mapTacGiaNames")
     default List<String> mapTacGiaNames(Set<TacGia> tacGiaSet) {

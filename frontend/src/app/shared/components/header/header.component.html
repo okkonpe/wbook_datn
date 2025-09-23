@@ -10,8 +10,12 @@
         <li class="nav-item dropdown dropdown-hover">
           <a class="nav-link dropdown-toggle" routerLink="" role="button"> Tủ sách</a>
           <ul class="dropdown-menu">
-<li><a class="dropdown-item" routerLink="/product">Kinh tế</a></li>
-<li><a class="dropdown-item" routerLink="/">Thiếu nhi</a></li>
+  <li *ngFor="let tl of theLoais">
+    <a class="dropdown-item"    (click)="goToCategory(tl.id, tl.tenTheLoai)">
+      {{ tl.tenTheLoai }}
+    </a>
+  </li>
+
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link" routerLink="/about">Giới thiệu</a></li>

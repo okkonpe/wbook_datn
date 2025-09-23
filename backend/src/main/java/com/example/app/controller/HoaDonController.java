@@ -98,6 +98,12 @@ public class HoaDonController {
 
         return ResponseEntity.ok(hoaDonService.chuyenTrangThaiNhanVienHuy(id,idNhanVien));
     }
+
+    @PutMapping("/cap-nhat-trang-thai/khach-hang-huy/{id}")
+    public ResponseEntity<ListDonHangDTO> khachHangHuy(@PathVariable Integer id){
+
+        return ResponseEntity.ok(hoaDonService.chuyenTrangThaiKhachHangHuy(id));
+    }
     @PutMapping("/cap-nhat-trang-thai/giao-hang-that-bai/{id}")
     public ResponseEntity<ListDonHangDTO> giaoHangThatBai(@PathVariable Integer id,@RequestParam Integer idNhanVien){
 

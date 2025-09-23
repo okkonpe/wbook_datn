@@ -17,13 +17,17 @@ export class RegisterComponent {
     tenKhachHang: '',
     email: '',
     sdt: '',
-    diaChi: ''
+    diaChi: '',
+  ngaySinh: new Date(),
   };
+  submitted = false; // biến theo dõi đã bấm nút submit
 
   constructor(private http: HttpClient,private router: Router) {}
 
-  register() {
-    this.http.post<any>('http://localhost:8080/api/auth/register-khach', this.registerData).subscribe({
+  register(form:any) {
+    this.submitted = true;
+     if (form.valid) {
+      this.http.post<any>('http://localhost:8080/api/auth/register-khach', this.registerData).subscribe({
       next: () => {alert('Đăng ký thành công! Mời bạn đăng nhập'),
       this.router.navigate(['/login']) },
      error: (err) => {
@@ -31,5 +35,7 @@ export class RegisterComponent {
   alert('Tài khoản đã tồn tại hoặc thông tin không hợp lệ');
 }
     });
+    }
+   
   }
 }

@@ -1,6 +1,7 @@
 package com.example.app.controller;
 
 import com.example.app.dto.banHangDTO.ListDonHangDTO;
+import com.example.app.dto.khachHangDTO.DoiMKDTO;
 import com.example.app.dto.khachHangDTO.KhachHangInfoDTO;
 import com.example.app.dto.khachHangDTO.KhachHangRegisterDTO;
 import com.example.app.entity.HoaDon;
@@ -8,6 +9,7 @@ import com.example.app.entity.KhachHang;
 import com.example.app.mapper.banHangMapper.HoaDonMapper;
 import com.example.app.security.KhachHangUserDetails;
 import com.example.app.service.KhachHangService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +30,7 @@ public class KhachHangController {
     HoaDonMapper hoaDonMapper;
     
     @GetMapping("/acitivity")
-    public ResponseEntity<List<ListDonHangDTO>> getDonHangCuaKhachHang(@AuthenticationPrincipal KhachHangUserDetails user) {
+    public ResponseEntity<List<ListDonHangDTO>> getDonHangCuaKhachHang(@AuthenticationPrincipal KhachHangUserDetails user)  {
         String username = user.getUsername();
         List<ListDonHangDTO> danhSach = khachHangService.layDonHangTheoKhachHang(username);
         return ResponseEntity.ok(danhSach);
@@ -63,7 +65,18 @@ public class KhachHangController {
         KhachHangInfoDTO updated = khachHangService.update(dto, id);
         return ResponseEntity.ok(updated);
     }
+    @PutMapping("/updateInfo")
+    public ResponseEntity<KhachHangInfoDTO> updateInfo(@AuthenticationPrincipal KhachHangUserDetails user, @RequestBody KhachHangInfoDTO dto) {
+        KhachHangInfoDTO updated = khachHangService.updateInfo(dto,user.getUsername());
+        return ResponseEntity.ok(updated);
+    }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody DoiMKDTO request,
+                                            @AuthenticationPrincipal KhachHangUserDetails user) {
+        khachHangService.changePassword(user.getUsername(), request);
+            return ResponseEntity.ok("Đổi mật khẩu thành công");
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         khachHangService.delete(id);

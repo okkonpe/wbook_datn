@@ -86,7 +86,7 @@ hoaDon: any;
   });
   }
  loadValidVouchers(): void {
-    this.voucherService.getValidVouchers(this.tongTien, this.isNewCustomer)
+    this.voucherService.getValidVouchers(this.tongTien)
       .subscribe({
         next: res => this.validVouchers = res,
         error: err => console.error(err)

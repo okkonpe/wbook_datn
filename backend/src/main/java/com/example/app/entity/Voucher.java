@@ -36,9 +36,6 @@ public class Voucher {
     private LocalDate ngayBatDau;
     private LocalDate ngayKetThuc;
 
-    private Integer soLuong;
-    private Integer daDung = 0;
 
     private Boolean trangThai = true;
-    private Boolean onlyNewCustomer = false;
 }

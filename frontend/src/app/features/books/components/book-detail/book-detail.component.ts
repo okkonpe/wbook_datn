@@ -33,6 +33,11 @@ export class BookDetailComponent implements OnInit {
       });
     }
   }
+blockNegative(event: KeyboardEvent) {
+  if (event.key === '-' || event.key === '+' || event.key === 'e') {
+    event.preventDefault();
+  }
+}
 
   getKhachHangIdFromToken(): number | null {
     const token = localStorage.getItem('token');
@@ -56,9 +61,16 @@ export class BookDetailComponent implements OnInit {
       soLuong: this.soLuong
     };
 
-    this.cartService.addToCart(dto).subscribe(() => {
+    this.cartService.addToCart(dto).subscribe({
+next:() => {
       alert('✅ Đã thêm vào giỏ hàng!');
       this.router.navigate(['/cart'])
-    });
+    },
+    error:(err)=>{
+    const errorMsg = err.error?.message || '❌ Có lỗi xảy ra!';
+    alert(errorMsg);
+    }
+    }
+      );
   }
 }

@@ -35,10 +35,7 @@ public class VoucherService {
         voucher.setDonToiThieu(updatedVoucher.getDonToiThieu());
         voucher.setNgayBatDau(updatedVoucher.getNgayBatDau());
         voucher.setNgayKetThuc(updatedVoucher.getNgayKetThuc());
-        voucher.setSoLuong(updatedVoucher.getSoLuong());
         voucher.setTrangThai(updatedVoucher.getTrangThai());
-        voucher.setOnlyNewCustomer(updatedVoucher.getOnlyNewCustomer());
-
         return voucherRepository.save(voucher);
     }
 
@@ -48,7 +45,6 @@ public class VoucherService {
         }
         voucherRepository.deleteById(id);
     }
-
     public List<Voucher> getAllVouchers() {
         return voucherRepository.findAll();
     }
@@ -58,7 +54,7 @@ public class VoucherService {
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
     }
 
-    public BigDecimal applyVoucher(String maVoucher, BigDecimal tongDonHang, boolean isNewCustomer) {
+    public BigDecimal applyVoucher(String maVoucher, BigDecimal tongDonHang) {
         Voucher voucher = voucherRepository.findByMaVoucher(maVoucher)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
 
@@ -68,14 +64,8 @@ public class VoucherService {
                 LocalDate.now().isAfter(voucher.getNgayKetThuc())) {
             throw new RuntimeException("Voucher đã hết hạn");
         }
-        if (voucher.getSoLuong() <= voucher.getDaDung()) {
-            throw new RuntimeException("Voucher đã hết số lượng");
-        }
         if (tongDonHang.compareTo(voucher.getDonToiThieu()) < 0) {
             throw new RuntimeException("Chưa đạt đơn tối thiểu");
-        }
-        if (voucher.getOnlyNewCustomer() && !isNewCustomer) {
-            throw new RuntimeException("Voucher chỉ áp dụng cho khách hàng mới");
         }
 
         // Tính giảm

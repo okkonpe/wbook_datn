@@ -35,11 +35,9 @@ export class VoucherService {
   deleteVoucher(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
-  getValidVouchers(tongTien: number, isNewCustomer: boolean): Observable<any[]> {
+  getValidVouchers(tongTien: number): Observable<any[]> {
     const params = new HttpParams()
       .set('tongTien', tongTien.toString())
-      .set('isNewCustomer', isNewCustomer.toString());
-
     return this.http.get<any[]>(`${this.apiUrl}/apply`, { params });
   }
 }

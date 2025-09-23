@@ -13,5 +13,5 @@ import java.util.Optional;
 @Repository
 public interface VoucherRepo extends JpaRepository<Voucher,Long> {
     Optional<Voucher> findByMaVoucher(String maVoucher);
-    
+
 }

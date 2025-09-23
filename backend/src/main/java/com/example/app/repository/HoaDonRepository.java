@@ -42,11 +42,12 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
                               Pageable pageable);
 
     // Tính doanh thu từ tất cả trạng thái hợp lệ (trừ chờ xác nhận, giao hàng thất bại, hủy hàng)
-    @Query("SELECT COALESCE(SUM(COALESCE(h.tongTienSauGiam, h.tongTien)),0) FROM HoaDon h WHERE h.trangThai.id IN (1,3,4,6,7,8,11,12,13,16) AND h.ngayTao BETWEEN :from AND :to")
+    @Query("SELECT COALESCE(SUM(COALESCE(h.tongTienSauGiam, h.tongTien)),0) FROM HoaDon h WHERE h.trangThai.id IN (4,16) AND h.ngayTao BETWEEN :from AND :to")
     java.math.BigDecimal sumRevenueBetween(@Param("from") java.time.LocalDate from, @Param("to") java.time.LocalDate to);
 
-    @Query("SELECT COUNT(h) FROM HoaDon h WHERE h.trangThai.id IN (1,3,4,6,7,8,11,12,13,16)")
+    @Query("SELECT COUNT(h) FROM HoaDon h WHERE h.trangThai.id IN (2,3,4,5,11,14,15,16)")
     long countAllOrders();
+
 
     // Top sản phẩm bán chạy
     @Query("SELECT b.id as id, b.maSanPhamChiTiet as maSanPhamChiTiet, " +
@@ -55,10 +56,10 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
            "JOIN hct.book b " +
            "JOIN b.sanPham sp " +
            "JOIN hct.hoaDon h " +
-           "WHERE h.trangThai.id IN (1,3,4,6,7,8,11,12,13,16) " +
+           "WHERE h.trangThai.id IN (4,16) " +
            "GROUP BY b.id, b.maSanPhamChiTiet, sp.tenSanPham " +
            "ORDER BY soLuongDaBan DESC")
-    List<Object[]> findTopSellingProducts(@Param("limit") int limit);
+    List<Object[]> findTopSellingProducts(Pageable pageable);
 
     // Sản phẩm sắp hết hàng
     @Query("SELECT b.id as id, b.maSanPhamChiTiet as maSanPhamChiTiet, " +

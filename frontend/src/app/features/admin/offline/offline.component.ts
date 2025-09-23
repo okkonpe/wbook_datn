@@ -3,14 +3,24 @@ import jsQR from 'jsqr';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { jwtDecode } from 'jwt-decode';
+import { RouterTestingHarness } from '@angular/router/testing';
 
 interface PendingInvoice {
   id: string;
-  orderNumber: string;
+  orderNumber: number;
+  hdNumber: any;
   items: InvoiceItem[];
   customer: Customer;
   totalAmount: number;
   createdAt: Date;
+}
+interface DecodedToken {
+  sub: string;
+  id: number;
+  role: string;
+  iat: number;
+  exp: number;
 }
 
 interface InvoiceItem {
@@ -133,10 +143,14 @@ export class OfflineComponent implements OnInit, AfterViewInit {
 
   createNewInvoice(): void {
     if (this.pendingInvoices.length >= 5) return;
-
+ const maxOrderNumber =
+    this.pendingInvoices.length > 0
+      ? Math.max(...this.pendingInvoices.map(inv => inv.orderNumber))
+      : 0;
     const newInvoice: PendingInvoice = {
       id: this.generateId(),
-      orderNumber: `HD${String(this.pendingInvoices.length + 1).padStart(2, '0')}`,
+      orderNumber: maxOrderNumber+1,
+      hdNumber:'HD'+maxOrderNumber,
       items: [],
       customer: {
         tenKhachHang: 'Khách lẻ',
@@ -167,7 +181,8 @@ export class OfflineComponent implements OnInit, AfterViewInit {
     this.discount = 0;
     this.customerPayment = 0;
     this.change = 0;
-    
+    console.log(this.selectedInvoice);
+
     console.log('🔄 Switched to invoice:', index, '- reset voucher and discount');
     this.saveSelectedIndex();
   }
@@ -615,7 +630,18 @@ export class OfflineComponent implements OnInit, AfterViewInit {
     
     return this.customerPayment >= total && this.change >= 0;
   }
-
+getUserIdFromToken(): number {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        return Number(decoded.id);
+      } catch (e) {
+        console.error('Decode token lỗi:', e);
+      }
+    }
+    return 0; // fallback nếu lỗi
+  }
   completePayment(): void {
     if (!this.canCompletePayment() || !this.selectedInvoice) return;
 
@@ -644,6 +670,7 @@ export class OfflineComponent implements OnInit, AfterViewInit {
       giamGia: this.discount,
       khachThanhToan: this.customerPayment,
       tienThua: this.change,
+      idNhanVien:this.getUserIdFromToken(),
       voucherId: this.selectedVoucher?.id || null,
       items: (this.selectedInvoice.items || []).map(it => ({ id: it.id, soLuong: it.soLuong, donGia: it.donGia }))
     };
@@ -786,8 +813,7 @@ export class OfflineComponent implements OnInit, AfterViewInit {
         this.availableVouchers = vouchers.filter(v => 
           v.trangThai && 
           new Date(v.ngayBatDau) <= new Date() && 
-          new Date(v.ngayKetThuc) >= new Date() &&
-          v.soLuong > v.daDung
+          new Date(v.ngayKetThuc) >= new Date()
         );
         console.log('📋 Vouchers loaded:', this.availableVouchers);
       },

@@ -88,7 +88,7 @@ public class BookService {
             Page<Book> books = bookRepository.findAll(spec, pageable);
             return books.map(bookMapper::listAllBookToDTO);
         } else {
-            Page<Book> books = bookRepository.findAll(pageable);
+            Page<Book> books = bookRepository.findAllByTrangThai(true,pageable);
             return books.map(bookMapper::listAllBookToDTO);
         }
     }

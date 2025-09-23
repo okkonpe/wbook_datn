@@ -23,7 +23,6 @@ export class DashboardComponent {
   todayRevenue = 0;
   weekRevenue = 0;
   monthRevenue = 0;
-  activeVouchers = 0;
   topSellingCount = 0;
   lowStockCount = 0;
   totalOrders = 0;
@@ -103,7 +102,6 @@ export class DashboardComponent {
       this.todayRevenue = res.todayRevenue || 0;
       this.weekRevenue = res.weekRevenue || 0;
       this.monthRevenue = res.monthRevenue || 0;
-      this.activeVouchers = res.activeVouchers || 0;
       this.topSellingCount = res.topSellingCount || 0;
       this.lowStockCount = res.lowStockCount || 0;
       this.totalOrders = res.totalOrders || 0;
@@ -112,7 +110,7 @@ export class DashboardComponent {
 
   openTopSelling() {
     this.showTopSelling = true; this.showLowStock = false;
-    this.http.get<any[]>('http://localhost:8080/api/hoa-don/stat/top-selling?limit=20').subscribe(r => this.topSelling = r, () => {});
+    this.http.get<any[]>('http://localhost:8080/api/hoa-don/stat/top-selling').subscribe(r => this.topSelling = r, () => {});
   }
 
   openLowStock() {

@@ -11,6 +11,7 @@ import com.example.app.repository.HoaDonRepository;
 import com.example.app.repository.NhanVienRepository;
 import com.example.app.repository.TrangThaiHoaDonRepo;
 import com.example.app.service.HoaDonService;
+import com.example.app.service.VoucherService;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -38,6 +39,8 @@ public class HoaDonController {
     HoaDonRepository hoaDonRepository;
     @Autowired
     NhanVienRepository nhanVienRepository;
+    @Autowired
+    VoucherService voucherService;
     @GetMapping("/order")
     public ResponseEntity<Page<ListDonHangDTO>> getAllOrderShipper( @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int size){
@@ -118,12 +121,13 @@ public class HoaDonController {
         java.math.BigDecimal todayRev = hoaDonRepository.sumRevenueBetween(today, today);
         java.math.BigDecimal weekRev = hoaDonRepository.sumRevenueBetween(today.minusDays(6), today);
         java.math.BigDecimal monthRev = hoaDonRepository.sumRevenueBetween(today.withDayOfMonth(1), today);
+        java.math.BigDecimal totalRev = hoaDonRepository.sumRevenueBetween(today.of(1900, 1, 1), today);
+
         m.put("todayRevenue", todayRev);
         m.put("weekRevenue", weekRev);
         m.put("monthRevenue", monthRev);
         m.put("totalOrders", hoaDonRepository.countAllOrders());
-        m.put("totalRevenue", weekRev);
-        m.put("activeVouchers", 0);
+        m.put("totalRevenue", totalRev);
         m.put("topSellingCount", 0);
         m.put("lowStockCount", 0);
         return ResponseEntity.ok(m);
@@ -179,9 +183,8 @@ public class HoaDonController {
     }
 
     @GetMapping("/stat/top-selling")
-    public ResponseEntity<List<Map<String, Object>>> getTopSellingProducts(
-            @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(hoaDonService.getTopSellingProducts(limit));
+    public ResponseEntity<List<Map<String, Object>>> getTopSellingProducts() {
+        return ResponseEntity.ok(hoaDonService.getTopSellingProducts());
     }
 
     @GetMapping("/stat/low-stock")

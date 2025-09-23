@@ -22,7 +22,6 @@ public class PublicVoucherController {
                 .filter(v -> v.getTrangThai())
                 .filter(v -> v.getNgayBatDau().compareTo(today) <= 0
                         && v.getNgayKetThuc().compareTo(today) >= 0)
-                .filter(v -> v.getSoLuong() > v.getDaDung())
                 .toList();
     }
 }

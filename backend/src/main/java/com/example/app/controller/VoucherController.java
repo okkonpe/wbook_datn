@@ -25,16 +25,14 @@ public class VoucherController {
     }
     @GetMapping("/apply")
     public List<Voucher> getValidVouchers(
-            @RequestParam BigDecimal tongTien,
-            @RequestParam boolean isNewCustomer) {
+            @RequestParam BigDecimal tongTien
+            ) {
         LocalDate today = LocalDate.now();
         return voucherRepository.findAll().stream()
                 .filter(v -> v.getTrangThai())
                 .filter(v -> v.getNgayBatDau().compareTo(today) <= 0
                         && v.getNgayKetThuc().compareTo(today) >= 0)
-                .filter(v -> v.getSoLuong() > v.getDaDung())
                 .filter(v -> tongTien.compareTo(v.getDonToiThieu()) >= 0)
-                .filter(v -> !v.getOnlyNewCustomer() || isNewCustomer)
                 .toList();
     }
 

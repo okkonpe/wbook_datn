@@ -23,6 +23,7 @@ public class OfflinePaymentRequestDTO {
     private BigDecimal tienThua;
     private Long voucherId; // ID của voucher được chọn
     private List<Item> items;
+    private Integer idNhanVien;
 
     @Getter
     @Setter

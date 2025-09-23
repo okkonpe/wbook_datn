@@ -45,12 +45,11 @@
   <select id="voucherSelect" class="form-select" [(ngModel)]="selectedVoucher" (change)="applyVoucher()">
     <option [ngValue]="null">-- Chọn voucher --</option>
     <option *ngFor="let v of validVouchers" [ngValue]="v">
-      {{ v.maVoucher }} - 
       <span *ngIf="v.loaiGiam === 'PERCENT'">
-        Giảm {{ v.giaTri }}% (Tối đa {{ v.giamToiDa | currency:'VND' }})
+        Giảm {{ v.giaTri }}% (Tối đa {{ v.giamToiDa | currency:'VND' }}) - {{v.moTa}} - Đơn tối thiểu: {{v.donToiThieu | currency:'VND' }}
       </span>
       <span *ngIf="v.loaiGiam === 'AMOUNT'">
-        Giảm {{ v.giaTri | currency:'VND' }}-{{v.moTa}}
+        Giảm {{ v.giaTri | currency:'VND' }} - {{v.moTa}} - Đơn tối thiểu: {{v.donToiThieu | currency:'VND' }}
       </span>
     </option>
   </select>

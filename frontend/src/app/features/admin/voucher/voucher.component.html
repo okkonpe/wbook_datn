@@ -41,17 +41,9 @@
       <label class="form-label">Ngày kết thúc</label>
       <input type="date" class="form-control" [(ngModel)]="currentVoucher.ngayKetThuc" name="ngayKetThuc">
     </div>
-    <div class="mb-2">
-      <label class="form-label">Số lượng</label>
-      <input type="number" class="form-control" [(ngModel)]="currentVoucher.soLuong" name="soLuong">
-    </div>
     <div class="mb-2 form-check">
       <input type="checkbox" class="form-check-input" [(ngModel)]="currentVoucher.trangThai" name="trangThai">
       <label class="form-check-label">Hoạt động</label>
-    </div>
-    <div class="mb-2 form-check">
-      <input type="checkbox" class="form-check-input" [(ngModel)]="currentVoucher.onlyNewCustomer" name="onlyNewCustomer">
-      <label class="form-check-label">Chỉ khách hàng mới</label>
     </div>
     <button type="submit" class="btn btn-primary me-2">{{ isEdit ? 'Cập nhật' : 'Thêm' }}</button>
     <button type="button" class="btn btn-secondary" (click)="cancel()">Hủy</button>
@@ -64,12 +56,11 @@
     <tr>
       <th>Mã</th>
       <th>Loại</th>
+            <th>Mô tả</th>
       <th>Giá trị</th>
       <th>Giảm tối đa</th>
       <th>Đơn tối thiểu</th>
       <th>Thời gian</th>
-      <th>Số lượng</th>
-      <th>Đã dùng</th>
       <th>Trạng thái</th>
       <th>Hành động</th>
     </tr>
@@ -78,12 +69,11 @@
     <tr *ngFor="let v of vouchers">
       <td>{{ v.maVoucher }}</td>
       <td>{{ v.loaiGiam }}</td>
+      <td>{{v.moTa}}</td>
       <td>{{ v.giaTri }}</td>
       <td>{{ v.giamToiDa }}</td>
       <td>{{ v.donToiThieu }}</td>
       <td>{{ v.ngayBatDau }} - {{ v.ngayKetThuc }}</td>
-      <td>{{ v.soLuong }}</td>
-      <td>{{ v.daDung }}</td>
       <td>
         <span class="badge" [ngClass]="v.trangThai ? 'bg-success' : 'bg-danger'">
           {{ v.trangThai ? 'Hoạt động' : 'Ngừng' }}
@@ -91,7 +81,6 @@
       </td>
       <td>
         <button class="btn btn-sm btn-primary me-1" (click)="editVoucher(v)">Sửa</button>
-        <button class="btn btn-sm btn-danger" (click)="deleteVoucher(v.id)">Xóa</button>
       </td>
     </tr>
   </tbody>

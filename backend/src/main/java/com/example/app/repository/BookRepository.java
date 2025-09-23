@@ -24,6 +24,8 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
 
     Page<Book> findByTheLoai_Id(Integer theLoaiId, Pageable pageable);
 
+    Page<Book> findAllByTrangThai(boolean trangThai,Pageable pageable);
+
     @Query("SELECT b FROM Book b ORDER BY b.soLuong ASC")
     List<Book> findLowStock(org.springframework.data.domain.Pageable pageable);
 }

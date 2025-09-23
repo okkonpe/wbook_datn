@@ -1,9 +1,9 @@
 <!-- Header -->
-<div class="pos-header">
+<div class="pos-header bg-warning">
   <div class="container-fluid">
     <div class="row align-items-center">
-      <div class="col-md-8">
-        <div class="header-content">
+      <div class="col-md-8 ">
+        <div class="header-content ">
           <h1 class="pos-title">
             <i class="bi bi-shop me-3"></i>
             Bán hàng tại quầy
@@ -13,7 +13,7 @@
       </div>
       <div class="col-md-4 text-end">
         <div class="header-actions">
-          <div class="invoice-counter">
+          <div class="invoice-counter bg-success">
             <span class="counter-label">Hóa đơn đang mở:</span>
             <span class="counter-value">{{ pendingInvoices.length }}/5</span>
           </div>
@@ -70,11 +70,11 @@
     <!-- Invoice Tabs -->
     <div class="invoice-tabs" *ngIf="pendingInvoices.length > 0">
       <div class="tab-header">
-        <div class="tab-item" 
+        <div class="tab-item bg-warning" 
              *ngFor="let invoice of pendingInvoices; index as i" 
              [class.active]="selectedInvoiceIndex === i"
              (click)="selectInvoice(i)">
-          <span class="tab-label">{{ invoice.orderNumber }}</span>
+          <span class="tab-label">{{ invoice.hdNumber }}</span>
           <button class="tab-close" (click)="closeInvoice(i); $event.stopPropagation()">
             <i class="bi bi-x"></i>
           </button>
@@ -93,7 +93,6 @@
                     <i class="bi bi-basket me-2"></i>
                     Danh sách sản phẩm
                   </h5>
-                  <span class="item-count">{{ selectedInvoice.items.length }} sản phẩm</span>
                 </div>
                 <div class="header-right">
                   <div class="quick-actions">
@@ -135,16 +134,18 @@
                     </button>
                   </div>
                 </div>
-              </div>
+               </div>
 
-              <!-- Cart Summary -->
-              <div class="cart-summary" *ngIf="selectedInvoice.items.length > 0">
+               <!-- Cart Summary -->
+               <div class="cart-summary bg-warning" *ngIf="(selectedInvoice?.items?.length ?? 0) > 0">
                 <div class="summary-header">
                   <h6>
                     <i class="bi bi-cart-check me-2"></i>
-                    Tóm tắt giỏ hàng
+                    Tóm tắt giỏ hàng 
                   </h6>
                   <span class="item-count">{{ selectedInvoice.items.length }} sản phẩm</span>
+                </div>
+                <div>
                 </div>
                 <div class="summary-stats">
                   <div class="stat-item">
@@ -170,8 +171,8 @@
                   <small>Quét mã QR hoặc tìm kiếm sản phẩm để thêm vào đơn hàng</small>
                 </div>
               </div>
-
-              <div class="product-list-horizontal" *ngIf="selectedInvoice.items.length > 0">
+<!-- *ngIf="selectedInvoice.items.length > 0" -->
+              <div class="product-list-horizontal" >
                 <div class="product-row" *ngFor="let item of selectedInvoice.items; index as i">
                   <div class="product-checkbox">
                     <input type="checkbox" [checked]="true" disabled>

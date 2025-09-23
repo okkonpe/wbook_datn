@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 @Repository
 public interface HoaDonChiTietRepo extends JpaRepository<HoaDonChiTiet,Integer> {
-    Optional<HoaDonChiTiet> findByHoaDonAndAndBook(HoaDon hoaDon, Book book);
+    Optional<HoaDonChiTiet> findByHoaDonAndBook(HoaDon hoaDon, Book book);
     @Query("""
     SELECT new com.example.app.dto.banHangDTO.ListGioHangDTO(
         b.id,

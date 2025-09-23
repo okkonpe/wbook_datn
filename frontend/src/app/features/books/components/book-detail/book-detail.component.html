@@ -22,7 +22,9 @@
   <input
     type="number"
     id="quantity"
+max="99999"
     class="form-control w-25"
+      (keydown)="blockNegative($event)" 
     min="1"
     [(ngModel)]="soLuong"
   />

@@ -7,6 +7,7 @@ import com.example.app.mapper.banHangMapper.HoaDonMapper;
 import com.example.app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -174,9 +175,12 @@ hd.setTongTienSauGiam(request.getTongTienSauGiam());
 public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVien){
     HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
         TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(3).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
-    if (hd.getNhanVien().getId()!=null&hd.getNhanVien().getId()!=idNhanVien){
-        throw new IllegalArgumentException("Đã có nhân viên xác nhận đơn này!");
+    if (hd.getNhanVien() != null &&
+            hd.getNhanVien().getId() != null &&
+            !hd.getNhanVien().getId().equals(idNhanVien)) {
+        throw new IllegalArgumentException("Đã có nhân viên khác xác nhận đơn này!");
     }
+
     if (hd.getTrangThai().getId()==4){
         throw new IllegalArgumentException("Đơn hàng đã giao!");
     }
@@ -200,9 +204,13 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
     public ListDonHangDTO chuyenTrangThaiDaGiaoHang(Integer idHD,Integer idNhanVien){
         HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
         TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(4).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
-        if (hd.getNhanVien().getId()!=idNhanVien){
-            throw new IllegalArgumentException("Đã có nhân viên xác nhận đơn này!");
+        if (hd.getNhanVien() != null &&
+                hd.getNhanVien().getId() != null &&
+                !hd.getNhanVien().getId().equals(idNhanVien)) {
+            throw new IllegalArgumentException("Đã có nhân viên khác xác nhận đơn này!");
         }
+
+
         if (hd.getTrangThai().getId()==5){
             throw new IllegalArgumentException("Đơn hàng đã huỷ!");
         }
@@ -222,16 +230,28 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
         hoaDonRepository.save(hd);
         return hoaDonMapper.donHangtoDTO(hd);
     }
+    void updateSLBook(Integer idHD){
+        List<HoaDonChiTiet> gioHang = hoaDonChiTietRepo.findByHoaDonId(idHD);
+        int oldSL;
+        int updateSL;
+        for ( HoaDonChiTiet x:gioHang) {
+            Book bookUpdate  = x.getBook();
+            oldSL=  x.getBook().getSoLuong();
+            updateSL=  oldSL+x.getSoLuongMua();
+            bookUpdate.setSoLuong(updateSL);
+            bookRepository.save(bookUpdate);
+        }
+    }
     public ListDonHangDTO chuyenTrangThaiKhachHangHuy(Integer idHD){
         HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
         TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(15).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
-
         if (hd.getTrangThai().getId()==3){
             throw new IllegalArgumentException("Đơn hàng đang giao!");
         }
         if (hd.getTrangThai().getId()==4){
             throw new IllegalArgumentException("Đơn hàng đã giao!");
         }
+        updateSLBook(idHD);
         hd.setTrangThai(trangThaiHoaDon);
         hoaDonRepository.save(hd);
         return hoaDonMapper.donHangtoDTO(hd);
@@ -239,9 +259,16 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
     public ListDonHangDTO chuyenTrangThaiNhanVienHuy(Integer idHD,Integer idNhanVien){
         HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
         TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(5).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
-        if (hd.getNhanVien().getId()!=idNhanVien){
-            throw new IllegalArgumentException("Đã có nhân viên xác nhận đơn này!");
+        NhanVien nv = nhanVienRepository.findById(idNhanVien).orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên"));
+        if (hd.getNhanVien() != null &&
+                hd.getNhanVien().getId() != null &&
+                !hd.getNhanVien().getId().equals(idNhanVien)) {
+            throw new IllegalArgumentException("Đã có nhân viên khác xác nhận đơn này!");
         }
+        if (hd.getNhanVien()==null){
+            hd.setNhanVien(nv);
+        }
+
 
         if (hd.getTrangThai().getId()==4){
             throw new IllegalArgumentException("Đơn hàng đã giao, không được huỷ!");
@@ -252,16 +279,19 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
         if (hd.getTrangThai().getId()==15){
             throw new IllegalArgumentException("Đơn hàng đã huỷ!");
         }
+        updateSLBook(idHD);
         hd.setTrangThai(trangThaiHoaDon);
         hoaDonRepository.save(hd);
         return hoaDonMapper.donHangtoDTO(hd);
     }
     public ListDonHangDTO chuyenTrangThaiGHThatBai(Integer idHD,Integer idNhanVien){
         HoaDon hd = hoaDonRepository.findById(idHD).orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn"));
-        TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(14).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));
-        if (hd.getNhanVien().getId()!=idNhanVien){
-            throw new IllegalArgumentException("Đã có nhân viên xác nhận đơn này!");
+        TrangThaiHoaDon trangThaiHoaDon = trangThaiHoaDonRepo.findById(14).orElseThrow(() -> new RuntimeException("Không tìm trạng thái"));if (hd.getNhanVien() != null &&
+                hd.getNhanVien().getId() != null &&
+                !hd.getNhanVien().getId().equals(idNhanVien)) {
+            throw new IllegalArgumentException("Đã có nhân viên khác xác nhận đơn này!");
         }
+
         if (hd.getTrangThai().getId()==4){
             throw new IllegalArgumentException("Đơn hàng đã giao!");
         }
@@ -277,6 +307,7 @@ public ListDonHangDTO chuyenTrangThaiDangGiaoHang(Integer idHD,Integer idNhanVie
         if (hd.getTrangThai().getId()==2){
             throw new IllegalArgumentException("Đơn hàng chờ xác nhận!");
         }
+        updateSLBook(idHD);
         hd.setTrangThai(trangThaiHoaDon);
         hoaDonRepository.save(hd);
         return hoaDonMapper.donHangtoDTO(hd);
@@ -307,7 +338,7 @@ KhachHang kh =khachHangRepo.findById(gioHangDTO.getKhachHangId()).orElseThrow(()
             .orElseGet(() -> {
             return    createHoaDon(kh);
             });
-    Optional<HoaDonChiTiet> existingCT = gioHangRepo.findByHoaDonAndAndBook(hoaDon, book);
+    Optional<HoaDonChiTiet> existingCT = gioHangRepo.findByHoaDonAndBook(hoaDon, book);
 
     int soLuongThucTeThem = gioHangDTO.getSoLuong(); // Số lượng thực tế được thêm vào
 
@@ -398,6 +429,7 @@ return gioHangDTO;
             com.example.app.dto.banHangDTO.OfflinePaymentRequestDTO request) {
         // Tạo hóa đơn độc lập, không phụ thuộc giỏ hàng hay khách hàng tồn tại
         HoaDon hoaDon = new HoaDon();
+        NhanVien nv = nhanVienRepository.findById(request.getIdNhanVien()).orElseThrow();
         hoaDon.setKhachHang(null); // khách lẻ
         hoaDon.setMaHoaDon(taoMaHoaDonTuDong());
         hoaDon.setNgayTao(LocalDate.now());
@@ -405,10 +437,9 @@ return gioHangDTO;
         hoaDon.setDiaChiGiaoHang(request.getDiaChi());
         hoaDon.setSdtNguoiNhan(request.getSoDienThoai());
         hoaDon.setLoaiThanhToan("TAI_QUAY");
+        hoaDon.setNhanVien(nv);
 
-        TrangThaiHoaDon trangThai = trangThaiHoaDonRepo.findById(16)
-                .orElseGet(() -> trangThaiHoaDonRepo.findById(4)
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái HOÀN THÀNH (id 16/4)")));
+        TrangThaiHoaDon trangThai = trangThaiHoaDonRepo.findById(16).orElseThrow(()->new IllegalArgumentException("Không tìm thấy trạng thái hoá đơn"));
         hoaDon.setTrangThai(trangThai);
         hoaDon = hoaDonRepository.save(hoaDon);
 
@@ -456,8 +487,6 @@ return gioHangDTO;
             if (appliedVoucher != null) {
                 System.out.println(" Thông tin voucher: " + appliedVoucher.getMaVoucher() + 
                                  " - Trạng thái: " + appliedVoucher.getTrangThai() +
-                                 " - Số lượng: " + appliedVoucher.getSoLuong() +
-                                 " - Đã dùng: " + appliedVoucher.getDaDung() +
                                  " - Đơn tối thiểu: " + appliedVoucher.getDonToiThieu() +
                                  " - Tổng tiền: " + tong);
                 
@@ -465,7 +494,6 @@ return gioHangDTO;
                 boolean isValid = appliedVoucher.getTrangThai() && 
                     appliedVoucher.getNgayBatDau().compareTo(java.time.LocalDate.now()) <= 0 &&
                     appliedVoucher.getNgayKetThuc().compareTo(java.time.LocalDate.now()) >= 0 &&
-                    appliedVoucher.getSoLuong() > appliedVoucher.getDaDung() &&
                     tong.compareTo(appliedVoucher.getDonToiThieu()) >= 0;
                 
                 System.out.println(" Voucher hợp lệ: " + isValid);
@@ -493,17 +521,6 @@ return gioHangDTO;
                                      " - Tổng tiền: " + tong + " - Sau giảm: " + tongTienSauGiam);
                     
                     // Giảm số lượng voucher đã sử dụng
-                    try {
-                        int oldDaDung = appliedVoucher.getDaDung();
-                        appliedVoucher.setDaDung(appliedVoucher.getDaDung() + 1);
-                        Voucher savedVoucher = voucherRepo.save(appliedVoucher);
-                        System.out.println("💾 Đã cập nhật voucher: " + appliedVoucher.getMaVoucher() + 
-                                         " - Trước: " + oldDaDung + " - Sau: " + savedVoucher.getDaDung());
-                    } catch (Exception e) {
-                        System.out.println("❌ Lỗi khi cập nhật voucher: " + e.getMessage());
-                        e.printStackTrace();
-                        throw new RuntimeException("Không thể cập nhật voucher: " + e.getMessage());
-                    }
                 } else {
                     System.out.println("❌ Voucher không đáp ứng điều kiện");
                     appliedVoucher = null;
@@ -556,7 +573,7 @@ return gioHangDTO;
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
         // Lấy số lượng sản phẩm trong giỏ hàng trước khi xóa để hoàn trả tồn kho
-        Optional<HoaDonChiTiet> existingCT = gioHangRepo.findByHoaDonAndAndBook(hoaDon, book);
+        Optional<HoaDonChiTiet> existingCT = gioHangRepo.findByHoaDonAndBook(hoaDon, book);
         if (existingCT.isPresent()) {
             int soLuongTrongGio = existingCT.get().getSoLuongMua();
             
@@ -641,8 +658,8 @@ return gioHangDTO;
     }
 
     // Top sản phẩm bán chạy
-    public java.util.List<java.util.Map<String, Object>> getTopSellingProducts(int limit) {
-        java.util.List<Object[]> results = hoaDonRepository.findTopSellingProducts(limit);
+    public java.util.List<java.util.Map<String, Object>> getTopSellingProducts() {
+        java.util.List<Object[]> results = hoaDonRepository.findTopSellingProducts(PageRequest.of(0,5));
         java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
         
         for (Object[] row : results) {

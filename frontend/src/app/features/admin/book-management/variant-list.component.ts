@@ -186,8 +186,8 @@ import { FormsModule } from '@angular/forms';
             <table class="modern-table">
               <thead>
                 <tr>
-                  <th>Mã SPCT</th>
                   <th>ISBN</th>
+                  <th>Tác giả</th>
                   <th>Thể loại</th>
                   <th>NXB</th>
                   <th>Số lượng</th>
@@ -199,8 +199,8 @@ import { FormsModule } from '@angular/forms';
               </thead>
               <tbody>
                 <tr *ngFor="let variant of filteredVariants; index as i" class="table-row" [class.even]="i % 2 === 0">
-                  <td>{{ variant.maSanPhamChiTiet }}</td>
                   <td>{{ variant.isbn }}</td>
+                  <td>{{ variant.tacGia }}</td>
                   <td>{{ variant.theLoai }}</td>
                   <td>{{ variant.nhaXuatBan }}</td>
                   <td>{{ variant.soLuong }}</td>
@@ -350,6 +350,78 @@ import { FormsModule } from '@angular/forms';
                   <option *ngFor="let tl of theLoais" [value]="tl.id">{{ tl.tenTheLoai }}</option>
                 </select>
               </div>
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-collection me-1"></i>
+                  Tác giả
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.tacGiaID" 
+                  name="tacGiaID"
+                  required>
+                  <option value="">-- Chọn tác giả --</option>
+                  <option *ngFor="let tg of tacGias" [value]="tg.id">{{tg.tenTacGia }}</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-collection me-1"></i>
+                  Kích thước
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.kichThuocID" 
+                  name="kichThuocID"
+                  required>
+                  <option value="">-- Chọn kích thước --</option>
+                  <option *ngFor="let tg of kichThuocs" [value]="tg.id">{{tg.chiSoKichThuoc }}</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-collection me-1"></i>
+                  Loại bìa
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.loaiBiaID" 
+                  name="loaiBiaID"
+                  required>
+                  <option value="">-- Chọn loại bìa --</option>
+                  <option *ngFor="let tg of loaiBias" [value]="tg.id">{{tg.tenBia }}</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-collection me-1"></i>
+                  Loại giấy
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.loaiGiayID" 
+                  name="loaiGiayID"
+                  required>
+                  <option value="">-- Chọn loại giấy --</option>
+                  <option *ngFor="let tg of loaiGiays" [value]="tg.id">{{tg.tenGiay }}</option>
+                </select>
+              </div>
+             
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-collection me-1"></i>
+                  Chủ đề
+                </label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="editingVariant.chuDeID" 
+                  name="chuDeID"
+                  required>
+                  <option value="">-- Chọn chủ đề --</option>
+                  <option *ngFor="let tg of chuDes" [value]="tg.id">{{tg.tenChuDe }}</option>
+                </select>
+              </div>
               
               <div class="col-md-6">
                 <label class="form-label">
@@ -456,7 +528,6 @@ import { FormsModule } from '@angular/forms';
                   </label>
                 </div>
               </div>
-            </div>
           </form>
         </div>
         
@@ -1263,12 +1334,18 @@ export class VariantListComponent implements OnInit {
   // Data for dropdowns
   theLoais: any[] = [];
   nhaXuatBans: any[] = [];
+  tacGias: any[] = [];
+  chuDes: any[] = [];
+  loaiGiays: any[] = [];
+  loaiBias: any[] = [];
+  kichThuocs: any[] = [];
+
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.productId = Number(this.route.snapshot.paramMap.get('id'));
@@ -1306,10 +1383,61 @@ export class VariantListComponent implements OnInit {
   }
 
   loadDropdownData() {
+    this.http.get<any>('http://localhost:8080/api/loai-giay?size=1000').subscribe({
+      next: (response) => {
+        this.loaiGiays = response.content || [];
+        console.log('Loaded thể loại:', this.theLoais);
+      },
+      error: (error) => {
+        console.error('Error loading thể loại:', error);
+        this.theLoais = [];
+      }
+    });
+    this.http.get<any>('http://localhost:8080/api/loai-bia?size=1000').subscribe({
+      next: (response) => {
+        this.loaiBias = response.content || [];
+        console.log('Loaded thể loại:', this.theLoais);
+      },
+      error: (error) => {
+        console.error('Error loading thể loại:', error);
+        this.theLoais = [];
+      }
+    });
+    this.http.get<any>('http://localhost:8080/api/kich-thuoc?size=1000').subscribe({
+      next: (response) => {
+        this.kichThuocs = response.content || [];
+        console.log('Loaded thể loại:', this.theLoais);
+      },
+      error: (error) => {
+        console.error('Error loading thể loại:', error);
+        this.theLoais = [];
+      }
+    });
+
+    this.http.get<any>('http://localhost:8080/api/chu-de?size=1000').subscribe({
+      next: (response) => {
+        this.chuDes = response.content || [];
+        console.log('Loaded thể loại:', this.theLoais);
+      },
+      error: (error) => {
+        console.error('Error loading thể loại:', error);
+        this.theLoais = [];
+      }
+    });
     // Load thể loại
     this.http.get<any>('http://localhost:8080/api/the-loai?size=1000').subscribe({
       next: (response) => {
         this.theLoais = response.content || [];
+        console.log('Loaded thể loại:', this.theLoais);
+      },
+      error: (error) => {
+        console.error('Error loading thể loại:', error);
+        this.theLoais = [];
+      }
+    });
+    this.http.get<any>('http://localhost:8080/api/tac-gia?size=1000').subscribe({
+      next: (response) => {
+        this.tacGias = response.content || [];
         console.log('Loaded thể loại:', this.theLoais);
       },
       error: (error) => {
@@ -1342,7 +1470,7 @@ export class VariantListComponent implements OnInit {
     // Search filter
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(variant => 
+      filtered = filtered.filter(variant =>
         variant.maSanPhamChiTiet?.toLowerCase().includes(term) ||
         variant.isbn?.toLowerCase().includes(term) ||
         variant.theLoai?.toLowerCase().includes(term) ||
@@ -1359,7 +1487,7 @@ export class VariantListComponent implements OnInit {
     // Sort
     filtered.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (this.sortBy) {
         case 'maSanPhamChiTiet':
           aValue = a.maSanPhamChiTiet || '';
@@ -1413,19 +1541,19 @@ export class VariantListComponent implements OnInit {
     this.sortOrder = 'asc';
     this.applyFilters();
   }
-  
+
   editProduct() {
     // Hiển thị modal sửa sản phẩm
     const newName = prompt('Nhập tên sản phẩm mới:', this.productName);
     if (newName && newName.trim() !== '') {
       const newDesc = prompt('Nhập mô tả mới:', this.productDescription || '');
-      
+
       const product = {
         tenSanPham: newName.trim(),
         moTa: newDesc?.trim(),
         trangThai: this.productStatus
       };
-      
+
       this.http.put(`http://localhost:8080/api/san-pham/${this.productId}`, product).subscribe({
         next: (result: any) => {
           this.productName = result.tenSanPham;
@@ -1439,7 +1567,7 @@ export class VariantListComponent implements OnInit {
       });
     }
   }
-  
+
   // Đã xóa phương thức toggleProductStatus() vì không cần thiết
 
   addNewVariant() {
@@ -1449,7 +1577,7 @@ export class VariantListComponent implements OnInit {
   editVariant(variant: any) {
     // Copy variant data to editing object
     this.editingVariant = { ...variant };
-    
+
     // Đảm bảo dữ liệu dropdown đã được load
     if (this.theLoais.length === 0 || this.nhaXuatBans.length === 0) {
       this.loadDropdownData();
@@ -1472,14 +1600,55 @@ export class VariantListComponent implements OnInit {
     } else {
       this.editingVariant.theLoaiId = '';
     }
-    
+
+
+
+    if (variant.tacGia && Array.isArray(this.tacGias)) {
+      console.log('ppppp'+variant.tacGia)
+      const tacGia = this.tacGias.find(tl => tl.tenTacGia === variant.tacGia);
+      this.editingVariant.tacGiaID = tacGia ? tacGia.id : '';
+    } else {
+      this.editingVariant.tacGiaID = '';
+    }
+
+    if (variant.chuDe && Array.isArray(this.chuDes)) {
+      const chuDe = this.chuDes.find(tl => tl.tenChuDe === variant.chuDe);
+      this.editingVariant.chuDeID = chuDe ? chuDe.id : '';
+    } else {
+      this.editingVariant.chuDeID = '';
+    }
+
+    if (variant.kichThuoc && Array.isArray(this.kichThuocs)) {
+      const kichThuoc = this.kichThuocs.find(tl => tl.chiSoKichThuoc === variant.kichThuoc);
+      this.editingVariant.kichThuocID = kichThuoc ? kichThuoc.id : '';
+    } else {
+      this.editingVariant.kichThuocID = '';
+    }
+
+    if (variant.loaiGiay && Array.isArray(this.loaiGiays)) {
+      const loaiGiay = this.loaiGiays.find(tl => tl.tenGiay === variant.loaiGiay);
+      this.editingVariant.loaiGiayID = loaiGiay ? loaiGiay.id : '';
+    } else {
+      this.editingVariant.loaiGiayID = '';
+    }
+
+    if (variant.loaiBia && Array.isArray(this.loaiBias)) {
+      const loaiBia = this.loaiBias.find(tl => tl.tenBia === variant.loaiBia);
+      this.editingVariant.loaiBiaID = loaiBia ? loaiBia.id : '';
+    } else {
+      this.editingVariant.loaiBiaID = '';
+    }
+
+
+
+
     if (variant.nhaXuatBan && Array.isArray(this.nhaXuatBans)) {
       const nxb = this.nhaXuatBans.find(n => n.tenNhaXuatBan === variant.nhaXuatBan);
       this.editingVariant.nhaXuatBanId = nxb ? nxb.id : '';
     } else {
       this.editingVariant.nhaXuatBanId = '';
     }
-    
+
     console.log('Editing variant:', this.editingVariant);
     console.log('Variant theLoai name:', variant.theLoai);
     console.log('Variant nhaXuatBan name:', variant.nhaXuatBan);
@@ -1509,7 +1678,7 @@ export class VariantListComponent implements OnInit {
 
       // Upload file to server
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('image', file);
 
       this.http.post('http://localhost:8080/api/books/upload-image', formData, {
         responseType: 'text' // Đảm bảo nhận response dạng text
@@ -1543,12 +1712,38 @@ export class VariantListComponent implements OnInit {
     // Map ID sang tên cho API
     let theLoaiName = '';
     let nhaXuatBanName = '';
-    
+    let tacGiaName = '';
+    let chuDeName = '';
+    let kichThuocName = '';
+    let loaiGiayName = '';
+    let loaiBiaName = '';
+
+    if (this.editingVariant.loaiGiayID && Array.isArray(this.loaiGiays)) {
+      const loaiGiay = this.loaiGiays.find(tl => tl.id == this.editingVariant.loaiGiayID);
+      loaiGiayName = loaiGiay ? loaiGiay.tenGiay : '';
+    }
+    if (this.editingVariant.loaiBiaID && Array.isArray(this.loaiBias)) {
+      const loaiBia = this.loaiBias.find(tl => tl.id == this.editingVariant.loaiBiaID);
+      loaiBiaName = loaiBia ? loaiBia.tenBia : '';
+    }
+    if (this.editingVariant.kichThuocID && Array.isArray(this.kichThuocs)) {
+      const kichThuoc = this.kichThuocs.find(tl => tl.id == this.editingVariant.kichThuocID);
+      kichThuocName = kichThuoc ? kichThuoc.chiSoKichThuoc : '';
+    }
+    if (this.editingVariant.chuDeID && Array.isArray(this.chuDes)) {
+      const chuDe = this.chuDes.find(tl => tl.id == this.editingVariant.chuDeID);
+      chuDeName = chuDe ? chuDe.tenChuDe : '';
+    }
+    if (this.editingVariant.tacGiaID && Array.isArray(this.tacGias)) {
+      const tacGia = this.tacGias.find(tl => tl.id == this.editingVariant.tacGiaID);
+      tacGiaName = tacGia ? tacGia.tenTacGia : '';
+    }
+
     if (this.editingVariant.theLoaiId && Array.isArray(this.theLoais)) {
       const theLoai = this.theLoais.find(tl => tl.id == this.editingVariant.theLoaiId);
       theLoaiName = theLoai ? theLoai.tenTheLoai : '';
     }
-    
+
     if (this.editingVariant.nhaXuatBanId && Array.isArray(this.nhaXuatBans)) {
       const nxb = this.nhaXuatBans.find(n => n.id == this.editingVariant.nhaXuatBanId);
       nhaXuatBanName = nxb ? nxb.tenNhaXuatBan : '';
@@ -1560,6 +1755,11 @@ export class VariantListComponent implements OnInit {
       isbn: this.editingVariant.isbn,
       maSanPhamChiTiet: this.editingVariant.maSanPhamChiTiet,
       theLoai: theLoaiName,
+      tacGia: [tacGiaName],
+      chuDe: [chuDeName],
+      kichThuoc: kichThuocName,
+      loaiBia: loaiBiaName,
+      loaiGiay: loaiGiayName,
       nhaXuatBan: nhaXuatBanName,
       soTrang: this.editingVariant.soTrang,
       soLanTaiBan: this.editingVariant.soLanTaiBan,
@@ -1592,11 +1792,11 @@ export class VariantListComponent implements OnInit {
 
     this.http.put(`http://localhost:8080/api/books/${this.editingVariant.id}`, updateData, { headers }).subscribe(
       (response: any) => {
-        console.log('Update response:', response);
-        
+        // console.log('Update response:', response);
+
         // Reload variants from server to get updated data
         this.loadVariants();
-        
+
         this.closeEditModal();
         alert('Cập nhật biến thể thành công!');
       },
@@ -1613,7 +1813,7 @@ export class VariantListComponent implements OnInit {
   toggleStatus(variant: any) {
     const newStatus = !variant.trangThai;
     const action = newStatus ? 'chuyển sang Hoạt động' : 'chuyển sang Ngừng hoạt động';
-    
+
     if (confirm(`Bạn có chắc chắn muốn ${action} biến thể "${variant.maSanPhamChiTiet}"?`)) {
       this.http.patch(`http://localhost:8080/api/books/${variant.id}/status`, { trangThai: newStatus }).subscribe(
         () => {

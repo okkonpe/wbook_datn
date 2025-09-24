@@ -23,9 +23,6 @@ public class TaiBan {
     @Column(name = "lan_tai_ban")
     private Integer lanTaiBan;
 
-    @Column(name = "nam_tai_ban")
-    private Integer namTaiBan;
-
     // @ManyToMany(mappedBy = "taiBans")
     // @Builder.Default
     // private Set<Book> books = new HashSet<>();

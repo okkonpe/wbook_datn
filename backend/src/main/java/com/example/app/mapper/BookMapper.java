@@ -102,7 +102,6 @@ public interface BookMapper {
                     TaiBanDTO dto = new TaiBanDTO();
                     dto.setId(taiBan.getId());
                     dto.setLanTaiBan(taiBan.getLanTaiBan());
-                    dto.setNamTaiBan(taiBan.getNamTaiBan());
                     return dto;
                 })
                 .collect(Collectors.toSet());

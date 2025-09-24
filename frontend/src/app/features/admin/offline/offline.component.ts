@@ -90,6 +90,7 @@ export class OfflineComponent implements OnInit, AfterViewInit {
   paymentMethod: string = 'cash';
   customerPayment: number = 0;
   change: number = 0;
+
   
   // Modal states
   isCustomerModalOpen: boolean = false;
@@ -112,7 +113,7 @@ export class OfflineComponent implements OnInit, AfterViewInit {
   // Product detail modal
   isProductDetailModalOpen: boolean = false;
   selectedProductDetail: InvoiceItem | null = null;
-  
+  showQrModal =false;
   // Voucher states
   showVoucherModal: boolean = false;
   availableVouchers: Voucher[] = [];
@@ -132,6 +133,7 @@ export class OfflineComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.restoreFromCookie();
+    
   }
 
   ngAfterViewInit(): void {
@@ -625,7 +627,6 @@ export class OfflineComponent implements OnInit, AfterViewInit {
 
   canCompletePayment(): boolean {
     if (!this.selectedInvoice || this.selectedInvoice.items.length === 0) return false;
-    
     const total = this.selectedInvoice.totalAmount - this.discount;
     
     return this.customerPayment >= total && this.change >= 0;
@@ -653,8 +654,7 @@ getUserIdFromToken(): number {
       hoTen: this.selectedInvoice.customer?.tenKhachHang || 'Khách lẻ',
       soDienThoai: this.selectedInvoice.customer?.soDienThoai || '',
       diaChi: this.selectedInvoice.customer?.diaChi || '',
-      ghiChu: '',
-      phuongThucThanhToan: 'TIEN_MAT'
+      ghiChu: ''    
     } as any;
 
     const token = this.getAuthToken();
@@ -662,6 +662,7 @@ getUserIdFromToken(): number {
     if (token) baseHeaders['Authorization'] = `Bearer ${token}`;
     const headers = new HttpHeaders(baseHeaders);
     const reqBody = {
+            khID:paymentData.khachHangID,
       hoTen: paymentData.hoTen,
       soDienThoai: paymentData.soDienThoai,
       diaChi: paymentData.diaChi,
@@ -672,14 +673,14 @@ getUserIdFromToken(): number {
       tienThua: this.change,
       idNhanVien:this.getUserIdFromToken(),
       voucherId: this.selectedVoucher?.id || null,
+      phuongThucTT:this.paymentMethod,
       items: (this.selectedInvoice.items || []).map(it => ({ id: it.id, soLuong: it.soLuong, donGia: it.donGia }))
     };
 
     console.log('💳 Payment request body:', reqBody);
     console.log('🎫 Selected voucher:', this.selectedVoucher);
     console.log('💰 Discount amount:', this.discount);
-
-    this.http.post<any>('http://localhost:8080/api/hoa-don/offline/thanh-toan', reqBody, { headers }).subscribe({
+ this.http.post<any>('http://localhost:8080/api/hoa-don/offline/thanh-toan', reqBody, { headers }).subscribe({
       next: (resp) => {
         const closeIdx = this.selectedInvoiceIndex;
         this.closeInvoice(closeIdx, true);
@@ -700,6 +701,71 @@ getUserIdFromToken(): number {
         }
       }
     });
+
+   
+  }
+  completePaymentQR(): void {
+ 
+console.log(this.paymentMethod)
+    if (!this.selectedInvoice) return;
+
+    const ok = confirm('Bạn đã nhận được tiền chuyển khoản?');
+    if (!ok) return;
+
+    const paymentData = {
+      khachHangID: this.selectedInvoice.customer?.id || null,
+      hoTen: this.selectedInvoice.customer?.tenKhachHang || 'Khách lẻ',
+      soDienThoai: this.selectedInvoice.customer?.soDienThoai || '',
+      diaChi: this.selectedInvoice.customer?.diaChi || '',
+      ghiChu: '',
+    } as any;
+
+    const token = this.getAuthToken();
+    const baseHeaders: any = { 'Content-Type': 'application/json' };
+    if (token) baseHeaders['Authorization'] = `Bearer ${token}`;
+    const headers = new HttpHeaders(baseHeaders);
+    const reqBody = {
+      khID:paymentData.khachHangID,
+      hoTen: paymentData.hoTen,
+      soDienThoai: paymentData.soDienThoai,
+      diaChi: paymentData.diaChi,
+      tongTien: this.selectedInvoice.totalAmount,
+      tongTienSauGiam: this.selectedInvoice.totalAmount - this.discount,
+      giamGia: this.discount,
+      // khachThanhToan: this.customerPayment,
+      // tienThua: this.change,
+      idNhanVien:this.getUserIdFromToken(),
+      voucherId: this.selectedVoucher?.id || null,
+            phuongThucTT:this.paymentMethod,
+      items: (this.selectedInvoice.items || []).map(it => ({ id: it.id, soLuong: it.soLuong, donGia: it.donGia }))
+    };
+
+    console.log('💳 Payment request body:', reqBody);
+    console.log('🎫 Selected voucher:', this.selectedVoucher);
+    console.log('💰 Discount amount:', this.discount);
+ this.http.post<any>('http://localhost:8080/api/hoa-don/offline/thanh-toan', reqBody, { headers }).subscribe({
+      next: (resp) => {
+                this.showQrModal=false;
+        const closeIdx = this.selectedInvoiceIndex;
+        this.closeInvoice(closeIdx, true);
+        this.customerPayment = 0;
+        this.change = 0;
+        this.discount = 0;        
+
+        // Hiển thị thông báo thanh toán thành công
+        alert('Thanh toán thành công!');
+      },
+      error: (err) => {
+        const status = err?.status;
+        if (status === 401 || status === 403) {
+          alert('Bạn không có quyền hoặc phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        } else {
+          alert('Thanh toán thất bại: ' + (err?.error?.message || 'Lỗi không xác định'));
+        }
+      }
+    });
+
+   
   }
 
   private getAuthToken(): string | null {
@@ -801,7 +867,9 @@ getUserIdFromToken(): number {
     // Không reset selectedVoucher khi đóng modal, chỉ khi removeVoucher()
     console.log('🔒 Voucher modal closed - selectedVoucher after:', this.selectedVoucher);
   }
-
+ closeQRTTModal(): void {
+    this.showQrModal = false;
+  }
   loadAvailableVouchers(): void {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.getAuthToken()}`,

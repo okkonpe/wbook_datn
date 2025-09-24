@@ -510,7 +510,18 @@ export class BookManagementComponent implements OnInit {
       alert('Vui lòng chọn nhà xuất bản!');
       return;
     }
-    
+     if (!this.newProduct.tacGiaIds) {
+      alert('Vui lòng chọn tác giả!');
+      return;
+    }
+     if (!this.newProduct.isbn?.trim()) {
+      alert('Vui nhập mã ISBN!');
+      return;
+    }
+    if (!this.newProduct.soTrang) {
+      alert('Vui nhập số trang!');
+      return;
+    }
     // Prepare data for API
     const productData = {
       // Product info
@@ -659,13 +670,10 @@ export class BookManagementComponent implements OnInit {
 
 
   quickAddTaiBan(): void {
-    const lanTaiBan = prompt('Nhập lần tái bản (số):');
-    const namTaiBan = prompt('Nhập năm tái bản:');
-    
-    if (lanTaiBan && namTaiBan && lanTaiBan.trim() && namTaiBan.trim()) {
+    const lanTaiBan = prompt('Nhập lần tái bản (số):');    
+    if (lanTaiBan &&  lanTaiBan.trim()) {
       const newTaiBan = { 
         lanTaiBan: parseInt(lanTaiBan.trim()), 
-        namTaiBan: parseInt(namTaiBan.trim()) 
       };
       this.http.post('http://localhost:8080/api/tai-ban', newTaiBan).subscribe({
         next: (response: any) => {

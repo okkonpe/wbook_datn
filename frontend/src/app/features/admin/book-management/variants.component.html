@@ -11,7 +11,7 @@
           <span class="breadcrumb-separator">/</span>
           <span class="breadcrumb-current">Thêm biến thể mới</span>
         </div>
-        <h1 class="hero-title">
+        <h1 class="hero-title text-primary">
           <i class="bi bi-plus-circle-fill me-3"></i>
           Thêm biến thể mới
         </h1>
@@ -58,12 +58,7 @@
                 [(ngModel)]="newDraft.isbn" 
                 placeholder="978-0-123456-78-9"
                 maxlength="13"
-                [disabled]="isDisabled('isbn')"
-                readonly>
-              <div class="input-help" *ngIf="isDisabled('isbn')">
-                <i class="bi bi-lock me-1"></i>
-                Kế thừa từ F1 (không thể chỉnh sửa)
-              </div>
+                >   
             </div>
           </div>
           
@@ -146,16 +141,12 @@
               </label>
               <input 
                 type="number" 
-                class="form-control-modern locked-field" 
+                class="form-control-modern" 
                 [(ngModel)]="newDraft.soTrang" 
                 placeholder="300"
                 min="1"
-                [disabled]="isDisabled('soTrang')"
-                [readonly]="isDisabled('soTrang')">
-              <div class="input-help" *ngIf="isDisabled('soTrang')">
-                <i class="bi bi-lock me-1"></i>
-                Kế thừa từ F1 (không thể chỉnh sửa)
-              </div>
+             >
+              
             </div>
           </div>
           
@@ -165,16 +156,13 @@
                 <i class="bi bi-arrow-repeat me-2"></i>
                 Tái bản
               </label>
-              <select class="form-control-modern" [(ngModel)]="newDraft.taiBanIds" [disabled]="isDisabled('taiBanIds')">
+              <select class="form-control-modern" [(ngModel)]="newDraft.taiBanIds">
                 <option [ngValue]="undefined">-- Chọn tái bản --</option>
                 <option *ngFor="let tb of taiBans" [ngValue]="tb.id">
-                  Lần {{ tb.lanTaiBan }} - {{ tb.namTaiBan }}
+                  Lần {{ tb.lanTaiBan }}
                 </option>
               </select>
-              <div class="input-help" *ngIf="isDisabled('taiBanIds')">
-                <i class="bi bi-lock me-1"></i>
-                Kế thừa từ F1 (không thể chỉnh sửa)
-              </div>
+          
             </div>
           </div>
           
@@ -186,17 +174,13 @@
               </label>
               <input 
                 type="number" 
-                class="form-control-modern locked-field" 
+                class="form-control-modern" 
                 [(ngModel)]="newDraft.khoiLuongTinh" 
                 placeholder="500"
                 min="0"
                 step="0.1"
-                [disabled]="isDisabled('khoiLuongTinh')"
-                [readonly]="isDisabled('khoiLuongTinh')">
-              <div class="input-help" *ngIf="isDisabled('khoiLuongTinh')">
-                <i class="bi bi-lock me-1"></i>
-                Kế thừa từ F1 (không thể chỉnh sửa)
-              </div>
+               >
+              
             </div>
           </div>
 
@@ -209,9 +193,11 @@
                   <option [ngValue]="undefined">-- Chọn thể loại --</option>
                   <option *ngFor="let t of theLoais" [ngValue]="t.id">{{ t.tenTheLoai }}</option>
                 </select>
-                <button class="btn btn-outline-success" type="button" (click)="quickAddTheLoai()" title="Thêm nhanh thể loại">
-                  <i class="bi bi-plus"></i>
-                </button>
+                <div class="input-help" *ngIf="isDisabled('theLoai')">
+                <i class="bi bi-lock me-1"></i>
+                Kế thừa từ F1 (không thể chỉnh sửa)
+              </div>
+          
               </div>
             </div>
           </div>
@@ -298,11 +284,11 @@
                 <i class="bi bi-tags me-2"></i>
                 Chủ đề
               </label>
-              <select class="form-control-modern" [(ngModel)]="newDraft.chuDeIds" [disabled]="isDisabled('chuDeIds')">
+              <select class="form-control-modern" [(ngModel)]="newDraft.chuDeIds" [disabled]="isDisabled('chuDe')">
                 <option [ngValue]="undefined">-- Chọn chủ đề --</option>
                 <option *ngFor="let cd of chuDes" [ngValue]="cd.id">{{ cd.tenChuDe }}</option>
               </select>
-              <div class="input-help" *ngIf="isDisabled('chuDeIds')">
+               <div class="input-help" *ngIf="isDisabled('chuDe')">
                 <i class="bi bi-lock me-1"></i>
                 Kế thừa từ F1 (không thể chỉnh sửa)
               </div>

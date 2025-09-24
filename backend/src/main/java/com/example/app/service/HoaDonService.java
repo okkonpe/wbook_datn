@@ -92,7 +92,7 @@ if (request.getMaVoucher()!=null){
     hoaDon.setLoaiThanhToan(request.getPhuongThucThanhToan());
     hoaDon.setTongTien(request.getTongTien());
     hoaDon.setPhiShip(new BigDecimal("30000"));
-
+hoaDon.setHinhThuc("online");
     hoaDon.setTongTienSauGiam(request.getTongTienSauGiam()); // hoặc request.getTongTienSauGiam()
 
     // 3. Set trạng thái = 2 (đã đat hang)
@@ -131,6 +131,7 @@ hd.setTongTienSauGiam(request.getTongTienSauGiam());
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trạng thái"));
 
         hd.setTrangThai(trangThaiDaDatHang);
+        hd.setHinhThuc("online");
         hoaDonRepository.save(hd);
         messagingTemplate.convertAndSend("/topic/admin/don-hang-moi",hoaDonMapper.donHangtoDTO(hd));
 
@@ -430,13 +431,20 @@ return gioHangDTO;
         // Tạo hóa đơn độc lập, không phụ thuộc giỏ hàng hay khách hàng tồn tại
         HoaDon hoaDon = new HoaDon();
         NhanVien nv = nhanVienRepository.findById(request.getIdNhanVien()).orElseThrow();
-        hoaDon.setKhachHang(null); // khách lẻ
+        if (request.getKhID()!=null){
+            KhachHang kh = khachHangRepo.findById(request.getKhID()).orElseThrow();
+            hoaDon.setKhachHang(kh);
+
+        }else{
+            hoaDon.setKhachHang(null); // khách lẻ
+        }
         hoaDon.setMaHoaDon(taoMaHoaDonTuDong());
         hoaDon.setNgayTao(LocalDate.now());
-        hoaDon.setHoTenNguoiNhan(request.getHoTen());
-        hoaDon.setDiaChiGiaoHang(request.getDiaChi());
-        hoaDon.setSdtNguoiNhan(request.getSoDienThoai());
-        hoaDon.setLoaiThanhToan("TAI_QUAY");
+//        hoaDon.setHoTenNguoiNhan(request.getHoTen());
+//        hoaDon.setDiaChiGiaoHang(request.getDiaChi());
+//        hoaDon.setSdtNguoiNhan(request.getSoDienThoai());
+        hoaDon.setHinhThuc("offline");
+        hoaDon.setLoaiThanhToan(request.getPhuongThucTT());
         hoaDon.setNhanVien(nv);
 
         TrangThaiHoaDon trangThai = trangThaiHoaDonRepo.findById(16).orElseThrow(()->new IllegalArgumentException("Không tìm thấy trạng thái hoá đơn"));

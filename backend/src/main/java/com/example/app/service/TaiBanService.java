@@ -48,8 +48,8 @@ public class TaiBanService {
     public TaiBanDTO createTaiBan(TaiBanDTO taiBanDTO) {
         System.out.println("TaiBanService.createTaiBan() called with: " + taiBanDTO);
         try {
-            if (taiBanRepository.existsByLanTaiBanAndNamTaiBan(
-                    taiBanDTO.getLanTaiBan(), taiBanDTO.getNamTaiBan())) {
+            if (taiBanRepository.existsByLanTaiBan(
+                    taiBanDTO.getLanTaiBan())) {
                 throw new RuntimeException("Tái bản này đã tồn tại");
             }
             
@@ -72,8 +72,6 @@ public class TaiBanService {
         if (existingTaiBan.isPresent()) {
             TaiBan taiBan = existingTaiBan.get();
             taiBan.setLanTaiBan(taiBanDTO.getLanTaiBan());
-            taiBan.setNamTaiBan(taiBanDTO.getNamTaiBan());
-            
             TaiBan updatedTaiBan = taiBanRepository.save(taiBan);
             return taiBanMapper.toDTO(updatedTaiBan);
         }
@@ -92,14 +90,5 @@ public class TaiBanService {
         List<TaiBan> taiBans = taiBanRepository.findByLanTaiBan(lanTaiBan);
         return taiBanMapper.toDTOList(taiBans);
     }
-    
-    public List<TaiBanDTO> findByNamTaiBan(Integer namTaiBan) {
-        List<TaiBan> taiBans = taiBanRepository.findByNamTaiBan(namTaiBan);
-        return taiBanMapper.toDTOList(taiBans);
-    }
-    
-    public List<TaiBanDTO> findByLanTaiBanAndNamTaiBan(Integer lanTaiBan, Integer namTaiBan) {
-        List<TaiBan> taiBans = taiBanRepository.findByLanTaiBanAndNamTaiBan(lanTaiBan, namTaiBan);
-        return taiBanMapper.toDTOList(taiBans);
-    }
+
 }

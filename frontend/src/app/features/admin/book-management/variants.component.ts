@@ -67,7 +67,7 @@ export class VariantsComponent {
     
     // Các trường kế thừa từ F1 và không cho sửa
     const inheritedFromF1 = new Set([
-      'isbn', 'soTrang', 'taiBanIds', 'khoiLuongTinh', 'tacGiaIds', 'chuDeIds'
+      'tacGiaIds', 'theLoai','chuDe'
     ]);
     
     // Chỉ disable các trường kế thừa từ F1 khi đã có dữ liệu F1 và có giá trị thực
@@ -347,12 +347,10 @@ export class VariantsComponent {
   // Quick add tái bản
   quickAddTaiBan(): void {
     const lanTaiBan = prompt('Nhập lần tái bản (số):');
-    const namTaiBan = prompt('Nhập năm tái bản:');
     
-    if (lanTaiBan && namTaiBan && lanTaiBan.trim() && namTaiBan.trim()) {
+    if (lanTaiBan  && lanTaiBan.trim() ) {
       const newTaiBan = { 
         lanTaiBan: parseInt(lanTaiBan.trim()), 
-        namTaiBan: parseInt(namTaiBan.trim()) 
       };
       this.http.post('http://localhost:8080/api/tai-ban', newTaiBan).subscribe({
         next: (response: any) => {

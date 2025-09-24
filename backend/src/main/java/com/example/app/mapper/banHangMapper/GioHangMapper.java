@@ -72,7 +72,7 @@ public interface GioHangMapper {
     default Set<String> mapTaiBanNames(Set<TaiBan> taiBanSet) {
         if (taiBanSet == null) return null;
         return taiBanSet.stream()
-                .map(tb -> "Lần " + tb.getLanTaiBan() + " - " + tb.getNamTaiBan())
+                .map(tb -> "Lần " + tb.getLanTaiBan())
                 .collect(Collectors.toSet());
     }
 }

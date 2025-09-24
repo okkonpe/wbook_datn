@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -52,10 +53,15 @@ public class HoaDonController {
     public ResponseEntity<Page<ListDonHangDTO>> locTimKiem(
             @RequestParam(required = false) String loaiTT,
             @RequestParam(required = false) String maHoaDon,
-            @RequestParam(required = false) String status,@RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String hinhThuc,
+            @RequestParam(required = false) LocalDate ngayBD,
+            @RequestParam(required = false) LocalDate ngayKT,
+            @RequestParam(required = false) String nhanVien,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<ListDonHangDTO> pagea = hoaDonRepository.searchHoaDon(loaiTT,status,maHoaDon,pageable).map(hoaDonMapper::donHangtoDTO);
+        Page<ListDonHangDTO> pagea = hoaDonRepository.searchHoaDon(loaiTT,status,maHoaDon,hinhThuc,ngayBD,ngayKT,nhanVien,pageable).map(hoaDonMapper::donHangtoDTO);
         return ResponseEntity.ok(pagea);
     }
 

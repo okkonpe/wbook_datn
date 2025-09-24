@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,11 +35,19 @@ public interface HoaDonRepository extends JpaRepository<HoaDon,Integer> {
     @Query("SELECT h FROM HoaDon h " +
             "WHERE (:status IS NULL OR h.trangThai.trangThai = :status) "+
             "and (:loaiTT IS NULL OR h.loaiThanhToan=:loaiTT)"+
-            "and (:maHoaDon IS NULL OR h.maHoaDon=:maHoaDon)"
-             )
+            "and (:maHoaDon IS NULL OR h.maHoaDon=:maHoaDon)"+
+            "and (:hinhThuc IS NULL OR h.hinhThuc=:hinhThuc)"+
+            "and (:startDate IS NULL OR :endDate IS NULL OR h.ngayTao BETWEEN :startDate AND :endDate)"+
+            "and (:nhanVien IS NULL OR h.nhanVien.taiKhoan = :nhanVien)"
+
+    )
     Page<HoaDon> searchHoaDon(@Param("loaiTT") String loaiTT,
                               @Param("status") String status,
                               @Param("maHoaDon") String maHoaDon,
+                              @Param("hinhThuc") String hinhThuc,
+                              @Param("startDate") LocalDate startDate,
+                              @Param("endDate") LocalDate endDate,
+                              @Param("nhanVien") String nhanVien,
                               Pageable pageable);
 
     // Tính doanh thu từ tất cả trạng thái hợp lệ (trừ chờ xác nhận, giao hàng thất bại, hủy hàng)

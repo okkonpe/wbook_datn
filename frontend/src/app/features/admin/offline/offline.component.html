@@ -161,18 +161,18 @@
                     <span class="stat-value">{{ (selectedInvoice.totalAmount - discount) | currency:'VND':'symbol':'1.0-0' }}</span>
                   </div>
                 </div>
-              </div>
+               </div>
 
-              <!-- Product List -->
-              <div class="product-list" *ngIf="selectedInvoice.items.length === 0">
+                 <!-- Product List -->
+                <div class="product-list" *ngIf="selectedInvoice.items.length === 0">
                 <div class="empty-cart">
                   <i class="bi bi-cart-x"></i>
                   <p>Giỏ hàng trống</p>
                   <small>Quét mã QR hoặc tìm kiếm sản phẩm để thêm vào đơn hàng</small>
                 </div>
-              </div>
-<!-- *ngIf="selectedInvoice.items.length > 0" -->
-              <div class="product-list-horizontal" >
+               </div>
+
+               <div class="product-list-horizontal" *ngIf="selectedInvoice.items.length > 0">
                 <div class="product-row" *ngFor="let item of selectedInvoice.items; index as i">
                   <div class="product-checkbox">
                     <input type="checkbox" [checked]="true" disabled>
@@ -222,7 +222,7 @@
                     </button>
                   </div>
                 </div>
-              </div>
+               </div>
             </div>
           </div>
 
@@ -307,8 +307,8 @@
                 </div>
                 <hr>
                 <div class="summary-total">
-                  <span>Tổng cần thanh toán:</span>
-                  <span class="total-amount">{{ (selectedInvoice.totalAmount - discount) | currency:'VND':'symbol':'1.0-0' }}</span>
+                  <p>Thanh toán:</p>
+                  <span class="total-amount text-danger">{{ (selectedInvoice.totalAmount - discount) | currency:'VND':'symbol':'1.0-0' }}</span>
                 </div>
               </div>
 
@@ -317,17 +317,24 @@
                 <div class="payment-methods">
                   <h6>Phương thức thanh toán</h6>
                   <div class="payment-options">
-                    <label class="payment-option" style="pointer-events: none;">
-                      <input type="radio" checked disabled>
-                      <span class="payment-label">
-                        <i class="bi bi-cash"></i>
-                        Tiền mặt
-                      </span>
-                    </label>
+                    <!-- payment.component.html -->
+<label class="payment-option">
+  <input type="radio" name="payment" value="cash" [(ngModel)]="paymentMethod" checked>
+  <span class="payment-label">
+    <i class="bi bi-cash"></i> Tiền mặt
+  </span>
+</label>
+
+<label class="payment-option">
+  <input type="radio" name="payment" value="ck" [(ngModel)]="paymentMethod" (change)="showQrModal = true">
+  <span class="payment-label">
+    <i class="bi bi-bank"></i> Chuyển khoản
+  </span>
+</label>
                   </div>
                 </div>
 
-                <div class="payment-input">
+                <div class="payment-input" *ngIf="paymentMethod==='cash'">
                   <label>Khách thanh toán:</label>
                   <input type="number" 
                          class="form-control payment-amount" 
@@ -598,7 +605,24 @@
     </div>
   </div>
 </div>
-
+<div class="modal-overlay al" *ngIf="showQrModal">
+  <div class="modal-content">
+    <div class="modal-header">
+    <h5>Thanh toán qua QR</h5>
+    </div>
+    <div class="modal-body">
+    <img src="../../../assets/images/qr_TT.jpg"  class="img-fluid mb-3" style="max-width:250px;">
+    <span class="total-amount text-danger">
+      {{ ((selectedInvoice?.totalAmount || 0) - (discount || 0)) | currency:'VND':'symbol':'1.0-0' }}
+    </span>
+    <p><b>Mã hóa đơn:</b> {{ selectedInvoice?.hdNumber }}</p>
+    <button class="btn btn-danger" (click)="showQrModal = false">Đóng</button>
+    <button class="btn btn-success" (click)="completePaymentQR()" >
+        Đã thanh toán 
+      </button>
+    </div>
+  </div>
+</div>
 <!-- Voucher Selection Modal -->
 <div class="modal-overlay" *ngIf="showVoucherModal" (click)="closeVoucherModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">

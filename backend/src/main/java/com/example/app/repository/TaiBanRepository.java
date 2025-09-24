@@ -11,9 +11,7 @@ public interface TaiBanRepository extends JpaRepository<TaiBan, Integer> {
     
     List<TaiBan> findByLanTaiBan(Integer lanTaiBan);
     
-    List<TaiBan> findByNamTaiBan(Integer namTaiBan);
-    
-    List<TaiBan> findByLanTaiBanAndNamTaiBan(Integer lanTaiBan, Integer namTaiBan);
-    
-    boolean existsByLanTaiBanAndNamTaiBan(Integer lanTaiBan, Integer namTaiBan);
+
+
+    boolean existsByLanTaiBan(Integer lanTaiBan);
 }

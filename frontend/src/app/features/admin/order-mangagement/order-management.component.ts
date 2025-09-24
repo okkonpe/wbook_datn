@@ -30,10 +30,13 @@ export class OrderManagementComponent {
   currentPage = 0;
   pageSize = 10;
   status?: string | null
+    nhanVien?: string | null
     loaiTT?: string | null
+    hinhThuc?: string | null
+    ngayBD?:Date
+    ngayKT?:Date
 maHoaDon?: string|null
 listNhanVien : any[] = [];
-selectNhanVien :string=''
 idNhanVien:number=0;
 
   private apiUrl = 'http://localhost:8080/api/hoa-don';
@@ -72,7 +75,11 @@ idNhanVien:number=0;
   filter: any = {
     status: null,
     loaiTT: null,
-    maHoaDon:null
+    maHoaDon:null,
+    hinhThuc:null,
+    ngayBD:null,
+    ngayKT:null,
+    nhanVien:null
   };
 
  locTimKiem(resetPage: boolean = false) {
@@ -80,9 +87,14 @@ idNhanVien:number=0;
   this.filter.status=this.status;
     this.filter.loaiTT=this.loaiTT;
     this.filter.maHoaDon=this.maHoaDon;
+    this.filter.hinhThuc=this.hinhThuc;
+        this.filter.ngayBD=this.ngayBD;
+    this.filter.ngayKT=this.ngayKT;
+      this.filter.nhanVien=this.nhanVien;
+
 
   // có filter thì gọi API lọc
-  if ( this.filter.status || this.filter.maHoaDon ||this.filter.loaiTT) {
+  if ( this.filter.status || this.filter.maHoaDon ||this.filter.loaiTT||this.filter.hinhThuc||this.filter.ngayBD||this.filter.ngayKT||this.filter.nhanVien) {
   let params: any = {
     page: this.currentPage,
     size: this.pageSize
@@ -90,6 +102,10 @@ idNhanVien:number=0;
     if (this.filter.status) params.status = this.filter.status;
     if (this.filter.maHoaDon) params.maHoaDon = this.filter.maHoaDon;
     if (this.filter.loaiTT) params.loaiTT = this.filter.loaiTT;
+    if (this.filter.hinhThuc) params.hinhThuc = this.filter.hinhThuc;
+    if (this.filter.ngayBD) params.ngayBD = this.filter.ngayBD;
+    if (this.filter.ngayKT) params.ngayKT = this.filter.ngayKT;
+        if (this.filter.nhanVien) params.nhanVien = this.filter.nhanVien;
 
     this.http.get<any>(`${this.apiUrl}/loc-tim-kiem`, { params }).subscribe(res => {
       this.hoaDons = res.content;

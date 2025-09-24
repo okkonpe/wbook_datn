@@ -24,6 +24,9 @@ public class OfflinePaymentRequestDTO {
     private Long voucherId; // ID của voucher được chọn
     private List<Item> items;
     private Integer idNhanVien;
+    private Integer khID;
+    private String phuongThucTT;
+
 
     @Getter
     @Setter

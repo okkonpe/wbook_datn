@@ -49,6 +49,8 @@ public class HoaDon {
     private String lyDoHuy;
     @Column(name = "loai_thanh_toan")
     private String loaiThanhToan;
+    @Column(name = "hinh_thuc")
+    private String hinhThuc;
 
     @Column(name = "phi_ship")
     private BigDecimal phiShip;

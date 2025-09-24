@@ -39,7 +39,7 @@
             </button>
             <button class="btn btn-add-product" (click)="addProduct()">
               <i class="bi bi-plus-circle me-2"></i>
-              Thêm sản phẩm
+              Thêm sách
             </button>
           </div>
         </div>
@@ -377,7 +377,7 @@
               <select class="form-control" [(ngModel)]="newProduct.taiBanIds">
                 <option [ngValue]="undefined">-- Chọn tái bản --</option>
                 <option *ngFor="let tb of taiBans" [ngValue]="tb.id">
-                  Lần {{ tb.lanTaiBan }} - {{ tb.namTaiBan }}
+                  Lần {{ tb.lanTaiBan }}
                 </option>
               </select>
               <button class="btn btn-outline-success" type="button" (click)="quickAddTaiBan()" title="Thêm nhanh tái bản">

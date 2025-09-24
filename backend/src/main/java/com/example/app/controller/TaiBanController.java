@@ -81,29 +81,6 @@ public class TaiBanController {
         List<TaiBanDTO> taiBans = taiBanService.findByLanTaiBan(lanTaiBan);
         return ResponseEntity.ok(taiBans);
     }
-    
-    @GetMapping("/nam/{namTaiBan}")
-    public ResponseEntity<List<TaiBanDTO>> findByNamTaiBan(@PathVariable Integer namTaiBan) {
-        List<TaiBanDTO> taiBans = taiBanService.findByNamTaiBan(namTaiBan);
-        return ResponseEntity.ok(taiBans);
-    }
-    
-    @GetMapping("/search")
-    public ResponseEntity<List<TaiBanDTO>> findByLanTaiBanAndNamTaiBan(
-            @RequestParam(required = false) Integer lanTaiBan,
-            @RequestParam(required = false) Integer namTaiBan) {
-        
-        List<TaiBanDTO> taiBans;
-        if (lanTaiBan != null && namTaiBan != null) {
-            taiBans = taiBanService.findByLanTaiBanAndNamTaiBan(lanTaiBan, namTaiBan);
-        } else if (lanTaiBan != null) {
-            taiBans = taiBanService.findByLanTaiBan(lanTaiBan);
-        } else if (namTaiBan != null) {
-            taiBans = taiBanService.findByNamTaiBan(namTaiBan);
-        } else {
-            taiBans = taiBanService.getAllTaiBan();
-        }
-        
-        return ResponseEntity.ok(taiBans);
-    }
+
+
 }

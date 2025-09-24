@@ -253,6 +253,40 @@ public class BookService {
                 existingBook.setTheLoai(theLoai);
             }
         }
+        if (dto.getTacGia() != null && !dto.getTacGia().isEmpty()) {
+            Set<TacGia> nhaXuatBan = tacGiaRepository.findByTenTacGia(dto.getTacGia().get(0));
+            if (nhaXuatBan != null) {
+                existingBook.setTacGia(nhaXuatBan);
+            }
+        }
+        if (dto.getLoaiBia() != null && !dto.getLoaiBia().isEmpty()) {
+            LoaiBia nhaXuatBan = loaiBiaRepository.findAll().stream()
+                    .filter(tl -> tl.getTenBia().equals(dto.getLoaiBia()))
+                    .findFirst()
+                    .orElse(null);
+            if (nhaXuatBan != null) {
+                existingBook.setLoaiBia(nhaXuatBan);
+            }
+        }
+        if (dto.getLoaiGiay() != null && !dto.getLoaiGiay().isEmpty()) {
+            LoaiGiay nhaXuatBan = loaiGiayRepository.findAll().stream()
+                    .filter(tl -> tl.getTenGiay().equals(dto.getLoaiGiay()))
+                    .findFirst()
+                    .orElse(null);
+            if (nhaXuatBan != null) {
+                existingBook.setLoaiGiay(nhaXuatBan);
+            }
+        }
+        if (dto.getKichThuoc() != null && !dto.getKichThuoc().isEmpty()) {
+            KichThuoc nhaXuatBan = kichThuocRepository.findAll().stream()
+                    .filter(tl -> tl.getChiSoKichThuoc().equals(dto.getKichThuoc()))
+                    .findFirst()
+                    .orElse(null);
+            if (nhaXuatBan != null) {
+                existingBook.setKichThuoc(nhaXuatBan);
+            }
+        }
+
 
         // Update nhaXuatBan if provided
         if (dto.getNhaXuatBan() != null && !dto.getNhaXuatBan().isBlank()) {
@@ -264,6 +298,7 @@ public class BookService {
                 existingBook.setNhaXuatBan(nhaXuatBan);
             }
         }
+
 
         // Update image if provided
         if (dto.getHinhAnh() != null && !dto.getHinhAnh().isBlank()) {

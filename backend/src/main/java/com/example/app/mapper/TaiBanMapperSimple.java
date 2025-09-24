@@ -18,7 +18,6 @@ public class TaiBanMapperSimple {
         return TaiBanDTO.builder()
                 .id(taiBan.getId())
                 .lanTaiBan(taiBan.getLanTaiBan())
-                .namTaiBan(taiBan.getNamTaiBan())
                 .build();
     }
     
@@ -30,7 +29,6 @@ public class TaiBanMapperSimple {
         return TaiBan.builder()
                 .id(taiBanDTO.getId())
                 .lanTaiBan(taiBanDTO.getLanTaiBan())
-                .namTaiBan(taiBanDTO.getNamTaiBan())
                 .build();
     }
     
